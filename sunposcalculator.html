@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- THIS WORKS 13.11.2019 -->
+
+<head>
+    <meta charset="utf-8">
+    <style>
+      .result {
+        background-color: white;
+        font-size: 1.6em;
+        color: orange;
+      }
+    </style>
+</head>
+
+<body>
+    <div id="Main"></div>
+
+    <script src="sunposcalculator.js"></script>
+
+    <script>
+        const myDiv = document.getElementById("Main");
+        const app = Elm.Main.init({ node: myDiv });
+    </script>
+</body>
+
+</html>
