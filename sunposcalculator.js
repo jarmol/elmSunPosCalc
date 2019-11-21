@@ -4466,10 +4466,73 @@ var elm$core$Set$toList = function (_n0) {
 };
 var elm$core$Basics$append = _Utils_append;
 var elm$core$Basics$lt = _Utils_lt;
+var elm$core$Basics$min = F2(
+	function (x, y) {
+		return (_Utils_cmp(x, y) < 0) ? x : y;
+	});
+var elm$core$List$foldl = F3(
+	function (func, acc, list) {
+		foldl:
+		while (true) {
+			if (!list.b) {
+				return acc;
+			} else {
+				var x = list.a;
+				var xs = list.b;
+				var $temp$func = func,
+					$temp$acc = A2(func, x, acc),
+					$temp$list = xs;
+				func = $temp$func;
+				acc = $temp$acc;
+				list = $temp$list;
+				continue foldl;
+			}
+		}
+	});
 var elm$core$Maybe$Just = function (a) {
 	return {$: 'Just', a: a};
 };
 var elm$core$Maybe$Nothing = {$: 'Nothing'};
+var elm$core$List$minimum = function (list) {
+	if (list.b) {
+		var x = list.a;
+		var xs = list.b;
+		return elm$core$Maybe$Just(
+			A3(elm$core$List$foldl, elm$core$Basics$min, x, xs));
+	} else {
+		return elm$core$Maybe$Nothing;
+	}
+};
+var elm$core$Maybe$withDefault = F2(
+	function (_default, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return value;
+		} else {
+			return _default;
+		}
+	});
+var elm$core$String$fromFloat = _String_fromNumber;
+var elm$core$String$indices = _String_indexes;
+var elm$core$String$slice = _String_slice;
+var elm$core$String$left = F2(
+	function (n, string) {
+		return (n < 1) ? '' : A3(elm$core$String$slice, 0, n, string);
+	});
+var elm$core$String$length = _String_length;
+var author$project$Main$cutDecNum = function (nr) {
+	var snr = elm$core$String$fromFloat(nr);
+	var dotIndex = A2(elm$core$String$indices, '.', snr);
+	var dotNr = A2(
+		elm$core$Maybe$withDefault,
+		0,
+		elm$core$List$minimum(dotIndex));
+	var intPart = A2(elm$core$String$left, dotNr, snr);
+	var decNrLength = elm$core$String$length(snr);
+	var decimPart = A3(elm$core$String$slice, dotNr, decNrLength, snr);
+	var cutTo6 = A2(elm$core$String$left, 7, decimPart);
+	return _Utils_ap(intPart, cutTo6);
+};
 var elm$core$String$fromInt = _String_fromNumber;
 var author$project$Main$zeroFill = function (x) {
 	return (x < 10) ? ('0' + elm$core$String$fromInt(x)) : elm$core$String$fromInt(x);
@@ -4489,15 +4552,6 @@ var author$project$Main$formTime = function (x) {
 	var sec = elm$core$Basics$round(60 * ((60 * (x - hrs)) - mns));
 	return author$project$Main$zeroFill(hrs) + (':' + (author$project$Main$zeroFill(mns) + (':' + author$project$Main$zeroFill(sec))));
 };
-var elm$core$Maybe$withDefault = F2(
-	function (_default, maybe) {
-		if (maybe.$ === 'Just') {
-			var value = maybe.a;
-			return value;
-		} else {
-			return _default;
-		}
-	});
 var elm$core$String$toInt = _String_toInt;
 var author$project$Main$gI = function (element) {
 	return A2(
@@ -4709,7 +4763,6 @@ var author$project$Main$solAzimuth = F2(
 var elm$core$Basics$negate = function (n) {
 	return -n;
 };
-var elm$core$String$fromFloat = _String_fromNumber;
 var elm$core$Basics$identity = function (x) {
 	return x;
 };
@@ -4743,25 +4796,6 @@ var elm$core$Array$SubTree = function (a) {
 	return {$: 'SubTree', a: a};
 };
 var elm$core$Elm$JsArray$initializeFromList = _JsArray_initializeFromList;
-var elm$core$List$foldl = F3(
-	function (func, acc, list) {
-		foldl:
-		while (true) {
-			if (!list.b) {
-				return acc;
-			} else {
-				var x = list.a;
-				var xs = list.b;
-				var $temp$func = func,
-					$temp$acc = A2(func, x, acc),
-					$temp$list = xs;
-				func = $temp$func;
-				acc = $temp$acc;
-				list = $temp$list;
-				continue foldl;
-			}
-		}
-	});
 var elm$core$List$reverse = function (list) {
 	return A3(elm$core$List$foldl, elm$core$List$cons, _List_Nil, list);
 };
@@ -5125,7 +5159,7 @@ var author$project$Main$viewDeclination = function (model) {
 				_List_fromArray(
 					[
 						elm$html$Html$text(
-						' Sun Declination   = ' + (elm$core$String$fromFloat(
+						' Sun Declination   = ' + (author$project$Main$cutDecNum(
 							author$project$Main$sunDeclination(
 								author$project$Main$getCentury(model))) + '°'))
 					])),
@@ -5171,7 +5205,7 @@ var author$project$Main$viewDeclination = function (model) {
 				_List_fromArray(
 					[
 						elm$html$Html$text(
-						' Sun Altitude      = ' + (elm$core$String$fromFloat(
+						' Sun Altitude      = ' + (author$project$Main$cutDecNum(
 							90.0 - A2(
 								author$project$Main$solZenith,
 								model,
@@ -5183,11 +5217,11 @@ var author$project$Main$viewDeclination = function (model) {
 				_List_fromArray(
 					[
 						elm$html$Html$text(
-						' Solar Azimuth     = ' + elm$core$String$fromFloat(
+						' Solar Azimuth     = ' + (author$project$Main$cutDecNum(
 							A2(
 								author$project$Main$solAzimuth,
 								model,
-								author$project$Main$getCentury(model))))
+								author$project$Main$getCentury(model))) + '°'))
 					]))
 			]));
 };
@@ -5380,13 +5414,13 @@ var author$project$Main$viewJD = function (model) {
 							author$project$Main$getJDN(model)))
 					])),
 				elm$html$Html$text(
-				' JD = ' + elm$core$String$fromFloat(
+				' JD = ' + author$project$Main$cutDecNum(
 					A2(
 						author$project$Main$preCent,
 						author$project$Main$getJDN(model),
 						author$project$Main$fJD(model)))),
 				elm$html$Html$text(
-				' Century = ' + elm$core$String$fromFloat(
+				' Century = ' + author$project$Main$cutDecNum(
 					author$project$Main$getCentury(model))),
 				A2(
 				elm$html$Html$p,
@@ -5394,7 +5428,7 @@ var author$project$Main$viewJD = function (model) {
 				_List_fromArray(
 					[
 						elm$html$Html$text(
-						' Right Ascension      = ' + elm$core$String$fromFloat(
+						' Right Ascension      = ' + author$project$Main$cutDecNum(
 							author$project$Main$rectAsc(
 								author$project$Main$getCentury(model))))
 					])),
@@ -5404,7 +5438,7 @@ var author$project$Main$viewJD = function (model) {
 				_List_fromArray(
 					[
 						elm$html$Html$text(
-						' Equation of Time     = ' + elm$core$String$fromFloat(
+						' Equation of Time     = ' + author$project$Main$cutDecNum(
 							author$project$Main$equatTime(
 								author$project$Main$getCentury(model))))
 					])),
@@ -5414,7 +5448,7 @@ var author$project$Main$viewJD = function (model) {
 				_List_fromArray(
 					[
 						elm$html$Html$text(
-						' Sunrise HA           = ' + elm$core$String$fromFloat(
+						' Sunrise HA           = ' + author$project$Main$cutDecNum(
 							author$project$Main$getHA(model)))
 					])),
 				A2(
@@ -5423,7 +5457,7 @@ var author$project$Main$viewJD = function (model) {
 				_List_fromArray(
 					[
 						elm$html$Html$text(
-						' True Solar Time      = ' + elm$core$String$fromFloat(
+						' True Solar Time      = ' + author$project$Main$cutDecNum(
 							A2(
 								author$project$Main$trueSolTime,
 								model,
@@ -5435,7 +5469,7 @@ var author$project$Main$viewJD = function (model) {
 				_List_fromArray(
 					[
 						elm$html$Html$text(
-						' Hour Angle           = ' + elm$core$String$fromFloat(
+						' Hour Angle           = ' + author$project$Main$cutDecNum(
 							A2(
 								author$project$Main$hourAngle,
 								model,
@@ -5447,7 +5481,7 @@ var author$project$Main$viewJD = function (model) {
 				_List_fromArray(
 					[
 						elm$html$Html$text(
-						' Solar Zenith         = ' + elm$core$String$fromFloat(
+						' Solar Zenith         = ' + author$project$Main$cutDecNum(
 							A2(
 								author$project$Main$solZenith,
 								model,
@@ -5530,7 +5564,8 @@ var author$project$Main$view = function (model) {
 		elm$html$Html$div,
 		_List_fromArray(
 			[
-				A2(elm$html$Html$Attributes$style, 'margin-left', '10%')
+				A2(elm$html$Html$Attributes$style, 'margin-left', '10%'),
+				A2(elm$html$Html$Attributes$style, 'margin-right', '20%')
 			]),
 		_List_fromArray(
 			[
@@ -5699,8 +5734,6 @@ var elm$core$Task$perform = F2(
 			elm$core$Task$Perform(
 				A2(elm$core$Task$map, toMessage, task)));
 	});
-var elm$core$String$length = _String_length;
-var elm$core$String$slice = _String_slice;
 var elm$core$String$dropLeft = F2(
 	function (n, string) {
 		return (n < 1) ? string : A3(
@@ -5716,10 +5749,6 @@ var elm$core$String$indexes = _String_indexes;
 var elm$core$String$isEmpty = function (string) {
 	return string === '';
 };
-var elm$core$String$left = F2(
-	function (n, string) {
-		return (n < 1) ? '' : A3(elm$core$String$slice, 0, n, string);
-	});
 var elm$core$String$contains = _String_contains;
 var elm$url$Url$Url = F6(
 	function (protocol, host, port_, path, query, fragment) {
