@@ -420,7 +420,7 @@ solAzimuth mod cent =
 
 view : Model -> Html Msg
 view model =
-    div [ style "margin-left" "10%" ]
+    div [ style "margin-left" "10%", style "margin-right" "20%" ]
         [ h1 [] [ text "Sun Position Calculator" ]
         , span [ style "background-color" "blue", style "color" "white" ]
             [ text "  Year "
@@ -505,8 +505,8 @@ viewJD : Model -> Html msg
 viewJD model =
     div [ style "color" "red", style "background-color" "lightblue" ]
         [ p [] [ text ("JDN " ++ fromInt (getJDN model)) ]
-        , text (" JD = " ++ fromFloat (preCent (getJDN model) (fJD model)))
-        , text (" Century = " ++ fromFloat (getCentury model))
+        , text (" JD = " ++ cutDecNum (preCent (getJDN model) (fJD model)))
+        , text (" Century = " ++ cutDecNum (getCentury model))
 --      , p [] [ text (" Sun Mean Long = " ++ fromFloat (calcSunML (getCentury model))) ]
 --      , p [] [ text (" Sun Mean Anomality = " ++ fromFloat (meanAnomalSun (getCentury model))) ]
 --      , p [] [ text (" Eccentricity of Earth Orbit = " ++ fromFloat (eccentEarthOrbit (getCentury model))) ]
@@ -516,26 +516,26 @@ viewJD model =
 --      , p [] [ text (" Apparent Longitude of Sun = " ++ fromFloat (appLongSun (getCentury model))) ]
 --      , p [] [ text (" Mean Obliquity of Ecliptic = " ++ fromFloat (meanObliqEclip (getCentury model))) ]
 --      , p [] [ text (" Corrected Obliquity  = " ++ fromFloat (obliqCorr (getCentury model))) ]
-        , p [] [ text (" Right Ascension      = " ++ fromFloat (rectAsc (getCentury model))) ]
+        , p [] [ text (" Right Ascension      = " ++ cutDecNum (rectAsc (getCentury model))) ]
 --      , p [] [ text (" Variable Y           = " ++ fromFloat (variableY (getCentury model))) ]
-        , p [] [ text (" Equation of Time     = " ++ fromFloat (equatTime (getCentury model))) ]
-        , p [] [ text (" Sunrise HA           = " ++ fromFloat (getHA model)) ]
-        , p [] [ text (" True Solar Time      = " ++ fromFloat (trueSolTime model (getCentury model))) ]
-        , p [] [ text (" Hour Angle           = " ++ fromFloat (hourAngle   model (getCentury model))) ]
-        , p [] [ text (" Solar Zenith         = " ++ fromFloat (solZenith   model (getCentury model))) ]
+        , p [] [ text (" Equation of Time     = " ++ cutDecNum (equatTime (getCentury model))) ]
+        , p [] [ text (" Sunrise HA           = " ++ cutDecNum (getHA model)) ]
+        , p [] [ text (" True Solar Time      = " ++ cutDecNum (trueSolTime model (getCentury model))) ]
+        , p [] [ text (" Hour Angle           = " ++ cutDecNum (hourAngle   model (getCentury model))) ]
+        , p [] [ text (" Solar Zenith         = " ++ cutDecNum (solZenith   model (getCentury model))) ]
         ]
 
 
 viewDeclination : Model -> Html msg
 viewDeclination model =
     div [ style "color" "red", style "font-size" "1.4em" ]
-        [ p [] [ text (" Sun Declination   = " ++ (fromFloat (sunDeclination (getCentury model))) ++ "°") ]
+        [ p [] [ text (" Sun Declination   = " ++ (cutDecNum (sunDeclination (getCentury model))) ++ "°")]
         , p [] [ text (" Day Length        = " ++ formTime  (getDayLength model)) ]
         , p [] [ text (" Noon Time         = " ++ mnToHrMn  (getNoon model) ++ locTZ model) ]
         , p [] [ text (" Sunrise Time      = " ++ mnToHrMn  (risetMns model -1) ++ locTZ model) ]
         , p [] [ text (" Sunset Time       = " ++ mnToHrMn  (risetMns model 1) ++ locTZ model) ]
-        , p [] [ text (" Sun Altitude      = " ++ (fromFloat (90.0 - (solZenith   model (getCentury model)))) ++ "°") ]
-        , p [] [ text (" Solar Azimuth     = " ++ fromFloat (solAzimuth   model (getCentury model))) ]
+        , p [] [ text (" Sun Altitude      = " ++ (cutDecNum (90.0 - (solZenith   model (getCentury model)))) ++ "°")]
+        , p [] [ text (" Solar Azimuth     = " ++ (cutDecNum (solAzimuth   model (getCentury model))) ++ "°")]
         ]
 
 
@@ -672,4 +672,21 @@ zeroFill x =
 
     else
         String.fromInt x
+
+
+-- Cut to six decimals format of Float-numbers
+cutDecNum : Float -> String
+cutDecNum nr =
+    let
+        snr = String.fromFloat nr
+        dotIndex = String.indices "." snr
+        dotNr = Maybe.withDefault 0 (List.minimum dotIndex)
+        decNrLength = String.length snr
+        decimPart = String.slice dotNr decNrLength snr
+        cutTo6 = String.left 7 decimPart
+        intPart = String.left dotNr snr
+    in
+        intPart ++ cutTo6
+
+
 
