@@ -415,6 +415,28 @@ solAzimuth mod cent =
         else 540.0 - preAz |> decNorm360
  
 -- Building new code 
+-- Atmospheric Refraction
+
+atmosRefract mod = 
+--            var atRef
+    let solElev = 90.0 - (solZenith mod cent)
+        cent    = getCentury mod 
+    in 
+        if solElev > 85.0 then 0.0
+
+        else if solElev > 5.0 then (58.1/tanDeg(solElev) - 0.07/ tanDeg(solElev) ^ 3 + 8.6e-5/ tanDeg(solElev) ^ 5 ) / 3600.0 
+
+        else if solElev >  -0.575 then (1735.0 + solElev*(-518.2 + solElev*(103.4 + solElev*(-12.79 + solElev*0.711)))) / 3600.0
+
+        else  -20.772/tanDeg(solElev) / 3600.0
+
+refractCorrectAltitude mod =
+  let 
+      solElev = 90.0 - (solZenith mod (getCentury mod))
+      refraction = atmosRefract mod
+  in  solElev + refraction
+
+
 
 -- VIEW
 
@@ -505,8 +527,8 @@ viewJD : Model -> Html msg
 viewJD model =
     div [ style "color" "red", style "background-color" "lightblue" ]
         [ p [] [ text ("JDN " ++ fromInt (getJDN model)) ]
-        , text (" JD = " ++ cutDecNum (preCent (getJDN model) (fJD model)))
-        , text (" Century = " ++ cutDecNum (getCentury model))
+        , text (" JD = " ++ cutDec6 (preCent (getJDN model) (fJD model)))
+        , text (" Century = " ++ cutDec6 (getCentury model))
 --      , p [] [ text (" Sun Mean Long = " ++ fromFloat (calcSunML (getCentury model))) ]
 --      , p [] [ text (" Sun Mean Anomality = " ++ fromFloat (meanAnomalSun (getCentury model))) ]
 --      , p [] [ text (" Eccentricity of Earth Orbit = " ++ fromFloat (eccentEarthOrbit (getCentury model))) ]
@@ -516,26 +538,30 @@ viewJD model =
 --      , p [] [ text (" Apparent Longitude of Sun = " ++ fromFloat (appLongSun (getCentury model))) ]
 --      , p [] [ text (" Mean Obliquity of Ecliptic = " ++ fromFloat (meanObliqEclip (getCentury model))) ]
 --      , p [] [ text (" Corrected Obliquity  = " ++ fromFloat (obliqCorr (getCentury model))) ]
-        , p [] [ text (" Right Ascension      = " ++ cutDecNum (rectAsc (getCentury model))) ]
+        , p [] [ text (" Right Ascension      = " ++ cutDec6 (rectAsc (getCentury model))) ]
 --      , p [] [ text (" Variable Y           = " ++ fromFloat (variableY (getCentury model))) ]
-        , p [] [ text (" Equation of Time     = " ++ cutDecNum (equatTime (getCentury model))) ]
-        , p [] [ text (" Sunrise HA           = " ++ cutDecNum (getHA model)) ]
-        , p [] [ text (" True Solar Time      = " ++ cutDecNum (trueSolTime model (getCentury model))) ]
-        , p [] [ text (" Hour Angle           = " ++ cutDecNum (hourAngle   model (getCentury model))) ]
-        , p [] [ text (" Solar Zenith         = " ++ cutDecNum (solZenith   model (getCentury model))) ]
+        , p [] [ text (" Equation of Time     = " ++ cutDec6 (equatTime (getCentury model))) ]
+        , p [] [ text (" Sunrise HA           = " ++ cutDec6 (getHA model)) ]
+        , p [] [ text (" True Solar Time      = " ++ cutDec6 (trueSolTime model (getCentury model))) ]
+        , p [] [ text (" Hour Angle           = " ++ cutDec6 (hourAngle   model (getCentury model))) ]
+        , p [] [ text (" Solar Zenith         = " ++ cutDec6 (solZenith   model (getCentury model))) ]
         ]
 
 
 viewDeclination : Model -> Html msg
 viewDeclination model =
     div [ style "color" "red", style "font-size" "1.4em" ]
-        [ p [] [ text (" Sun Declination   = " ++ (cutDecNum (sunDeclination (getCentury model))) ++ "°")]
+        [ p [] [ text (" Sun Declination   = " ++ (cutDec4 (sunDeclination (getCentury model))) ++ "°")]
         , p [] [ text (" Day Length        = " ++ formTime  (getDayLength model)) ]
         , p [] [ text (" Noon Time         = " ++ mnToHrMn  (getNoon model) ++ locTZ model) ]
         , p [] [ text (" Sunrise Time      = " ++ mnToHrMn  (risetMns model -1) ++ locTZ model) ]
         , p [] [ text (" Sunset Time       = " ++ mnToHrMn  (risetMns model 1) ++ locTZ model) ]
-        , p [] [ text (" Sun Altitude      = " ++ (cutDecNum (90.0 - (solZenith   model (getCentury model)))) ++ "°")]
-        , p [] [ text (" Solar Azimuth     = " ++ (cutDecNum (solAzimuth   model (getCentury model))) ++ "°")]
+        , p [] [ text (" Solar Azimuth     = " ++ (cutDec4  (solAzimuth   model (getCentury model))) ++ "°")]
+        , p [] [ text (" Air refraction    = " ++ (cutDec4  (atmosRefract model )) ++ "°")]
+        , p [] [ text (" Sun Altitude      = " ++ (cutDec4  (90.0 - (solZenith   model (getCentury model)))) 
+                                               ++ "°  without air-refraction") ]
+        , p [] [ text (" Sun Altitude      = " ++ (cutDec4  ( refractCorrectAltitude model)) 
+                                               ++ "° Corrected with air-refraction") ]
         ]
 
 
@@ -675,18 +701,21 @@ zeroFill x =
 
 
 -- Cut to six decimals format of Float-numbers
-cutDecNum : Float -> String
-cutDecNum nr =
+cutDecNum : Float -> Int -> String
+cutDecNum nr ndecim =
     let
         snr = String.fromFloat nr
         dotIndex = String.indices "." snr
         dotNr = Maybe.withDefault 0 (List.minimum dotIndex)
         decNrLength = String.length snr
         decimPart = String.slice dotNr decNrLength snr
-        cutTo6 = String.left 7 decimPart
+        cutTo6 = String.left ndecim decimPart
         intPart = String.left dotNr snr
     in
         intPart ++ cutTo6
 
+cutDec6 nr = cutDecNum nr 7  
 
+
+cutDec4 nr = cutDecNum nr 5
 
