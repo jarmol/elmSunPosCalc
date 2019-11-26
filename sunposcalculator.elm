@@ -205,9 +205,8 @@ obliqCorr cent =
 -- Right Ascension RA, OK tested 14.11.2019
 
 
-rectAsc : Float -> Float
-rectAsc cent =
-    let
+rectAsc mod =
+    let cent = getCentury mod
         oblCorr =
             obliqCorr cent
 
@@ -221,8 +220,8 @@ rectAsc cent =
 -- Used in Equation of Time
 
 
-variableY cent =
-    let
+variableY mod =
+    let cent = getCentury mod
         x =
             tanDeg (obliqCorr cent / 2.0)
     in
@@ -233,10 +232,10 @@ variableY cent =
 -- Equation of Time, OK tested 15.11.2019
 
 
-equatTime cent =
-    let
+equatTime mod =
+    let cent = getCentury mod
         varY =
-            variableY cent
+            variableY mod
 
         meanLongS =
             calcSunML cent
@@ -274,13 +273,11 @@ equatTime cent =
 -- HA of Sunrise hourangle, OK tested 15.11.2019
 
 
-srHA cent geoLat =
-    let
-        zenith =
-            90.833
+srHA mod zenith =
+    let geoLat = (getDecVar mod.latitude)
 
         declination =
-            sunDeclination cent
+            sunDeclination mod
     in
     acosDeg
         (cosDeg zenith
@@ -290,8 +287,12 @@ srHA cent geoLat =
 
 
 getHA mod =
-    srHA (getCentury mod) (getDecVar mod.latitude)
+    srHA  mod 90.83
 
+
+-- Civil twilight Sunrise HA
+getCivTwHA mod =
+    srHA  mod 96.0
 
 
 -- Noon time as minutes since midnight
@@ -307,7 +308,7 @@ getNoon mod =
             getDecVar mod.timezone
 
         eqTime =
-            equatTime (getCentury mod)
+            equatTime mod
     in
     (720.0 - 4.0 * geoLong) - eqTime + timeZone * 60
 
@@ -316,14 +317,17 @@ getNoon mod =
 -- Sunrise in minutes, option = -1
 -- Sunset  in minutes, option = +1
 
-
 risetMns mod rsOption =
     getNoon mod + 4 * rsOption * getHA mod
 
 
+-- Civil Twilight minutes since midnight
+
+civTwlMns mod rsOption =
+   getNoon mod + 4 * rsOption * getCivTwHA mod
+
 
 -- Converts minutes to hh:mn:ss
-
 
 mnToHrMn : Float -> String
 mnToHrMn mns =
@@ -355,21 +359,23 @@ getDayLength mod =
 
 -- Sun Declination, OK tested 24.10.2019
 
-sunDeclination : Float -> Float
-sunDeclination cent =
-    asinDeg (sinDeg (obliqCorr cent) * sinDeg (appLongSun cent))
+sunDeclination mod =
+    let cent = getCentury mod
+    in
+        asinDeg (sinDeg (obliqCorr cent) * sinDeg (appLongSun cent))
 
 
  
 -- True Solar Time, OK tested 17.11.2019
 
-trueSolTime mod cent =  
+trueSolTime mod =  
     let
+        cent = getCentury mod
         hr = getDecVar mod.hour
         mn = getDecVar mod.minute
         tz = getDecVar mod.timezone 
         e2 = 60.0*( hr + tz ) + mn 
-        v2 = equatTime cent
+        v2 = equatTime mod 
         b4 = getDecVar mod.longitude
     in   
         e2 + v2 + 4.0 * b4 - 60.0 * tz 
@@ -377,9 +383,9 @@ trueSolTime mod cent =
 
 -- Hour Angle degr. OK tested 17.11.2019
 
-hourAngle mod cent =    
+hourAngle mod =    
     let
-        tSt = trueSolTime mod cent
+        tSt = trueSolTime mod
     in 
         if tSt > 0.0 then 0.25 * tSt - 180.0
         else 0.25 * tSt + 180.0
@@ -387,39 +393,37 @@ hourAngle mod cent =
 
 -- Solar Zenith (degrees)
 
-solZenith mod cent =  
+solZenith mod =  
     let  
         b3  = getDecVar mod.latitude
-        t2 =  sunDeclination cent
-        hrA = hourAngle mod cent
+        t2 =  sunDeclination mod
+        hrA = hourAngle mod
     in   
         acosDeg(sinDeg(b3)*sinDeg(t2) + cosDeg(b3)*cosDeg(t2)*cosDeg(hrA))
 
 
 --  Solar Azimuth angle clockwise from north, OK tested 19.11.2019 
 
-preAzimuth mod cent = 
-     let ac = hourAngle mod cent
+preAzimuth mod = 
+     let ac = hourAngle mod
          b3 = getDecVar mod.latitude
-         ad = solZenith mod cent
-         t  = sunDeclination cent
+         ad = solZenith mod
+         t  = sunDeclination mod
      in
          acosDeg ((sinDeg(b3)*cosDeg(ad) - sinDeg(t))/(cosDeg(b3)*sinDeg(ad)))
 
 
-solAzimuth mod cent =
-    let preAz = preAzimuth mod cent
-        ac    = hourAngle mod cent
+solAzimuth mod =
+    let preAz = preAzimuth mod
+        ac    = hourAngle mod
     in
         if ac > 0.0 then preAz + 180.0 |> decNorm360
         else 540.0 - preAz |> decNorm360
  
--- Building new code 
 -- Atmospheric Refraction
 
 atmosRefract mod = 
---            var atRef
-    let solElev = 90.0 - (solZenith mod cent)
+    let solElev = 90.0 - (solZenith mod)
         cent    = getCentury mod 
     in 
         if solElev > 85.0 then 0.0
@@ -432,10 +436,13 @@ atmosRefract mod =
 
 refractCorrectAltitude mod =
   let 
-      solElev = 90.0 - (solZenith mod (getCentury mod))
+      solElev = 90.0 - (solZenith mod)
       refraction = atmosRefract mod
   in  solElev + refraction
 
+
+-- Building new code 
+-------------------
 
 
 -- VIEW
@@ -538,27 +545,30 @@ viewJD model =
 --      , p [] [ text (" Apparent Longitude of Sun = " ++ fromFloat (appLongSun (getCentury model))) ]
 --      , p [] [ text (" Mean Obliquity of Ecliptic = " ++ fromFloat (meanObliqEclip (getCentury model))) ]
 --      , p [] [ text (" Corrected Obliquity  = " ++ fromFloat (obliqCorr (getCentury model))) ]
-        , p [] [ text (" Right Ascension      = " ++ cutDec6 (rectAsc (getCentury model))) ]
---      , p [] [ text (" Variable Y           = " ++ fromFloat (variableY (getCentury model))) ]
-        , p [] [ text (" Equation of Time     = " ++ cutDec6 (equatTime (getCentury model))) ]
-        , p [] [ text (" Sunrise HA           = " ++ cutDec6 (getHA model)) ]
-        , p [] [ text (" True Solar Time      = " ++ cutDec6 (trueSolTime model (getCentury model))) ]
-        , p [] [ text (" Hour Angle           = " ++ cutDec6 (hourAngle   model (getCentury model))) ]
-        , p [] [ text (" Solar Zenith         = " ++ cutDec6 (solZenith   model (getCentury model))) ]
+        , p [] [ text (" Right Ascension      = " ++ cutDec6 (rectAsc     model)) ]
+--      , p [] [ text (" Variable Y           = " ++ cutDec6 (variableY   model)) ]
+        , p [] [ text (" Equation of Time     = " ++ cutDec6 (equatTime   model)) ]
+        , p [] [ text (" Sunrise HA           = " ++ cutDec6 (getHA       model)) ]
+        , p [] [ text (" Sunrise Civil Twilight HA  = " ++ cutDec6 (getCivTwHA model)) ]
+        , p [] [ text (" True Solar Time      = " ++ cutDec6 (trueSolTime model)) ]
+        , p [] [ text (" Hour Angle           = " ++ cutDec6 (hourAngle   model)) ]
+        , p [] [ text (" Solar Zenith         = " ++ cutDec6 (solZenith   model)) ]
         ]
 
 
 viewDeclination : Model -> Html msg
 viewDeclination model =
     div [ style "color" "red", style "font-size" "1.4em" ]
-        [ p [] [ text (" Sun Declination   = " ++ (cutDec4 (sunDeclination (getCentury model))) ++ "°")]
+        [ p [] [ text (" Sun Declination   = " ++ (cutDec4  (sunDeclination model)) ++ "°")]
         , p [] [ text (" Day Length        = " ++ formTime  (getDayLength model)) ]
-        , p [] [ text (" Noon Time         = " ++ mnToHrMn  (getNoon model) ++ locTZ model) ]
-        , p [] [ text (" Sunrise Time      = " ++ mnToHrMn  (risetMns model -1) ++ locTZ model) ]
-        , p [] [ text (" Sunset Time       = " ++ mnToHrMn  (risetMns model 1) ++ locTZ model) ]
-        , p [] [ text (" Solar Azimuth     = " ++ (cutDec4  (solAzimuth   model (getCentury model))) ++ "°")]
+        , p [] [ text (" Civil Twilight    = " ++ mnToHrMn  (civTwlMns model -1)   ++ locTZ model) ]
+        , p [] [ text (" Sunrise Time      = " ++ mnToHrMn  (risetMns model -1)    ++ locTZ model) ]
+        , p [] [ text (" Noon Time         = " ++ mnToHrMn  (getNoon model)        ++ locTZ model) ]
+        , p [] [ text (" Sunset Time       = " ++ mnToHrMn  (risetMns model 1)     ++ locTZ model) ]
+        , p [] [ text (" Civil Twilight    = " ++ mnToHrMn  (civTwlMns model 1)    ++ locTZ model) ]
+        , p [] [ text (" Solar Azimuth     = " ++ (cutDec4  (solAzimuth   model )) ++ "°")]
         , p [] [ text (" Air refraction    = " ++ (cutDec4  (atmosRefract model )) ++ "°")]
-        , p [] [ text (" Sun Altitude      = " ++ (cutDec4  (90.0 - (solZenith   model (getCentury model)))) 
+        , p [] [ text (" Sun Altitude      = " ++ (cutDec4  (90.0 - (solZenith   model))) 
                                                ++ "°  without air-refraction") ]
         , p [] [ text (" Sun Altitude      = " ++ (cutDec4  ( refractCorrectAltitude model)) 
                                                ++ "° Corrected with air-refraction") ]
