@@ -4584,35 +4584,36 @@ var author$project$Main$tanDeg = function (alfa) {
 	return elm$core$Basics$tan(
 		author$project$Main$toRad(alfa));
 };
-var author$project$Main$variableY = function (cent) {
+var author$project$Main$variableY = function (mod) {
+	var cent = author$project$Main$getCentury(mod);
 	var x = author$project$Main$tanDeg(
 		author$project$Main$obliqCorr(cent) / 2.0);
 	return x * x;
 };
-var author$project$Main$equatTime = function (cent) {
-	var varY = author$project$Main$variableY(cent);
-	var meanLongS = author$project$Main$calcSunML(cent);
-	var meanAnomS = author$project$Main$meanAnomalSun(cent);
+var author$project$Main$equatTime = function (mod) {
+	var varY = author$project$Main$variableY(mod);
+	var cent = author$project$Main$getCentury(mod);
 	var eOrbitEx = author$project$Main$eccentEarthOrbit(cent);
+	var meanAnomS = author$project$Main$meanAnomalSun(cent);
+	var meanLongS = author$project$Main$calcSunML(cent);
 	return author$project$Main$toDeg(
 		((((varY * author$project$Main$sinDeg(2.0 * meanLongS)) - ((2.0 * eOrbitEx) * author$project$Main$sinDeg(meanAnomS))) + ((((4.0 * eOrbitEx) * varY) * author$project$Main$sinDeg(meanAnomS)) * author$project$Main$cosDeg(2.0 * meanLongS))) - (((0.5 * varY) * varY) * author$project$Main$sinDeg(4.0 * meanLongS))) - (((1.25 * eOrbitEx) * eOrbitEx) * author$project$Main$sinDeg(2.0 * meanAnomS))) * 4.0;
 };
-var author$project$Main$trueSolTime = F2(
-	function (mod, cent) {
-		var v2 = author$project$Main$equatTime(cent);
-		var tz = author$project$Main$getDecVar(mod.x);
-		var mn = author$project$Main$getDecVar(mod.C);
-		var hr = author$project$Main$getDecVar(mod.A);
-		var e2 = (60.0 * (hr + tz)) + mn;
-		var b4 = author$project$Main$getDecVar(mod.B);
-		return ((e2 + v2) + (4.0 * b4)) - (60.0 * tz);
-	});
+var author$project$Main$trueSolTime = function (mod) {
+	var v2 = author$project$Main$equatTime(mod);
+	var tz = author$project$Main$getDecVar(mod.x);
+	var mn = author$project$Main$getDecVar(mod.C);
+	var hr = author$project$Main$getDecVar(mod.A);
+	var e2 = (60.0 * (hr + tz)) + mn;
+	var cent = author$project$Main$getCentury(mod);
+	var b4 = author$project$Main$getDecVar(mod.B);
+	return ((e2 + v2) + (4.0 * b4)) - (60.0 * tz);
+};
 var elm$core$Basics$gt = _Utils_gt;
-var author$project$Main$hourAngle = F2(
-	function (mod, cent) {
-		var tSt = A2(author$project$Main$trueSolTime, mod, cent);
-		return (tSt > 0.0) ? ((0.25 * tSt) - 180.0) : ((0.25 * tSt) + 180.0);
-	});
+var author$project$Main$hourAngle = function (mod) {
+	var tSt = author$project$Main$trueSolTime(mod);
+	return (tSt > 0.0) ? ((0.25 * tSt) - 180.0) : ((0.25 * tSt) + 180.0);
+};
 var author$project$Main$sunEqCntr = function (cent) {
 	var mAnomalSun = author$project$Main$meanAnomalSun(cent);
 	return ((author$project$Main$sinDeg(mAnomalSun) * (1.914602 - (cent * (4.817e-3 + (1.4e-5 * cent))))) + (author$project$Main$sinDeg(2.0 * mAnomalSun) * (1.9993e-2 - (1.01e-4 * cent)))) + (author$project$Main$sinDeg(3.0 * mAnomalSun) * 2.89e-4);
@@ -4628,27 +4629,27 @@ var author$project$Main$asinDeg = function (x) {
 	return author$project$Main$toDeg(
 		elm$core$Basics$asin(x));
 };
-var author$project$Main$sunDeclination = function (cent) {
+var author$project$Main$sunDeclination = function (mod) {
+	var cent = author$project$Main$getCentury(mod);
 	return author$project$Main$asinDeg(
 		author$project$Main$sinDeg(
 			author$project$Main$obliqCorr(cent)) * author$project$Main$sinDeg(
 			author$project$Main$appLongSun(cent)));
 };
-var author$project$Main$solZenith = F2(
-	function (mod, cent) {
-		var t2 = author$project$Main$sunDeclination(cent);
-		var hrA = A2(author$project$Main$hourAngle, mod, cent);
-		var b3 = author$project$Main$getDecVar(mod.t);
-		return author$project$Main$acosDeg(
-			(author$project$Main$sinDeg(b3) * author$project$Main$sinDeg(t2)) + ((author$project$Main$cosDeg(b3) * author$project$Main$cosDeg(t2)) * author$project$Main$cosDeg(hrA)));
-	});
+var author$project$Main$solZenith = function (mod) {
+	var t2 = author$project$Main$sunDeclination(mod);
+	var hrA = author$project$Main$hourAngle(mod);
+	var b3 = author$project$Main$getDecVar(mod.t);
+	return author$project$Main$acosDeg(
+		(author$project$Main$sinDeg(b3) * author$project$Main$sinDeg(t2)) + ((author$project$Main$cosDeg(b3) * author$project$Main$cosDeg(t2)) * author$project$Main$cosDeg(hrA)));
+};
 var elm$core$Basics$negate = function (n) {
 	return -n;
 };
 var elm$core$Basics$pow = _Basics_pow;
 var author$project$Main$atmosRefract = function (mod) {
+	var solElev = 90.0 - author$project$Main$solZenith(mod);
 	var cent = author$project$Main$getCentury(mod);
-	var solElev = 90.0 - A2(author$project$Main$solZenith, mod, cent);
 	return (solElev > 85.0) ? 0.0 : ((solElev > 5.0) ? ((((58.1 / author$project$Main$tanDeg(solElev)) - (7.0e-2 / A2(
 		elm$core$Basics$pow,
 		author$project$Main$tanDeg(solElev),
@@ -4657,8 +4658,28 @@ var author$project$Main$atmosRefract = function (mod) {
 		author$project$Main$tanDeg(solElev),
 		5))) / 3600.0) : ((_Utils_cmp(solElev, -0.575) > 0) ? ((1735.0 + (solElev * ((-518.2) + (solElev * (103.4 + (solElev * ((-12.79) + (solElev * 0.711)))))))) / 3600.0) : (((-20.772) / author$project$Main$tanDeg(solElev)) / 3600.0)));
 };
-var elm$core$Basics$append = _Utils_append;
 var elm$core$Basics$lt = _Utils_lt;
+var author$project$Main$srHA = F2(
+	function (mod, zenith) {
+		var geoLat = author$project$Main$getDecVar(mod.t);
+		var declination = author$project$Main$sunDeclination(mod);
+		var x = (author$project$Main$cosDeg(zenith) / (author$project$Main$cosDeg(geoLat) * author$project$Main$cosDeg(declination))) - (author$project$Main$tanDeg(geoLat) * author$project$Main$tanDeg(declination));
+		return (x < 1.0) ? author$project$Main$acosDeg(x) : 0.0;
+	});
+var author$project$Main$getCivTwHA = function (mod) {
+	return A2(author$project$Main$srHA, mod, 96.0);
+};
+var author$project$Main$getNoon = function (mod) {
+	var timeZone = author$project$Main$getDecVar(mod.x);
+	var geoLong = author$project$Main$getDecVar(mod.B);
+	var eqTime = author$project$Main$equatTime(mod);
+	return ((720.0 - (4.0 * geoLong)) - eqTime) + (timeZone * 60);
+};
+var author$project$Main$civTwlMns = F2(
+	function (mod, rsOption) {
+		return author$project$Main$getNoon(mod) + ((4 * rsOption) * author$project$Main$getCivTwHA(mod));
+	});
+var elm$core$Basics$append = _Utils_append;
 var elm$core$Basics$min = F2(
 	function (x, y) {
 		return (_Utils_cmp(x, y) < 0) ? x : y;
@@ -4728,28 +4749,11 @@ var author$project$Main$formTime = function (x) {
 	var sec = elm$core$Basics$round(60 * ((60 * (x - hrs)) - mns));
 	return author$project$Main$zeroFill(hrs) + (':' + (author$project$Main$zeroFill(mns) + (':' + author$project$Main$zeroFill(sec))));
 };
-var author$project$Main$srHA = F2(
-	function (cent, geoLat) {
-		var zenith = 90.833;
-		var declination = author$project$Main$sunDeclination(cent);
-		return author$project$Main$acosDeg(
-			(author$project$Main$cosDeg(zenith) / (author$project$Main$cosDeg(geoLat) * author$project$Main$cosDeg(declination))) - (author$project$Main$tanDeg(geoLat) * author$project$Main$tanDeg(declination)));
-	});
 var author$project$Main$getHA = function (mod) {
-	return A2(
-		author$project$Main$srHA,
-		author$project$Main$getCentury(mod),
-		author$project$Main$getDecVar(mod.t));
+	return A2(author$project$Main$srHA, mod, 90.83);
 };
 var author$project$Main$getDayLength = function (mod) {
 	return author$project$Main$getHA(mod) / 7.5;
-};
-var author$project$Main$getNoon = function (mod) {
-	var timeZone = author$project$Main$getDecVar(mod.x);
-	var geoLong = author$project$Main$getDecVar(mod.B);
-	var eqTime = author$project$Main$equatTime(
-		author$project$Main$getCentury(mod));
-	return ((720.0 - (4.0 * geoLong)) - eqTime) + (timeZone * 60);
 };
 var author$project$Main$locTZ = function (mod) {
 	return ' UTC +' + (mod.x + ' h local time');
@@ -4760,33 +4764,42 @@ var author$project$Main$mnToHrMn = function (mns) {
 	var lhrs = (elm$core$Basics$floor(mns) / 60) | 0;
 	return author$project$Main$zeroFill(lhrs) + (':' + (author$project$Main$zeroFill(lmins) + (':' + author$project$Main$zeroFill(lsec))));
 };
-var author$project$Main$refractCorrectAltitude = function (mod) {
-	var solElev = 90.0 - A2(
-		author$project$Main$solZenith,
-		mod,
-		author$project$Main$getCentury(mod));
-	var refraction = author$project$Main$atmosRefract(mod);
-	return solElev + refraction;
-};
 var author$project$Main$risetMns = F2(
 	function (mod, rsOption) {
 		return author$project$Main$getNoon(mod) + ((4 * rsOption) * author$project$Main$getHA(mod));
 	});
-var author$project$Main$preAzimuth = F2(
-	function (mod, cent) {
-		var t = author$project$Main$sunDeclination(cent);
-		var b3 = author$project$Main$getDecVar(mod.t);
-		var ad = A2(author$project$Main$solZenith, mod, cent);
-		var ac = A2(author$project$Main$hourAngle, mod, cent);
-		return author$project$Main$acosDeg(
-			((author$project$Main$sinDeg(b3) * author$project$Main$cosDeg(ad)) - author$project$Main$sinDeg(t)) / (author$project$Main$cosDeg(b3) * author$project$Main$sinDeg(ad)));
-	});
-var author$project$Main$solAzimuth = F2(
-	function (mod, cent) {
-		var preAz = A2(author$project$Main$preAzimuth, mod, cent);
-		var ac = A2(author$project$Main$hourAngle, mod, cent);
-		return (ac > 0.0) ? author$project$Main$decNorm360(preAz + 180.0) : author$project$Main$decNorm360(540.0 - preAz);
-	});
+var author$project$Main$morningToNoon = function (mod) {
+	var dayLength = author$project$Main$getDayLength(mod);
+	var a2 = ' Polar winter, no sunrise';
+	var a1 = ' Sunrise Time      = ' + (author$project$Main$mnToHrMn(
+		A2(author$project$Main$risetMns, mod, -1)) + author$project$Main$locTZ(mod));
+	return (dayLength > 0) ? a1 : a2;
+};
+var author$project$Main$noonToEvening = function (mod) {
+	var dayLength = author$project$Main$getDayLength(mod);
+	var a2 = ' Polar winter, no sunrise, no sunset';
+	var a1 = ' Sunset Time      = ' + (author$project$Main$mnToHrMn(
+		A2(author$project$Main$risetMns, mod, 1)) + author$project$Main$locTZ(mod));
+	return (dayLength > 0) ? a1 : a2;
+};
+var author$project$Main$refractCorrectAltitude = function (mod) {
+	var solElev = 90.0 - author$project$Main$solZenith(mod);
+	var refraction = author$project$Main$atmosRefract(mod);
+	return solElev + refraction;
+};
+var author$project$Main$preAzimuth = function (mod) {
+	var t = author$project$Main$sunDeclination(mod);
+	var b3 = author$project$Main$getDecVar(mod.t);
+	var ad = author$project$Main$solZenith(mod);
+	var ac = author$project$Main$hourAngle(mod);
+	return author$project$Main$acosDeg(
+		((author$project$Main$sinDeg(b3) * author$project$Main$cosDeg(ad)) - author$project$Main$sinDeg(t)) / (author$project$Main$cosDeg(b3) * author$project$Main$sinDeg(ad)));
+};
+var author$project$Main$solAzimuth = function (mod) {
+	var preAz = author$project$Main$preAzimuth(mod);
+	var ac = author$project$Main$hourAngle(mod);
+	return (ac > 0.0) ? author$project$Main$decNorm360(preAz + 180.0) : author$project$Main$decNorm360(540.0 - preAz);
+};
 var elm$core$Basics$identity = function (x) {
 	return x;
 };
@@ -5184,8 +5197,7 @@ var author$project$Main$viewDeclination = function (model) {
 					[
 						elm$html$Html$text(
 						' Sun Declination   = ' + (author$project$Main$cutDec4(
-							author$project$Main$sunDeclination(
-								author$project$Main$getCentury(model))) + '°'))
+							author$project$Main$sunDeclination(model)) + '°'))
 					])),
 				A2(
 				elm$html$Html$p,
@@ -5202,6 +5214,23 @@ var author$project$Main$viewDeclination = function (model) {
 				_List_fromArray(
 					[
 						elm$html$Html$text(
+						' Civil Twilight    = ' + (author$project$Main$mnToHrMn(
+							A2(author$project$Main$civTwlMns, model, -1)) + author$project$Main$locTZ(model)))
+					])),
+				A2(
+				elm$html$Html$p,
+				_List_Nil,
+				_List_fromArray(
+					[
+						elm$html$Html$text(
+						author$project$Main$morningToNoon(model))
+					])),
+				A2(
+				elm$html$Html$p,
+				_List_Nil,
+				_List_fromArray(
+					[
+						elm$html$Html$text(
 						' Noon Time         = ' + (author$project$Main$mnToHrMn(
 							author$project$Main$getNoon(model)) + author$project$Main$locTZ(model)))
 					])),
@@ -5211,8 +5240,7 @@ var author$project$Main$viewDeclination = function (model) {
 				_List_fromArray(
 					[
 						elm$html$Html$text(
-						' Sunrise Time      = ' + (author$project$Main$mnToHrMn(
-							A2(author$project$Main$risetMns, model, -1)) + author$project$Main$locTZ(model)))
+						author$project$Main$noonToEvening(model))
 					])),
 				A2(
 				elm$html$Html$p,
@@ -5220,8 +5248,8 @@ var author$project$Main$viewDeclination = function (model) {
 				_List_fromArray(
 					[
 						elm$html$Html$text(
-						' Sunset Time       = ' + (author$project$Main$mnToHrMn(
-							A2(author$project$Main$risetMns, model, 1)) + author$project$Main$locTZ(model)))
+						' Civil Twilight    = ' + (author$project$Main$mnToHrMn(
+							A2(author$project$Main$civTwlMns, model, 1)) + author$project$Main$locTZ(model)))
 					])),
 				A2(
 				elm$html$Html$p,
@@ -5230,10 +5258,7 @@ var author$project$Main$viewDeclination = function (model) {
 					[
 						elm$html$Html$text(
 						' Solar Azimuth     = ' + (author$project$Main$cutDec4(
-							A2(
-								author$project$Main$solAzimuth,
-								model,
-								author$project$Main$getCentury(model))) + '°'))
+							author$project$Main$solAzimuth(model)) + '°'))
 					])),
 				A2(
 				elm$html$Html$p,
@@ -5251,10 +5276,7 @@ var author$project$Main$viewDeclination = function (model) {
 					[
 						elm$html$Html$text(
 						' Sun Altitude      = ' + (author$project$Main$cutDec4(
-							90.0 - A2(
-								author$project$Main$solZenith,
-								model,
-								author$project$Main$getCentury(model))) + '°  without air-refraction'))
+							90.0 - author$project$Main$solZenith(model)) + '°  without air-refraction'))
 					])),
 				A2(
 				elm$html$Html$p,
@@ -5431,7 +5453,8 @@ var author$project$Main$atan2Deg = F2(
 		return author$project$Main$toDeg(
 			A2(elm$core$Basics$atan2, x, y));
 	});
-var author$project$Main$rectAsc = function (cent) {
+var author$project$Main$rectAsc = function (mod) {
+	var cent = author$project$Main$getCentury(mod);
 	var oblCorr = author$project$Main$obliqCorr(cent);
 	var appLongS = author$project$Main$appLongSun(cent);
 	return A2(
@@ -5474,8 +5497,7 @@ var author$project$Main$viewJD = function (model) {
 					[
 						elm$html$Html$text(
 						' Right Ascension      = ' + author$project$Main$cutDec6(
-							author$project$Main$rectAsc(
-								author$project$Main$getCentury(model))))
+							author$project$Main$rectAsc(model)))
 					])),
 				A2(
 				elm$html$Html$p,
@@ -5484,8 +5506,7 @@ var author$project$Main$viewJD = function (model) {
 					[
 						elm$html$Html$text(
 						' Equation of Time     = ' + author$project$Main$cutDec6(
-							author$project$Main$equatTime(
-								author$project$Main$getCentury(model))))
+							author$project$Main$equatTime(model)))
 					])),
 				A2(
 				elm$html$Html$p,
@@ -5502,11 +5523,17 @@ var author$project$Main$viewJD = function (model) {
 				_List_fromArray(
 					[
 						elm$html$Html$text(
+						' Sunrise Civil Twilight HA  = ' + author$project$Main$cutDec6(
+							author$project$Main$getCivTwHA(model)))
+					])),
+				A2(
+				elm$html$Html$p,
+				_List_Nil,
+				_List_fromArray(
+					[
+						elm$html$Html$text(
 						' True Solar Time      = ' + author$project$Main$cutDec6(
-							A2(
-								author$project$Main$trueSolTime,
-								model,
-								author$project$Main$getCentury(model))))
+							author$project$Main$trueSolTime(model)))
 					])),
 				A2(
 				elm$html$Html$p,
@@ -5515,10 +5542,7 @@ var author$project$Main$viewJD = function (model) {
 					[
 						elm$html$Html$text(
 						' Hour Angle           = ' + author$project$Main$cutDec6(
-							A2(
-								author$project$Main$hourAngle,
-								model,
-								author$project$Main$getCentury(model))))
+							author$project$Main$hourAngle(model)))
 					])),
 				A2(
 				elm$html$Html$p,
@@ -5527,10 +5551,7 @@ var author$project$Main$viewJD = function (model) {
 					[
 						elm$html$Html$text(
 						' Solar Zenith         = ' + author$project$Main$cutDec6(
-							A2(
-								author$project$Main$solZenith,
-								model,
-								author$project$Main$getCentury(model))))
+							author$project$Main$solZenith(model)))
 					]))
 			]));
 };
@@ -5633,7 +5654,7 @@ var author$project$Main$view = function (model) {
 						elm$html$Html$text('  Year '),
 						A4(author$project$Main$viewInput, 'number', 'Give year', model.M, author$project$Main$Year),
 						elm$html$Html$text('  Month    '),
-						A4(author$project$Main$viewInput, 'number', 'Month (1 ... 12)', model.u, author$project$Main$Month),
+						A4(author$project$Main$viewInput, 'number', 'Month', model.u, author$project$Main$Month),
 						elm$html$Html$text('  Day   '),
 						A4(author$project$Main$viewInput, 'number', 'Day', model.r, author$project$Main$Daynumber),
 						elm$html$Html$text('  Hours UTC '),

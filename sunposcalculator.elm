@@ -275,15 +275,18 @@ equatTime mod =
 
 srHA mod zenith =
     let geoLat = (getDecVar mod.latitude)
-
         declination =
             sunDeclination mod
+
+        x =
+            (cosDeg zenith
+               / (cosDeg geoLat * cosDeg declination)
+               - (tanDeg geoLat * tanDeg declination)
+            )  
     in
-    acosDeg
-        (cosDeg zenith
-            / (cosDeg geoLat * cosDeg declination)
-            - (tanDeg geoLat * tanDeg declination)
-        )
+        if x < 1.00 then acosDeg (x)
+
+        else 0.00
 
 
 getHA mod =
@@ -455,7 +458,7 @@ view model =
             [ text "  Year "
             , viewInput "number" "Give year" model.year Year
             , text "  Month    "
-            , viewInput "number" "Month (1 ... 12)" model.month Month
+            , viewInput "number" "Month" model.month Month
             , text "  Day   "
             , viewInput "number" "Day" model.day Daynumber
             , text "  Hours UTC "
@@ -562,10 +565,10 @@ viewDeclination model =
         [ p [] [ text (" Sun Declination   = " ++ (cutDec4  (sunDeclination model)) ++ "°")]
         , p [] [ text (" Day Length        = " ++ formTime  (getDayLength model)) ]
         , p [] [ text (" Civil Twilight    = " ++ mnToHrMn  (civTwlMns model -1)   ++ locTZ model) ]
-        , p [] [ text (" Sunrise Time      = " ++ mnToHrMn  (risetMns model -1)    ++ locTZ model) ]
+        , p [] [ text (morningToNoon model) ]
         , p [] [ text (" Noon Time         = " ++ mnToHrMn  (getNoon model)        ++ locTZ model) ]
-        , p [] [ text (" Sunset Time       = " ++ mnToHrMn  (risetMns model 1)     ++ locTZ model) ]
-        , p [] [ text (" Civil Twilight    = " ++ mnToHrMn  (civTwlMns model 1)    ++ locTZ model) ]
+        , p [] [ text (noonToEvening model) ]
+        , p [] [ text (" Civil Twilight    = " ++ mnToHrMn  (civTwlMns model 1)    ++ locTZ model) ] 
         , p [] [ text (" Solar Azimuth     = " ++ (cutDec4  (solAzimuth   model )) ++ "°")]
         , p [] [ text (" Air refraction    = " ++ (cutDec4  (atmosRefract model )) ++ "°")]
         , p [] [ text (" Sun Altitude      = " ++ (cutDec4  (90.0 - (solZenith   model))) 
@@ -573,6 +576,24 @@ viewDeclination model =
         , p [] [ text (" Sun Altitude      = " ++ (cutDec4  ( refractCorrectAltitude model)) 
                                                ++ "° Corrected with air-refraction") ]
         ]
+
+
+morningToNoon mod =
+    let a1 = " Sunrise Time      = " ++ mnToHrMn  (risetMns mod -1)    ++ locTZ mod
+        a2 = " Polar winter, no sunrise"
+        dayLength = getDayLength mod
+    
+    in 
+       if dayLength > 0 then a1 else a2
+
+
+noonToEvening mod =
+    let a1 = " Sunset Time      = " ++ mnToHrMn  (risetMns mod 1)    ++ locTZ mod
+        a2 = " Polar winter, no sunrise, no sunset"
+        dayLength = getDayLength mod
+    
+    in   
+       if dayLength > 0 then a1 else a2
 
 
 viewFooter : Model -> Html msg
