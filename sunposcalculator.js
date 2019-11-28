@@ -4658,13 +4658,14 @@ var author$project$Main$atmosRefract = function (mod) {
 		author$project$Main$tanDeg(solElev),
 		5))) / 3600.0) : ((_Utils_cmp(solElev, -0.575) > 0) ? ((1735.0 + (solElev * ((-518.2) + (solElev * (103.4 + (solElev * ((-12.79) + (solElev * 0.711)))))))) / 3600.0) : (((-20.772) / author$project$Main$tanDeg(solElev)) / 3600.0)));
 };
+var elm$core$Basics$and = _Basics_and;
 var elm$core$Basics$lt = _Utils_lt;
 var author$project$Main$srHA = F2(
 	function (mod, zenith) {
 		var geoLat = author$project$Main$getDecVar(mod.t);
 		var declination = author$project$Main$sunDeclination(mod);
 		var x = (author$project$Main$cosDeg(zenith) / (author$project$Main$cosDeg(geoLat) * author$project$Main$cosDeg(declination))) - (author$project$Main$tanDeg(geoLat) * author$project$Main$tanDeg(declination));
-		return (x < 1.0) ? author$project$Main$acosDeg(x) : 0.0;
+		return ((x > 0.999) && (declination < 0.0)) ? 0.0 : (((_Utils_cmp(x, -0.999) < 0) && (declination > 0.0)) ? 180.0 : author$project$Main$acosDeg(x));
 	});
 var author$project$Main$getCivTwHA = function (mod) {
 	return A2(author$project$Main$srHA, mod, 96.0);
@@ -4769,18 +4770,24 @@ var author$project$Main$risetMns = F2(
 		return author$project$Main$getNoon(mod) + ((4 * rsOption) * author$project$Main$getHA(mod));
 	});
 var author$project$Main$morningToNoon = function (mod) {
+	var declination = author$project$Main$sunDeclination(mod);
 	var dayLength = author$project$Main$getDayLength(mod);
+	var a3 = ' Polar summer, no sunset';
 	var a2 = ' Polar winter, no sunrise';
 	var a1 = ' Sunrise Time      = ' + (author$project$Main$mnToHrMn(
 		A2(author$project$Main$risetMns, mod, -1)) + author$project$Main$locTZ(mod));
-	return (dayLength > 0) ? a1 : a2;
+	return ((dayLength > 0.0) && (dayLength < 24.0)) ? a1 : ((declination < 0.0) ? a2 : a3);
 };
 var author$project$Main$noonToEvening = function (mod) {
-	var dayLength = author$project$Main$getDayLength(mod);
+	var sHA = author$project$Main$getHA(mod);
+	var declination = author$project$Main$sunDeclination(mod);
+	var daylength = author$project$Main$getDayLength(mod);
+	var altitude = 90.0 - author$project$Main$solZenith(mod);
+	var a3 = ' Polar summer, no sunset';
 	var a2 = ' Polar winter, no sunrise, no sunset';
 	var a1 = ' Sunset Time      = ' + (author$project$Main$mnToHrMn(
 		A2(author$project$Main$risetMns, mod, 1)) + author$project$Main$locTZ(mod));
-	return (dayLength > 0) ? a1 : a2;
+	return ((declination < 0.0) && (_Utils_cmp(altitude, -0.8097) < 0)) ? a2 : ((daylength > 23.99) ? a3 : a1);
 };
 var author$project$Main$refractCorrectAltitude = function (mod) {
 	var solElev = 90.0 - author$project$Main$solZenith(mod);
@@ -4971,7 +4978,6 @@ var elm$json$Json$Decode$Index = F2(
 var elm$json$Json$Decode$OneOf = function (a) {
 	return {$: 2, a: a};
 };
-var elm$core$Basics$and = _Basics_and;
 var elm$core$Basics$or = _Basics_or;
 var elm$core$Char$toCode = _Char_toCode;
 var elm$core$Char$isLower = function (_char) {

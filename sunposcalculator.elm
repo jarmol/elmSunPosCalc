@@ -284,10 +284,12 @@ srHA mod zenith =
                - (tanDeg geoLat * tanDeg declination)
             )  
     in
-        if x < 1.00 then acosDeg (x)
 
-        else 0.00
+        if x > 0.999 && declination < 0.00 then 0.00
+        
+        else if x < -0.999 && declination > 0.00 then  180.0
 
+        else acosDeg (x)
 
 getHA mod =
     srHA  mod 90.83
@@ -581,19 +583,27 @@ viewDeclination model =
 morningToNoon mod =
     let a1 = " Sunrise Time      = " ++ mnToHrMn  (risetMns mod -1)    ++ locTZ mod
         a2 = " Polar winter, no sunrise"
+        a3 = " Polar summer, no sunset"
         dayLength = getDayLength mod
-    
+        declination = sunDeclination mod 
     in 
-       if dayLength > 0 then a1 else a2
+       if dayLength > 0.0 && dayLength < 24.0 then a1 
+       else if declination < 0.0 then  a2
+       else a3
 
 
 noonToEvening mod =
     let a1 = " Sunset Time      = " ++ mnToHrMn  (risetMns mod 1)    ++ locTZ mod
         a2 = " Polar winter, no sunrise, no sunset"
-        dayLength = getDayLength mod
-    
-    in   
-       if dayLength > 0 then a1 else a2
+        a3 = " Polar summer, no sunset"
+        sHA  = getHA mod
+        declination = sunDeclination mod
+        daylength = getDayLength mod
+        altitude = 90.0 - (solZenith  mod)
+    in
+        if declination < 0.0 && altitude < -0.8097 then a2
+        else if daylength > 23.99 then a3 
+        else a1
 
 
 viewFooter : Model -> Html msg
