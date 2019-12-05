@@ -35,10 +35,10 @@ type alias Model =
     , timezone : String
     }
 
-
+-- Initial values set for Helsinki and date 2019-December-04
 init : Model
 init =
-    Model "2019" "09" "16" "10" "18" "65.85" "24.18" "2"
+    Model "2019" "12" "04" "10" "10" "60.11" "24.98" "2"
 
 
 wCalculated =
@@ -171,24 +171,30 @@ calcSunML cent =
 
 -- Sun true longitude, OK tested 12.11.2019
 
-
-trueLongSun cent =
+trueLongSun : Model -> Float
+trueLongSun mod =
+    let cent = getCentury mod
+    in
     calcSunML cent + sunEqCntr cent
 
 
 
 -- Sun apparent longitude, OK tested 22.10.19
 
-
-appLongSun cent =
-    trueLongSun cent - 5.69e-3 - 4.78e-3 * sinDeg (125.04 - 1934.136 * cent)
+appLongSun : Model -> Float
+appLongSun mod =
+    let cent = getCentury mod
+    in
+    trueLongSun mod - 5.69e-3 - 4.78e-3 * sinDeg (125.04 - 1934.136 * cent)
 
 
 
 -- Mean Obliquity of Ecliptic
 
-
-meanObliqEclip cent =
+meanObliqEclip : Model -> Float
+meanObliqEclip mod =
+    let cent = getCentury mod
+    in
     23.0 + (26.0 + (21.448 - cent * (46.815 + cent * (5.9e-4 - cent * 1.813e-3))) / 60.0) / 60.0
 
 
@@ -196,9 +202,11 @@ meanObliqEclip cent =
 -- Corrected obliquity, OK 22.10.19
 
 
-obliqCorr : Float -> Float
-obliqCorr cent =
-    meanObliqEclip cent + 0.00256 * cosDeg (125.04 - 1934.136 * cent)
+obliqCorr : Model -> Float
+obliqCorr mod =
+    let cent = getCentury mod
+    in
+    meanObliqEclip mod + 0.00256 * cosDeg (125.04 - 1934.136 * cent)
 
 
 
@@ -208,10 +216,11 @@ obliqCorr cent =
 rectAsc mod =
     let cent = getCentury mod
         oblCorr =
-            obliqCorr cent
+            obliqCorr mod
+
 
         appLongS =
-            appLongSun cent
+            appLongSun mod
     in
     atan2Deg (cosDeg oblCorr * sinDeg appLongS) (cosDeg appLongS)
 
@@ -223,7 +232,7 @@ rectAsc mod =
 variableY mod =
     let cent = getCentury mod
         x =
-            tanDeg (obliqCorr cent / 2.0)
+            tanDeg (obliqCorr mod / 2.0)
     in
     x * x
 
@@ -285,9 +294,9 @@ srHA mod zenith =
             )  
     in
 
-        if x > 0.999 && declination < 0.00 then 0.00
+        if x > 0.99999 && declination < 0.00 then 0.00
         
-        else if x < -0.999 && declination > 0.00 then  180.0
+        else if x < -0.99999 && declination > 0.00 then  180.0
 
         else acosDeg (x)
 
@@ -367,7 +376,7 @@ getDayLength mod =
 sunDeclination mod =
     let cent = getCentury mod
     in
-        asinDeg (sinDeg (obliqCorr cent) * sinDeg (appLongSun cent))
+        asinDeg (sinDeg (obliqCorr mod) * sinDeg (appLongSun mod))
 
 
  
@@ -546,10 +555,10 @@ viewJD model =
 --      , p [] [ text (" Eccentricity of Earth Orbit = " ++ fromFloat (eccentEarthOrbit (getCentury model))) ]
 --      , p [] [ text (" Mean and True Anomality Difference  = " ++ fromFloat (sunEqCntr (getCentury model))) ]
 --      , p [] [ text (" Sun True Anomality = " ++ fromFloat (sunTrueAnom (getCentury model))) ]
---      , p [] [ text (" True Longitude of Sun = " ++ fromFloat (trueLongSun (getCentury model))) ]
---      , p [] [ text (" Apparent Longitude of Sun = " ++ fromFloat (appLongSun (getCentury model))) ]
---      , p [] [ text (" Mean Obliquity of Ecliptic = " ++ fromFloat (meanObliqEclip (getCentury model))) ]
---      , p [] [ text (" Corrected Obliquity  = " ++ fromFloat (obliqCorr (getCentury model))) ]
+--      , p [] [ text (" True Longitude of Sun =      " ++ fromFloat (trueLongSun    model)) ]
+--      , p [] [ text (" Apparent Longitude of Sun =  " ++ fromFloat (appLongSun     model)) ]
+--      , p [] [ text (" Mean Obliquity of Ecliptic = " ++ fromFloat (meanObliqEclip model)) ]
+--      , p [] [ text (" Corrected Obliquity  = " ++ fromFloat (obliqCorr model)) ]
         , p [] [ text (" Right Ascension      = " ++ cutDec6 (rectAsc     model)) ]
 --      , p [] [ text (" Variable Y           = " ++ cutDec6 (variableY   model)) ]
         , p [] [ text (" Equation of Time     = " ++ cutDec6 (equatTime   model)) ]
@@ -582,28 +591,27 @@ viewDeclination model =
 
 morningToNoon mod =
     let a1 = " Sunrise Time      = " ++ mnToHrMn  (risetMns mod -1)    ++ locTZ mod
-        a2 = " Polar winter, no sunrise"
-        a3 = " Polar summer, no sunset"
-        dayLength = getDayLength mod
-        declination = sunDeclination mod 
-    in 
-       if dayLength > 0.0 && dayLength < 24.0 then a1 
-       else if declination < 0.0 then  a2
-       else a3
+        a2 = " Arctic winter, no sunrise"
+        a3 = " Arctic summer, no sunset"
+        geoLat = (getDecVar mod.latitude)
+        declination = sunDeclination mod
+    in
+       if declination      < 0.0 && geoLat > (90.8 + declination) then a2
+       else if declination > 0.0 && geoLat > (89.2 - declination) then a3
+       else a1  
 
 
 noonToEvening mod =
     let a1 = " Sunset Time      = " ++ mnToHrMn  (risetMns mod 1)    ++ locTZ mod
-        a2 = " Polar winter, no sunrise, no sunset"
+        a2 = " Arctic winter, no sunriset"
         a3 = " Polar summer, no sunset"
-        sHA  = getHA mod
+        geoLat = (getDecVar mod.latitude)
         declination = sunDeclination mod
-        daylength = getDayLength mod
-        altitude = 90.0 - (solZenith  mod)
     in
-        if declination < 0.0 && altitude < -0.8097 then a2
-        else if daylength > 23.99 then a3 
+        if declination < 0.0 &&  geoLat > (90.8 + declination) then a2
+        else if declination > 0.0 && geoLat > (89.2 - declination) then a3
         else a1
+
 
 
 viewFooter : Model -> Html msg
