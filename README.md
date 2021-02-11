@@ -1,3 +1,4 @@
+<H1>THE SOLAR POSITION CALCULATOR IN ELM-LANGUAGE CODE</H1>
 This application was created in Elm language version 0.19.0
 
 You can run this also offline in your browser by the html file if you have compiled the elm-source to js file.
