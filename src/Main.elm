@@ -5,6 +5,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onInput)
 import String exposing (fromFloat, fromInt, toInt)
 import GregorJDN  exposing (jdnGr, jdateGr)
+import MnToHrMnSc exposing (mnToHrMn)
 
 -- File saved in https://ellie-app.com/7drvTVwxKGVa1
 -- and https://ellie-app.com/7drL34ytZTWa1
@@ -35,7 +36,7 @@ type alias Model =
 
 init : Model
 init = 
-    Model "2022" "08" "28" "10" "24" "33" "65.85" "24.18" "2"
+    Model "2022" "08" "28" "10" "24" "31" "65.85" "24.18" "2"
 
 -- UPDATE
 
@@ -279,24 +280,6 @@ risetMns mod rsOption =
 
 civTwlMns mod rsOption =
    getNoon mod + 4 * rsOption * getCivTwHA mod
-
-
--- Converts minutes to hh:mn:ss
--- Fixed seconds 25.1.2020
-
-mnToHrMn : Float -> String
-mnToHrMn mns =
-    let
-        lmins = remainderBy 60 (floor mns)
-        lhrs = floor ( mns / 60.0 )
-        lsec = floor (60*mns - toFloat(3600*lhrs + 60*lmins ))
-    in
-    zeroFill lhrs
-        ++ ":"
-        ++ zeroFill lmins
-        ++ ":"
-        ++ zeroFill lsec
-
 
 
 -- Daylength as hours
