@@ -6,9 +6,10 @@ import Html.Events exposing (onInput)
 import String exposing (fromFloat, fromInt, toInt)
 import GregorJDN  exposing (jdnGr, jdateGr)
 import MnToHrMnSc exposing (mnToHrMn)
+import DecimalFormat exposing (cutDec3, cutDec6)
 import SunHelper  exposing (getNoon, sunSet, sunRise, civTwlMns, getDayLength
     , fJD, getJDN, sunDeclination, solAzimuth, solZenith, atmosRefract
-    , refractCorrectAltitude, getDecVar, getInputValue, cutDec6, cutDec4)
+    , refractCorrectAltitude, getDecVar, getInputValue)
 
 -- File saved in https://ellie-app.com/7drvTVwxKGVa1
 -- and https://ellie-app.com/7drL34ytZTWa1
@@ -194,11 +195,11 @@ viewDeclination model =
         , p [] [ text (" Noon Time         = " ++ mnToHrMn  (getNoon model)        ++ locTZ model) ]
         , p [] [ text (noonToEvening model) ]
         , p [] [ text (" Civil Twilight    = " ++ mnToHrMn  (civTwlMns model 1)    ++ locTZ model) ] 
-        , p [] [ text (" Solar Azimuth     = " ++ (cutDec4  (solAzimuth   model )) ++ "°")]
-        , p [] [ text (" Air refraction    = " ++ (cutDec4  (atmosRefract model )) ++ "°")]
-        , p [] [ text (" Sun Altitude      = " ++ (cutDec4  (90.0 - (solZenith   model))) 
+        , p [] [ text (" Solar Azimuth     = " ++ (cutDec3  (solAzimuth   model )) ++ "°")]
+        , p [] [ text (" Air refraction    = " ++ (cutDec3  (atmosRefract model )) ++ "°")]
+        , p [] [ text (" Sun Altitude      = " ++ (cutDec3  (90.0 - (solZenith   model))) 
                                                ++ "°  without air-refraction") ]
-        , p [] [ text (" Sun Altitude      = " ++ (cutDec4  ( refractCorrectAltitude model)) 
+        , p [] [ text (" Sun Altitude      = " ++ (cutDec3  ( refractCorrectAltitude model)) 
                                                ++ "° Corrected with air-refraction") ]
         ]
 

@@ -435,26 +435,3 @@ getDecVar x =
 getInputValue : String -> Int
 getInputValue laji =
     Maybe.withDefault 0 (toInt laji)
-
--- Cut to six decimals format of Float-numbers
-cutDecNum : Float -> Int -> String
-cutDecNum nr ndecim =
-    let
-        snr = String.fromFloat nr
-        dotIndex = String.indices "." snr
-        dotNr = Maybe.withDefault 0 (List.minimum dotIndex)
-        decNrLength = String.length snr
-        decimPart = String.slice dotNr decNrLength snr
-        cutTo6 = String.left ndecim decimPart
-        intPart = String.left dotNr snr
-    in
-        intPart ++ cutTo6
-
-
-cutDec6 : Float -> String
-cutDec6 nr = cutDecNum nr 7  
-
-
-cutDec4 : Float -> String
-cutDec4 nr = cutDecNum nr 5
-
