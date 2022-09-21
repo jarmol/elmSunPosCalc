@@ -2,7 +2,8 @@ module EquinoxDeclinationTests exposing (..)
 
 import Expect exposing (Expectation)
 import Test exposing (..)
-import Main exposing (Model,sunDeclination)
+import Main exposing (Model)
+import SunHelper exposing (sunDeclination)
 import Zip exposing (zip)
 {-
 Calculation and testing of the solar Declination in autumn equinox
