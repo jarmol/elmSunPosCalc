@@ -1,4 +1,6 @@
 module SunHelper exposing (..)
+
+import CommonModel exposing (InputData)
 import String exposing (fromFloat, fromInt, toInt)
 import GregorJDN  exposing (jdnGr, jdateGr)
 import MnToHrMnSc exposing (mnToHrMn)
@@ -9,21 +11,7 @@ import MnToHrMnSc exposing (mnToHrMn)
 
 -- MODEL
 
-type alias Model =
-    { year : String
-    , month : String
-    , day : String
-    , hour : String
-    , minute : String
-    , second : String
-    , latitude : String
-    , longitude : String
-    , timezone : String
-    }   
-
-init : Model
-init = 
-    Model "2022" "08" "28" "10" "24" "31" "65.85" "24.18" "2"
+type alias Model = CommonModel.InputData
 
 
 sunEqCntr : Float -> Float

@@ -1,33 +1,13 @@
 module WorkSunHelper exposing (..)
-
+import CommonModel exposing (InputData)
 import GregorJDN exposing (jdateGr, jdnGr)
-import MnToHrMnSc exposing (mnToHrMn)
-import String exposing (fromFloat, fromInt, toInt)
+import MnToHrMnSc exposing (mnToHrMn)   -- Converts minutes of day to usual time hr:mn:sc
 
 
 
--- Sun true anomality, OK tested 21.10.19
--- sunTrueAnom cent =
--- meanAnomalSun cent + sunEqCntr cent
 -- MODEL
 
-
-type alias Inputdata =
-    { year : String
-    , month : String
-    , day : String
-    , hour : String
-    , minute : String
-    , second : String
-    , latitude : String
-    , longitude : String
-    , timezone : String
-    }
-
-
-init : Inputdata
-init =
-    Inputdata "2022" "08" "28" "10" "24" "31" "65.85" "24.18" "2"
+type alias InputData = CommonModel.InputData
 
 
 sunEqCntr : Float -> Float
@@ -68,8 +48,8 @@ meanAnomalSun cent =
     a + cent * (b + cent * c) |> decNorm360
 
 
-getCentury inputdata =
-    getCent (fJD inputdata)
+getCentury inputData =
+    getCent (fJD inputData)
 
 
 
@@ -94,11 +74,11 @@ calcSunML cent =
 -- Sun true longitude, OK tested 12.11.2019
 
 
-trueLongSun : Inputdata -> Float
-trueLongSun inputdata =
+trueLongSun : InputData -> Float
+trueLongSun inputData =
     let
         cent =
-            getCentury inputdata
+            getCentury inputData
     in
     calcSunML cent + sunEqCntr cent
 
@@ -107,20 +87,20 @@ trueLongSun inputdata =
 -- Sun apparent longitude, OK tested 22.10.19
 
 
-appLongSun : Inputdata -> Float
-appLongSun inputdata =
-    trueLongSun inputdata - 5.69e-3 - 4.78e-3 * sinDeg (125.04 - 1934.136 * getCentury inputdata)
+appLongSun : InputData -> Float
+appLongSun inputData =
+    trueLongSun inputData - 5.69e-3 - 4.78e-3 * sinDeg (125.04 - 1934.136 * getCentury inputData)
 
 
 
 -- Mean Obliquity of Ecliptic
 
 
-meanObliqEclip : Inputdata -> Float
-meanObliqEclip inputdata =
+meanObliqEclip : InputData -> Float
+meanObliqEclip inputData =
     let
         cent =
-            getCentury inputdata
+            getCentury inputData
     in
     23.0 + (26.0 + (21.448 - cent * (46.815 + cent * (5.9e-4 - cent * 1.813e-3))) / 60.0) / 60.0
 
@@ -129,33 +109,33 @@ meanObliqEclip inputdata =
 -- Corrected obliquity, OK 22.10.19
 
 
-obliqCorr : Inputdata -> Float
-obliqCorr inputdata =
-    meanObliqEclip inputdata + 0.00256 * cosDeg (125.04 - 1934.136 * getCentury inputdata)
+obliqCorr : InputData -> Float
+obliqCorr inputData =
+    meanObliqEclip inputData + 0.00256 * cosDeg (125.04 - 1934.136 * getCentury inputData)
 
 
 
 -- Right Ascension RA, OK tested 14.11.2019
 
 
-rectAsc : Inputdata -> Float
-rectAsc inputdata =
+rectAsc : InputData -> Float
+rectAsc inputData =
     let
         appLongS =
-            appLongSun inputdata
+            appLongSun inputData
     in
-    atan2Deg (cosDeg (obliqCorr inputdata) * sinDeg appLongS) (cosDeg appLongS)
+    atan2Deg (cosDeg (obliqCorr inputData) * sinDeg appLongS) (cosDeg appLongS)
 
 
 
 -- Used in Equation of Time
 
 
-variableY : Inputdata -> Float
-variableY inputdata =
+variableY : InputData -> Float
+variableY inputData =
     let
         x =
-            tanDeg (obliqCorr inputdata / 2.0)
+            tanDeg (obliqCorr inputData / 2.0)
     in
     x * x
 
@@ -164,14 +144,14 @@ variableY inputdata =
 -- Equation of Time, OK tested 15.11.2019
 
 
-equatTime : Inputdata -> Float
-equatTime inputdata =
+equatTime : InputData -> Float
+equatTime inputData =
     let
         cent =
-            getCentury inputdata
+            getCentury inputData
 
         varY =
-            variableY inputdata
+            variableY inputData
 
         meanLongS =
             calcSunML cent
@@ -209,13 +189,13 @@ equatTime inputdata =
 -- HA of Sunrise hourangle, OK tested 15.11.2019
 
 
-srHA inputdata zenith =
+srHA inputData zenith =
     let
         geoLat =
-            getDecVar inputdata.latitude
+            getDecVar inputData.latitude
 
         declination =
-            sunDeclination inputdata
+            sunDeclination inputData
 
         x =
             cosDeg zenith
@@ -232,16 +212,16 @@ srHA inputdata zenith =
         acosDeg x
 
 
-getHA inputdata =
-    srHA inputdata 90.833
+getHA inputData =
+    srHA inputData 90.833
 
 
 
 -- Civil twilight Sunrise HA
 
 
-getCivTwHA inputdata =
-    srHA inputdata 96.0
+getCivTwHA inputData =
+    srHA inputData 96.0
 
 
 
@@ -249,16 +229,16 @@ getCivTwHA inputdata =
 -- OK tested 01.11.2019
 
 
-getNoon inputdata =
+getNoon inputData =
     let
         geoLong =
-            getDecVar inputdata.longitude
+            getDecVar inputData.longitude
 
         timeZone =
-            getDecVar inputdata.timezone
+            getDecVar inputData.timezone
 
         eqTime =
-            equatTime inputdata
+            equatTime inputData
     in
     (720.0 - 4.0 * geoLong) - eqTime + timeZone * 60
 
@@ -267,72 +247,74 @@ getNoon inputdata =
 -- Sunrise in minutes, option = -1
 
 
-sunRise inputdata =
-    risetMns inputdata -1
+sunRise inputData =
+    risetMns inputData -1
 
 
 
 -- Sunset  in minutes, option = +1
 
 
-sunSet inputdata =
-    risetMns inputdata 1
+sunSet inputData =
+    risetMns inputData 1
 
 
-risetMns inputdata rsOption =
-    getNoon inputdata + 4.0 * rsOption * getHA inputdata
+risetMns inputData rsOption =
+    getNoon inputData + 4.0 * rsOption * getHA inputData
 
 
 
 -- Civil Twilight minutes since midnight
 
 
-civTwlMns inputdata rsOption =
-    getNoon inputdata + 4 * rsOption * getCivTwHA inputdata
+civTwlMns inputData rsOption =
+    getNoon inputData + 4 * rsOption * getCivTwHA inputData
 
 
 
 -- Daylength as hours
 
 
-getDayLength inputdata =
-    getHA inputdata / 7.5
+getDayLength inputData =
+    getHA inputData / 7.5
 
 
 
 -- Sun Declination, OK tested 24.10.2019
 
-
-sunDeclination inputdata =
-    asinDeg (sinDeg (obliqCorr inputdata) * sinDeg (appLongSun inputdata))
-
+sunDeclination inputData =
+    let 
+        appLS = sinDeg <|appLongSun inputData
+        oblC  = sinDeg <| obliqCorr inputData
+    in
+        asinDeg (oblC * appLS)
 
 
 -- True Solar Time, OK tested 17.11.2019
 
 
-trueSolTime inputdata =
+trueSolTime inputData =
     let
         hr =
-            getDecVar inputdata.hour
+            getDecVar inputData.hour
 
         mn =
-            getDecVar inputdata.minute
+            getDecVar inputData.minute
 
         sc =
-            getDecVar inputdata.second
+            getDecVar inputData.second
 
         tz =
-            getDecVar inputdata.timezone
+            getDecVar inputData.timezone
 
         e2 =
             60.0 * (hr + tz) + mn + sc / 60.0
 
         v2 =
-            equatTime inputdata
+            equatTime inputData
 
         b4 =
-            getDecVar inputdata.longitude
+            getDecVar inputData.longitude
     in
     e2 + v2 + 4.0 * b4 - 60.0 * tz
 
@@ -341,10 +323,10 @@ trueSolTime inputdata =
 -- Hour Angle degr. OK tested 17.11.2019
 
 
-hourAngle inputdata =
+hourAngle inputData =
     let
         tSt =
-            trueSolTime inputdata
+            trueSolTime inputData
     in
     if tSt > 0.0 then
         0.25 * tSt - 180.0
@@ -357,42 +339,42 @@ hourAngle inputdata =
 -- Solar Zenith (degrees)
 
 
-solZenith inputdata =
+solZenith inputData =
     let
         b3 =
-            getDecVar inputdata.latitude
+            getDecVar inputData.latitude
 
         t2 =
-            sunDeclination inputdata
+            sunDeclination inputData
     in
-    acosDeg (sinDeg b3 * sinDeg t2 + cosDeg b3 * cosDeg t2 * cosDeg (hourAngle inputdata))
+    acosDeg (sinDeg b3 * sinDeg t2 + cosDeg b3 * cosDeg t2 * cosDeg (hourAngle inputData))
 
 
 
 --  Solar Azimuth angle clockwise from north, OK tested 19.11.2019
 
 
-preAzimuth inputdata =
+preAzimuth inputData =
     let
         b3 =
-            getDecVar inputdata.latitude
+            getDecVar inputData.latitude
 
         ad =
-            solZenith inputdata
+            solZenith inputData
 
         t =
-            sunDeclination inputdata
+            sunDeclination inputData
     in
     acosDeg ((sinDeg b3 * cosDeg ad - sinDeg t) / (cosDeg b3 * sinDeg ad))
 
 
-solAzimuth inputdata =
+solAzimuth inputData =
     let
         preAz =
-            preAzimuth inputdata
+            preAzimuth inputData
 
         ac =
-            hourAngle inputdata
+            hourAngle inputData
     in
     if ac > 0.0 then
         preAz + 180.0 |> decNorm360
@@ -405,10 +387,10 @@ solAzimuth inputdata =
 -- Atmospheric Refraction
 
 
-atmosRefract inputdata =
+atmosRefract inputData =
     let
         solElev =
-            90.0 - solZenith inputdata
+            90.0 - solZenith inputData
     in
     if solElev > 85.0 then
         0.0
@@ -439,20 +421,20 @@ atmosRefract inputdata =
         -20.772 / tanDeg solElev / 3600.0
 
 
-refractCorrectAltitude inputdata =
+refractCorrectAltitude inputData =
     90.0
-        - solZenith inputdata
-        + atmosRefract inputdata
+        - solZenith inputData
+        + atmosRefract inputData
 
 
-locTZ inputdata =
-    " UTC + " ++ inputdata.timezone ++ " h local time"
+locTZ inputData =
+    " UTC + " ++ inputData.timezone ++ " h local time"
 
 
-morningToNoon inputdata =
+morningToNoon inputData =
     let
         a1 =
-            " Sunrise Time      = " ++ mnToHrMn (sunRise inputdata) ++ locTZ inputdata
+            " Sunrise Time      = " ++ mnToHrMn (sunRise inputData) ++ locTZ inputData
 
         a2 =
             " Arctic winter, no sunrise"
@@ -467,13 +449,13 @@ morningToNoon inputdata =
             " Daylength Exception: "
 
         geoLat =
-            getDecVar inputdata.latitude
+            getDecVar inputData.latitude
 
         declination =
-            sunDeclination inputdata
+            sunDeclination inputData
 
         dayLength =
-            getDayLength inputdata
+            getDayLength inputData
     in
     if declination < 0.0 && geoLat > (90.83 + declination) then
         a2
@@ -491,10 +473,10 @@ morningToNoon inputdata =
         a0 ++ String.fromFloat dayLength
 
 
-noonToEvening inputdata =
+noonToEvening inputData =
     let
         a1 =
-            " Sunset Time      = " ++ mnToHrMn (sunSet inputdata) ++ locTZ inputdata
+            " Sunset Time      = " ++ mnToHrMn (sunSet inputData) ++ locTZ inputData
 
         a2 =
             " Arctic winter, no Sunrise"
@@ -506,10 +488,10 @@ noonToEvening inputdata =
             " No Sunset, Summer in Antarctis"
 
         geoLat =
-            getDecVar inputdata.latitude
+            getDecVar inputData.latitude
 
         declination =
-            sunDeclination inputdata
+            sunDeclination inputData
     in
     if declination < 0.0 && geoLat > (90.8 + declination) then
         a2
@@ -593,8 +575,8 @@ frac x =
 -- Determine Julian day from calendar date
 
 
-getJDN inputdata =
-    jdnGr (gI inputdata.year) (gI inputdata.month) (gI inputdata.day)
+getJDN inputData =
+    jdnGr (gI inputData.year) (gI inputData.month) (gI inputData.day)
 
 
 getCent : Float -> Float
@@ -616,31 +598,31 @@ fJD :
         , year : String
     }
     -> Float
-fJD inputdata =
+fJD inputData =
     let
         y =
-            gI inputdata.year
+            gI inputData.year
 
         m =
-            gI inputdata.month
+            gI inputData.month
 
         d =
-            gI inputdata.day
+            gI inputData.day
 
         h =
-            gI inputdata.hour
+            gI inputData.hour
 
         mn =
-            gI inputdata.minute
+            gI inputData.minute
 
         s =
-            gI inputdata.second
+            gI inputData.second
     in
     jdateGr y m d h mn s
 
 
 gI element =
-    Maybe.withDefault 0 (toInt element)
+    Maybe.withDefault 0 (String.toInt element)
 
 
 getDecVar : String -> Float
@@ -650,4 +632,4 @@ getDecVar x =
 
 getInputValue : String -> Int
 getInputValue laji =
-    Maybe.withDefault 0 (toInt laji)
+    Maybe.withDefault 0 (String.toInt laji)

@@ -1,4 +1,4 @@
-module WorkSuncalculator exposing (..)
+module WorkSunCalculator exposing (..)
 
 import Browser
 import DecimalFormat exposing (cutDec3, cutDec6)
@@ -8,6 +8,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onInput)
 import MnToHrMnSc exposing (mnToHrMn)
 import String exposing (fromFloat, fromInt, toInt)
+import CommonModel exposing (InputData)
 import WorkSunHelper
     exposing
         ( atmosRefract
@@ -41,18 +42,7 @@ main =
 
 -- MODEL
 
-
-type alias InputData =
-    { year : String
-    , month : String
-    , day : String
-    , hour : String
-    , minute : String
-    , second : String
-    , latitude : String
-    , longitude : String
-    , timezone : String
-    }
+type alias InputData = CommonModel.InputData
 
 
 init : InputData
