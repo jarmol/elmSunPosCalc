@@ -7,15 +7,12 @@ import String exposing (fromFloat, fromInt, toInt)
 import GregorJDN  exposing (jdnGr, jdateGr)
 import MnToHrMnSc exposing (mnToHrMn)
 import DecimalFormat exposing (cutDec3, cutDec6)
+import CommonModel exposing (InputData)
 import SunHelper  exposing (getNoon, sunSet, sunRise, civTwlMns, getDayLength
     , fJD, getJDN, sunDeclination, solAzimuth, solZenith, atmosRefract
     , refractCorrectAltitude, getDecVar, getInputValue)
 
--- File saved in https://ellie-app.com/7drvTVwxKGVa1
--- and https://ellie-app.com/7drL34ytZTWa1
--- Calculates some parametres of the solar position
 -- jdateGr Converts Calendar date to Julian Day Number JDN
--- This code is compatible with Elm 0.19.1
 -- © 2022  Jarmo Lammi
 
 -- MAIN
@@ -26,25 +23,15 @@ main =
 
 -- MODEL
 
-type alias Model =
-    { year : String
-    , month : String
-    , day : String
-    , hour : String
-    , minute : String
-    , second : String
-    , latitude : String
-    , longitude : String
-    , timezone : String
-    }
+type alias Model = CommonModel.InputData
 
-init : Model
-init = 
-    Model "2022" "08" "28" "10" "24" "31" "65.85" "24.18" "2"
+init : InputData
+init =
+    InputData "2022" "09" "23" "1" "04" "27" "60.0" "25.0" "3"
 
 -- UPDATE
 
-type Msg
+type Msg 
     = Year String
     | Month String
     | Daynumber String
