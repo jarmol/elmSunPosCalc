@@ -1,4 +1,4 @@
-module CommonModel exposing (..)
+module CommonModel exposing (InputData)
 
 -- MODEL
 
@@ -14,3 +14,4 @@ type alias InputData =
     , longitude : String
     , timezone : String
     }
+
