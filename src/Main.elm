@@ -142,6 +142,10 @@ viewInput t p v toMsg =
 
 viewValidation : InputData -> Html msg
 viewValidation inputData =
+    let
+        validationResult color remark =
+           div [style "color" color] [text remark]
+    in
     if
         getInputValue inputData.month
             > 0
@@ -152,11 +156,9 @@ viewValidation inputData =
             && getInputValue inputData.day
             < 32
     then
-        div [ style "color" "blue" ] [ text "Date entry OK" ]
-
+        validationResult "blue" "Date maybe Ok"
     else
-        div [ style "color" "red" ] [ text "Incorrect month or day" ]
-
+        validationResult "red" "Date is incorrect!"
 
 viewResults : InputData -> Html msg
 viewResults inputData =
