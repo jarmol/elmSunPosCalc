@@ -1,14 +1,17 @@
 module SunHelper exposing (..)
+
 import CommonModel exposing (InputData)
 import GregorJDN exposing (jdateGr, jdnGr)
-import MnToHrMnSc exposing (mnToHrMn)   -- Converts minutes of day to usual time hr:mn:sc
+import MnToHrMnSc exposing (mnToHrMn)
 
 
 
+-- Converts minutes of day to usual time hr:mn:sc
 -- MODEL
 
-type alias InputData = CommonModel.InputData
 
+type alias InputData =
+    CommonModel.InputData
 
 
 sunEqCntr : Float -> Float
@@ -283,12 +286,17 @@ getDayLength inputData =
 
 -- Sun Declination, OK tested 24.10.2019
 
+
 sunDeclination inputData =
-    let 
-        appLS = sinDeg <|appLongSun inputData
-        oblC  = sinDeg <| obliqCorr inputData
+    let
+        appLS =
+            sinDeg <| appLongSun inputData
+
+        oblC =
+            sinDeg <| obliqCorr inputData
     in
-        asinDeg (oblC * appLS)
+    asinDeg (oblC * appLS)
+
 
 
 -- True Solar Time, OK tested 17.11.2019
@@ -509,6 +517,7 @@ noonToEvening inputData =
 
 
 -- Help functions
+-- coversion degrees to radians
 
 
 toRad =
@@ -516,15 +525,11 @@ toRad =
 
 
 
--- coversion degrees to radians
+-- conversion radians to degrees
 
 
 toDeg =
     \beta -> 180.0 * beta / pi
-
-
-
--- conversion radians to degrees
 
 
 cosDeg alfa =
@@ -570,6 +575,15 @@ decNorm360 =
 
 frac x =
     x - toFloat (floor x)
+
+
+
+-- Convert decimal hour to time string hh:mm:ss
+
+
+decHrToTime : Float -> String
+decHrToTime dechr =
+    mnToHrMn (60 * dechr)
 
 
 
