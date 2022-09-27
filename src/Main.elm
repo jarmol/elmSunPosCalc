@@ -1,19 +1,18 @@
 module Main exposing (..)
 
 import Browser
-import CommonModel exposing (InputData)
 import DecimalFormat exposing (cutDec3, cutDec6)
-import GregorJDN exposing (jdateGr, jdnGr)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onInput)
 import MnToHrMnSc exposing (mnToHrMn)
 import String exposing (fromFloat, fromInt, toInt)
+import CommonModel exposing (InputData)
 import SunHelper
     exposing
         ( atmosRefract
-        , civTwlMns
         , decHrToTime
+        , civTwlMns
         , fJD
         , getDayLength
         , getDecVar
@@ -43,9 +42,7 @@ main =
 
 -- MODEL
 
-
-type alias InputData =
-    CommonModel.InputData
+type alias InputData = CommonModel.InputData
 
 
 init : InputData
@@ -55,7 +52,6 @@ init =
 
 
 -- UPDATE
-
 
 type Msg
     = Year String
@@ -132,7 +128,7 @@ view inputData =
             , viewValidation inputData
             , viewResults inputData
             , viewJD inputData
-            , viewDeclination inputData
+            , viewCalculated inputData
             , viewFooter inputData
             ]
         ]
@@ -147,7 +143,7 @@ viewValidation : InputData -> Html msg
 viewValidation inputData =
     let
         validationResult color remark =
-            div [ style "color" color ] [ text remark ]
+           div [style "color" color] [text remark]
     in
     if
         getInputValue inputData.month
@@ -160,10 +156,8 @@ viewValidation inputData =
             < 32
     then
         validationResult "blue" "Date maybe Ok"
-
     else
         validationResult "red" "Date is incorrect!"
-
 
 viewResults : InputData -> Html msg
 viewResults inputData =
@@ -206,35 +200,35 @@ viewResults inputData =
 viewJD : InputData -> Html msg
 viewJD inputdata =
     div [ style "color" "red", style "background-color" "lightblue" ]
-        [ text ("JDN " ++ fromInt (getJDN inputdata))
-        , p [] [ text (" JD = " ++ cutDec6 (fJD inputdata)) ]
+        [ text ("JDN " ++ fromInt (getJDN inputdata)) 
+        , p [] [text (" JD = " ++ cutDec6 (fJD inputdata))]
         ]
 
 
-viewDeclination : InputData -> Html msg
-viewDeclination inputdata =
-    let
-        viewDeclinationItem : String -> Html msg
-        viewDeclinationItem content =
-            p [] [ text content ]
 
-        items : List String
-        items =
-            [ " Sun Declination   = " ++ cutDec6     (sunDeclination inputdata) ++ "°"
-            , " Day Length        = " ++ decHrToTime (getDayLength inputdata)
-            , " Civil Twilight    = " ++ mnToHrMn    (civTwlMns inputdata -1) ++ locTZ inputdata
-            , morningToNoon inputdata
-            , " Noon Time         = " ++ mnToHrMn (getNoon inputdata) ++ locTZ inputdata
-            , noonToEvening inputdata
-            , " Civil Twilight    = " ++ mnToHrMn (civTwlMns inputdata 1) ++ locTZ inputdata
-            , " Solar Azimuth     = " ++ cutDec3 (solAzimuth inputdata) ++ "°"
-            , " Air refraction    = " ++ cutDec3 (atmosRefract inputdata) ++ "°"
-            , " Sun Altitude      = " ++ cutDec3 (90.0 - solZenith inputdata) ++ "°  without air-refraction"
-            , " Sun Altitude      = " ++ cutDec3 (refractCorrectAltitude inputdata) ++ "° Corrected with air-refraction"
-            ]
-    in
-    div [ style "color" "green", style "font-size" "1.4em" ]
-        (List.map viewDeclinationItem items)
+viewCalculated : InputData -> Html msg
+viewCalculated inputdata =
+    let
+          viewCalculatedItem : String -> Html msg
+          viewCalculatedItem content =
+             p [] [ text content]
+          items : List String
+          items =
+             [ " Sun Declination   = " ++ cutDec6 (sunDeclination inputdata) ++ "°"
+             , " Day Length        = " ++ decHrToTime (getDayLength inputdata)
+             , " Civil Twilight    = " ++ mnToHrMn (civTwlMns inputdata -1) ++ locTZ inputdata
+             , morningToNoon inputdata
+             , " Noon Time         = " ++ mnToHrMn (getNoon inputdata) ++ locTZ inputdata
+             , noonToEvening inputdata
+             , " Civil Twilight    = " ++ mnToHrMn (civTwlMns inputdata 1) ++ locTZ inputdata
+             , " Solar Azimuth     = " ++ cutDec3 (solAzimuth inputdata) ++ "°"
+             , " Air refraction    = " ++ cutDec3 (atmosRefract inputdata) ++ "°"
+             , " Sun Altitude      = " ++ cutDec3 (90.0 - solZenith inputdata) ++ "°  without air-refraction"
+             , " Sun Altitude      = " ++ cutDec3 (refractCorrectAltitude inputdata) ++ "° Corrected with air-refraction" 
+             ]
+     in
+    div [ style "color" "green", style "font-size" "1.4em"]
+       (List.map viewCalculatedItem items)
 
 
 morningToNoon mod =
