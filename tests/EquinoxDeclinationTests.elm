@@ -2,7 +2,7 @@ module EquinoxDeclinationTests exposing (..)
 
 import Expect exposing (Expectation)
 import Test exposing (..)
-import Main exposing (Model)
+import CommonModel exposing (InputData)
 import SunHelper exposing (sunDeclination)
 import Zip exposing (zip)
 {-
@@ -18,7 +18,7 @@ minutes1 = [46,49,52,55,58]       -- for times 0:46 to 0:58 UTC
 minutes2 = [1,4,7,10,13,16,19,22] -- for times 1:01 to 1:22
 
 -- London 2022-09-23 autumn equinox at 01:04:27
-london =  Model "2022" "9" "23" "1" "4" "27" "51.5" "-0.13"  "1"
+london =  InputData "2022" "9" "23" "1" "4" "27" "51.5" "-0.13"  "1"
 
 mods1 = List.map (\mn -> {london | hour = "0", minute = String.fromInt mn}) minutes1
 
