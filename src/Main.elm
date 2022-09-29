@@ -1,18 +1,18 @@
-module Main exposing (..)
+module Main exposing (InputData, Msg(..), main)
 
 import Browser
+import CommonModel exposing (InputData)
 import DecimalFormat exposing (cutDec3, cutDec6)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onInput)
 import MnToHrMnSc exposing (mnToHrMn)
-import String exposing (fromFloat, fromInt, toInt)
-import CommonModel exposing (InputData)
+import String exposing (fromInt)
 import SunHelper
     exposing
         ( atmosRefract
-        , decHrToTime
         , civTwlMns
+        , decHrToTime
         , fJD
         , getDayLength
         , getDecVar
@@ -42,7 +42,9 @@ main =
 
 -- MODEL
 
-type alias InputData = CommonModel.InputData
+
+type alias InputData =
+    CommonModel.InputData
 
 
 init : InputData
@@ -52,6 +54,7 @@ init =
 
 
 -- UPDATE
+
 
 type Msg
     = Year String
@@ -143,7 +146,7 @@ viewValidation : InputData -> Html msg
 viewValidation inputData =
     let
         validationResult color remark =
-           div [style "color" color] [text remark]
+            div [ style "color" color ] [ text remark ]
     in
     if
         getInputValue inputData.month
@@ -156,8 +159,10 @@ viewValidation inputData =
             < 32
     then
         validationResult "blue" "Date maybe Ok"
+
     else
         validationResult "red" "Date is incorrect!"
+
 
 viewResults : InputData -> Html msg
 viewResults inputData =
@@ -198,95 +203,74 @@ viewResults inputData =
 
 
 viewJD : InputData -> Html msg
-viewJD inputdata =
+viewJD inputData =
     div [ style "color" "red", style "background-color" "lightblue" ]
-        [ text ("JDN " ++ fromInt (getJDN inputdata)) 
-        , p [] [text (" JD = " ++ cutDec6 (fJD inputdata))]
+        [ text ("JDN " ++ fromInt (getJDN inputData))
+        , p [] [ text (" JD = " ++ cutDec6 (fJD inputData)) ]
         ]
 
 
-
 viewCalculated : InputData -> Html msg
-viewCalculated inputdata =
+viewCalculated inputData =
     let
-          viewCalculatedItem : String -> Html msg
-          viewCalculatedItem content =
-             p [] [ text content]
-          items : List String
-          items =
-             [ " Sun Declination   = " ++ cutDec6 (sunDeclination inputdata) ++ "°"
-             , " Day Length        = " ++ decHrToTime (getDayLength inputdata)
-             , " Civil Twilight    = " ++ mnToHrMn (civTwlMns inputdata -1) ++ locTZ inputdata
-             , morningToNoon inputdata
-             , " Noon Time         = " ++ mnToHrMn (getNoon inputdata) ++ locTZ inputdata
-             , noonToEvening inputdata
-             , " Civil Twilight    = " ++ mnToHrMn (civTwlMns inputdata 1) ++ locTZ inputdata
-             , " Solar Azimuth     = " ++ cutDec3 (solAzimuth inputdata) ++ "°"
-             , " Air refraction    = " ++ cutDec3 (atmosRefract inputdata) ++ "°"
-             , " Sun Altitude      = " ++ cutDec3 (90.0 - solZenith inputdata) ++ "°  without air-refraction"
-             , " Sun Altitude      = " ++ cutDec3 (refractCorrectAltitude inputdata) ++ "° Corrected with air-refraction" 
-             ]
-     in
-    div [ style "color" "green", style "font-size" "1.4em"]
-       (List.map viewCalculatedItem items)
+        viewCalculatedItem : String -> Html msg
+        viewCalculatedItem content =
+            p [] [ text content ]
+
+        items : List String
+        items =
+            [ " Sun Declination   = " ++ cutDec6 (sunDeclination inputData) ++ "°"
+            , " Day Length        = " ++ decHrToTime (getDayLength inputData)
+            , " Civil Twilight    = " ++ mnToHrMn (civTwlMns inputData -1) ++ locTZ inputData
+            , morningToNoon inputData
+            , " Noon Time         = " ++ mnToHrMn (getNoon inputData) ++ locTZ inputData
+            , noonToEvening inputData
+            , " Civil Twilight    = " ++ mnToHrMn (civTwlMns inputData 1) ++ locTZ inputData
+            , " Solar Azimuth     = " ++ cutDec3 (solAzimuth inputData) ++ "°"
+            , " Air refraction    = " ++ cutDec3 (atmosRefract inputData) ++ "°"
+            , " Sun Altitude      = " ++ cutDec3 (90.0 - solZenith inputData) ++ "°  without air-refraction"
+            , " Sun Altitude      = " ++ cutDec3 (refractCorrectAltitude inputData) ++ "° Corrected with air-refraction"
+            ]
+    in
+    div [ style "color" "green", style "font-size" "1.4em" ]
+        (List.map viewCalculatedItem items)
 
 
 morningToNoon mod =
     let
-        a1 =
-            " Sunrise Time      = " ++ mnToHrMn (sunRise mod) ++ locTZ mod
-
-        a2 =
-            " Arctic winter, no sunrise"
-
-        a3 =
-            " Arctic summer, no sunset"
-
-        a4 =
-            " Antarctic midsummer, no sunset"
-
-        a0 =
-            " Daylength Exception: "
-
         geoLat =
             getDecVar mod.latitude
 
         declination =
             sunDeclination mod
-
-        dayLength =
-            getDayLength mod
     in
     if declination < 0.0 && geoLat > (90.83 + declination) then
-        a2
+        " Arctic winter, no sunrise"
 
     else if declination < 0.0 && geoLat < (-89.17 - declination) then
-        a4
+        " Antarctic midsummer, no sunset"
 
     else if declination > 0.0 && geoLat > (89.17 - declination) then
-        a3
-
-    else if dayLength > 0.0 && dayLength < 24.0 then
-        a1
+        " Arctic summer, no sunset"
 
     else
-        a0 ++ String.fromFloat dayLength
+        let
+            dayLength =
+                getDayLength mod
+        in
+        if dayLength > 0.0 && dayLength < 24.0 then
+            " Sunrise Time      = " ++ mnToHrMn (sunRise mod) ++ locTZ mod
+
+        else
+            let
+                a0 =
+                    " Daylength Exception: "
+            in
+            a0 ++ String.fromFloat dayLength
 
 
 noonToEvening mod =
     let
-        a1 =
-            " Sunset Time      = " ++ mnToHrMn (sunSet mod) ++ locTZ mod
-
-        a2 =
-            " Arctic winter, no Sunrise"
-
-        a3 =
-            " Polar summer, no sunset"
-
-        a4 =
-            " No Sunset, Summer in Antarctis"
-
         geoLat =
             getDecVar mod.latitude
 
@@ -294,20 +278,20 @@ noonToEvening mod =
             sunDeclination mod
     in
     if declination < 0.0 && geoLat > (90.8 + declination) then
-        a2
+        " Arctic winter, no Sunrise"
 
     else if declination < 0.0 && geoLat < -89.2 - declination then
-        a4
+        " No Sunset, Summer in Antarctis"
 
     else if declination > 0.0 && geoLat > (89.2 - declination) then
-        a3
+        " Polar summer, no sunset"
 
     else
-        a1
+        " Sunset Time      = " ++ mnToHrMn (sunSet mod) ++ locTZ mod
 
 
 viewFooter : InputData -> Html msg
-viewFooter inputdata =
+viewFooter inputData =
     div [ style "color" "black", style "font-size" "1.0em" ]
         [ p [ style "margin-right" "50%" ]
             [ text
