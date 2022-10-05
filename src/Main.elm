@@ -1,10 +1,10 @@
-module Main exposing (InputData, Msg(..), main)
+module Main exposing (InputData, Msg, main)
 
 import Browser
 import CommonModel exposing (InputData)
 import DecimalFormat exposing (cutDec3, cutDec6)
-import Html exposing (..)
-import Html.Attributes exposing (..)
+import Html exposing (Html, div, h1, h2, input, p, span, text)
+import Html.Attributes exposing (placeholder, style, type_, value)
 import Html.Events exposing (onInput)
 import MnToHrMnSc exposing (mnToHrMn)
 import String exposing (fromInt)
@@ -35,6 +35,7 @@ import SunHelper
 -- MAIN
 
 
+main : Program () InputData Msg
 main =
     Browser.sandbox { init = init, update = update, view = view }
 
@@ -132,7 +133,7 @@ view inputData =
             , viewResults inputData
             , viewJD inputData
             , viewCalculated inputData
-            , viewFooter inputData
+            , viewFooter
             ]
         ]
 
@@ -145,6 +146,7 @@ viewInput t p v toMsg =
 viewValidation : InputData -> Html msg
 viewValidation inputData =
     let
+        validationResult : String -> String -> Html msg
         validationResult color remark =
             div [ style "color" color ] [ text remark ]
     in
@@ -203,10 +205,10 @@ viewResults inputData =
 
 
 viewJD : InputData -> Html msg
-viewJD inputData =
+viewJD mod =
     div [ style "color" "red", style "background-color" "lightblue" ]
-        [ text ("JDN " ++ fromInt (getJDN inputData))
-        , p [] [ text (" JD = " ++ cutDec6 (fJD inputData)) ]
+        [ text ("JDN " ++ fromInt (getJDN mod))
+        , p [] [ text (" JD = " ++ cutDec6 (fJD mod)) ]
         ]
 
 
@@ -236,11 +238,14 @@ viewCalculated inputData =
         (List.map viewCalculatedItem items)
 
 
+morningToNoon : InputData -> String
 morningToNoon mod =
     let
+        geoLat : Float
         geoLat =
             getDecVar mod.latitude
 
+        declination : Float
         declination =
             sunDeclination mod
     in
@@ -255,6 +260,7 @@ morningToNoon mod =
 
     else
         let
+            dayLength : Float
             dayLength =
                 getDayLength mod
         in
@@ -263,17 +269,21 @@ morningToNoon mod =
 
         else
             let
+                a0 : String
                 a0 =
                     " Daylength Exception: "
             in
             a0 ++ String.fromFloat dayLength
 
 
+noonToEvening : InputData -> String
 noonToEvening mod =
     let
+        geoLat : Float
         geoLat =
             getDecVar mod.latitude
 
+        declination : Float
         declination =
             sunDeclination mod
     in
@@ -290,8 +300,12 @@ noonToEvening mod =
         " Sunset Time      = " ++ mnToHrMn (sunSet mod) ++ locTZ mod
 
 
-viewFooter : InputData -> Html msg
-viewFooter inputData =
+
+-- viewFooter : InputData -> Html msg
+
+
+viewFooter : Html msg
+viewFooter =
     div [ style "color" "black", style "font-size" "1.0em" ]
         [ p [ style "margin-right" "50%" ]
             [ text
@@ -308,5 +322,6 @@ viewFooter inputData =
         ]
 
 
+locTZ : InputData -> String
 locTZ mod =
     " UTC +" ++ mod.timezone ++ " h local time"

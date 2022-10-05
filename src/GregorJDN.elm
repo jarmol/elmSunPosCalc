@@ -1,24 +1,28 @@
-module GregorJDN  exposing (jdnGr, jdateGr, weekday, yearLength, isLeapYear)
+module GregorJDN exposing (jdateGr, jdnGr, weekday, yearLength)
+
 
 jdnGr : Int -> Int -> Int -> Int
-jdnGr y m d= (1461 * (y + 4800 + (m - 14)//12))//4
-        + (367 * (m - 2 - 12 * ((m - 14)//12)))//12
-        - ((3 * ((y + 4900 + (m - 14)//12)//100))//4)
-        + d - 32075
+jdnGr y m d =
+    (1461 * (y + 4800 + (m - 14) // 12))
+        // 4
+        + (367 * (m - 2 - 12 * ((m - 14) // 12)))
+        // 12
+        - ((3 * ((y + 4900 + (m - 14) // 12) // 100)) // 4)
+        + d
+        - 32075
 
 
 yearLength : Int -> Int
 yearLength y =
-      (jdnGr (y + 1)  1 1) - (jdnGr y 1 1)
+    jdnGr (y + 1) 1 1 - jdnGr y 1 1
 
-
-isLeapYear : Int -> Bool
-isLeapYear y =
-      yearLength y == 366
 
 weekday : Int -> Int -> Int -> String
 weekday y m d =
-    let dayNumber = remainderBy 7 (1 + jdnGr y m d)
+    let 
+        dayNumber : Int
+        dayNumber =
+            remainderBy 7 (1 + jdnGr y m d)
     in
     case dayNumber of
         0 ->
@@ -45,13 +49,26 @@ weekday y m d =
         _ ->
             "Unknown day"
 
+
+
 -- Finding Julian date given Julian day number and time of day
+
 
 jdateGr : Int -> Int -> Int -> Int -> Int -> Int -> Float
 jdateGr y m d hr mn sc =
-        let jdn = jdnGr y m d
-        in  (toFloat jdn) + ((toFloat hr) - 12.0)/24.0 + (toFloat mn)/1440.0
-            + (toFloat sc)/86400.0 
+    let
+        jdn : Int
+        jdn =
+            jdnGr y m d
+    in
+    toFloat jdn
+        + (toFloat hr - 12.0)
+        / 24.0
+        + toFloat mn
+        / 1440.0
+        + toFloat sc
+        / 86400.0
+
 
 
 {-
@@ -70,10 +87,10 @@ jdateGr y m d hr mn sc =
    The function yearLength is the child of function jdnGr
    Examples
    Year Length 1999
-   > yearLength 1999 
+   > yearLength 1999
    365 : Int
    Leap Year 2000 Length
-   > yearLength 2000  
+   > yearLength 2000
    366 : Int
    Year 2100
    > yearLength 2100
@@ -93,5 +110,5 @@ jdateGr y m d hr mn sc =
    "Monday" : String
    > weekday 2022 8 28
    "Sunday" : String
-   6 : Int  Sunday 
+   6 : Int  Sunday
 -}

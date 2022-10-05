@@ -1,27 +1,45 @@
-module SuncalcEquinox exposing (..)
+module SuncalcEquinox exposing (Model, Msg(..), main)
+
 import Browser
+import DecimalFormat exposing (cutDec3, cutDec6)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onInput)
-import String exposing (fromFloat, fromInt, toInt)
-import GregorJDN  exposing (jdnGr, jdateGr)
 import MnToHrMnSc exposing (mnToHrMn)
-import DecimalFormat exposing (cutDec3, cutDec6)
-import SunHelper  exposing (getNoon, sunSet, sunRise, civTwlMns, getDayLength
-    , fJD, getJDN, sunDeclination, solAzimuth, solZenith, atmosRefract
-    , refractCorrectAltitude, getDecVar, getInputValue)
+import String exposing (fromInt)
+import SunHelper
+    exposing
+        ( atmosRefract
+        , civTwlMns
+        , fJD
+        , getDayLength
+        , getDecVar
+        , getInputValue
+        , getJDN
+        , getNoon
+        , refractCorrectAltitude
+        , solAzimuth
+        , solZenith
+        , sunDeclination
+        , sunRise
+        , sunSet
+        )
+
+
 
 -- Initial data set to Autumn equinox date 2022-9-23
--- and time 01:04:27 UTC 
+-- and time 01:04:27 UTC
 -- © 2022  Jarmo Lammi
-
 -- MAIN
+
 
 main =
     Browser.sandbox { init = init, update = update, view = view }
 
 
+
 -- MODEL
+
 
 type alias Model =
     { year : String
@@ -35,22 +53,26 @@ type alias Model =
     , timezone : String
     }
 
+
 init : Model
-init = 
+init =
     Model "2022" "09" "23" "1" "04" "27" "60.0" "25.0" "3"
 
+
+
 -- UPDATE
+
 
 type Msg
     = Year String
     | Month String
     | Daynumber String
-    | Hour      String
-    | Minute    String
-    | Second    String
-    | Latitude  String
+    | Hour String
+    | Minute String
+    | Second String
+    | Latitude String
     | Longitude String
-    | Timezone  String
+    | Timezone String
 
 
 update : Msg -> Model -> Model
@@ -84,7 +106,9 @@ update msg model =
             { model | timezone = timezone }
 
 
+
 -- VIEW
+
 
 view : Model -> Html Msg
 view model =
@@ -115,7 +139,7 @@ view model =
             , viewResults model
             , viewJD model
             , viewDeclination model
-            , viewFooter model
+            , viewFooter
             ]
         ]
 
@@ -157,9 +181,16 @@ viewResults model =
                     ++ model.day
                 )
             ]
-        , p [] [ text (" Hours UTC "    ++ model.hour
-                         ++ " Minutes " ++ model.minute
-                         ++ " Seconds " ++ model.second) ]
+        , p []
+            [ text
+                (" Hours UTC "
+                    ++ model.hour
+                    ++ " Minutes "
+                    ++ model.minute
+                    ++ " Seconds "
+                    ++ model.second
+                )
+            ]
         , p []
             [ text
                 ("  Latitude "
@@ -178,66 +209,99 @@ viewJD : Model -> Html msg
 viewJD model =
     div [ style "color" "red", style "background-color" "lightblue" ]
         [ p [] [ text ("JDN " ++ fromInt (getJDN model)) ]
-        , text (" JD = " ++ cutDec6  (fJD model))
-        
+        , text (" JD = " ++ cutDec6 (fJD model))
         ]
+
 
 viewDeclination : Model -> Html msg
 viewDeclination model =
     div [ style "color" "red", style "font-size" "1.4em" ]
-        [ p [] [ text (" Sun Declination   = " ++ (cutDec6  (sunDeclination model)) ++ "°")]
-        , p [] [ text (" Day Length        = " ++ mnToHrMn  (60*(getDayLength model))) ]
-        , p [] [ text (" Civil Twilight    = " ++ mnToHrMn  (civTwlMns model -1)   ++ locTZ model) ]
+        [ p [] [ text (" Sun Declination   = " ++ cutDec6 (sunDeclination model) ++ "°") ]
+        , p [] [ text (" Day Length        = " ++ mnToHrMn (60 * getDayLength model)) ]
+        , p [] [ text (" Civil Twilight    = " ++ mnToHrMn (civTwlMns model -1) ++ locTZ model) ]
         , p [] [ text (morningToNoon model) ]
-        , p [] [ text (" Noon Time         = " ++ mnToHrMn  (getNoon model)        ++ locTZ model) ]
+        , p [] [ text (" Noon Time         = " ++ mnToHrMn (getNoon model) ++ locTZ model) ]
         , p [] [ text (noonToEvening model) ]
-        , p [] [ text (" Civil Twilight    = " ++ mnToHrMn  (civTwlMns model 1)    ++ locTZ model) ] 
-        , p [] [ text (" Solar Azimuth     = " ++ (cutDec3  (solAzimuth   model )) ++ "°")]
-        , p [] [ text (" Air refraction    = " ++ (cutDec3  (atmosRefract model )) ++ "°")]
-        , p [] [ text (" Sun Altitude      = " ++ (cutDec3  (90.0 - (solZenith   model))) 
-                                               ++ "°  without air-refraction") ]
-        , p [] [ text (" Sun Altitude      = " ++ (cutDec3  ( refractCorrectAltitude model)) 
-                                               ++ "° Corrected with air-refraction") ]
+        , p [] [ text (" Civil Twilight    = " ++ mnToHrMn (civTwlMns model 1) ++ locTZ model) ]
+        , p [] [ text (" Solar Azimuth     = " ++ cutDec3 (solAzimuth model) ++ "°") ]
+        , p [] [ text (" Air refraction    = " ++ cutDec3 (atmosRefract model) ++ "°") ]
+        , p []
+            [ text
+                (" Sun Altitude      = "
+                    ++ cutDec3 (90.0 - solZenith model)
+                    ++ "°  without air-refraction"
+                )
+            ]
+        , p []
+            [ text
+                (" Sun Altitude      = "
+                    ++ cutDec3 (refractCorrectAltitude model)
+                    ++ "° Corrected with air-refraction"
+                )
+            ]
         ]
 
 
 morningToNoon mod =
-    let a1 = " Sunrise Time      = " ++ (mnToHrMn  (sunRise mod))    ++ locTZ mod
-        a2 = " Arctic winter, no sunrise"
-        a3 = " Arctic summer, no sunset"
-        a4 = " Antarctic midsummer, no sunset"
-        a0 = " Daylength Exception: "
-        geoLat = (getDecVar mod.latitude)
-        declination = sunDeclination mod
-        dayLength = getDayLength mod
+    let
+        geoLat =
+            getDecVar mod.latitude
+
+        declination =
+            sunDeclination mod
     in
-        if declination      < 0.0 && geoLat > (  90.83  + declination ) then a2
-        else if declination < 0.0 && geoLat < ( -89.17  - declination ) then a4
-        else if declination > 0.0 && geoLat > (  89.17  - declination ) then a3
-        else if dayLength > 0.00 && dayLength < 24.0 then a1  
-        else a0 ++ String.fromFloat dayLength
+    if declination < 0.0 && geoLat > (90.83 + declination) then
+        " Arctic winter, no sunrise"
+
+    else if declination < 0.0 && geoLat < (-89.17 - declination) then
+        " Antarctic midsummer, no sunset"
+
+    else if declination > 0.0 && geoLat > (89.17 - declination) then
+        " Arctic summer, no sunset"
+
+    else
+        let
+            dayLength =
+                getDayLength mod
+        in
+        if dayLength > 0.0 && dayLength < 24.0 then
+            " Sunrise Time      = " ++ mnToHrMn (sunRise mod) ++ locTZ mod
+
+        else
+            let
+                a0 =
+                    " Daylength Exception: "
+            in
+            a0 ++ String.fromFloat dayLength
+
 
 noonToEvening mod =
-    let a1 = " Sunset Time      = " ++ mnToHrMn  (sunSet mod)    ++ locTZ mod
-        a2 = " Arctic winter, no Sunrise"
-        a3 = " Polar summer, no sunset"
-        a4 = " No Sunset, Summer in Antarctis"
-        geoLat = (getDecVar mod.latitude)
-        declination = sunDeclination mod
+    let
+        geoLat =
+            getDecVar mod.latitude
+
+        declination =
+            sunDeclination mod
     in
-        if declination < 0.0 &&  geoLat > (90.8 + declination) then a2
-        else if declination < 0.0 && geoLat < -89.2 - declination then a4
-        else if declination > 0.0 && geoLat > (89.2 - declination) then a3
-        else a1
+    if declination < 0.0 && geoLat > (90.8 + declination) then
+        " Arctic winter, no Sunrise"
+
+    else if declination < 0.0 && geoLat < -89.2 - declination then
+        " No Sunset, Summer in Antarctis"
+
+    else if declination > 0.0 && geoLat > (89.2 - declination) then
+        " Polar summer, no sunset"
+
+    else
+        " Sunset Time      = " ++ mnToHrMn (sunSet mod) ++ locTZ mod
 
 
-
-viewFooter : Model -> Html msg
-viewFooter model =
+viewFooter : Html msg 
+viewFooter =
     div [ style "color" "black", style "font-size" "1.0em" ]
         [ p [ style "margin-right" "50%" ]
             [ text
-                 """
+                """
                  This program contains the basic functions
                  to be used in calculation of solar positions,
                  Sunrise and Sunset times for the given

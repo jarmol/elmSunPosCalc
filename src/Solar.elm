@@ -1,9 +1,9 @@
-module Solar exposing (..)
+module Solar exposing (main)
 
-import Html exposing (Attribute, div, h1, p, text)
+import Html exposing (div, h1, p, text)
 import Html.Attributes exposing (..)
 import MnToHrMnSc exposing (mnToHrMn)
-import SunHelper exposing (civTwlMns, getDayLength, getNoon, sunDeclination, sunRise, sunSet)
+import SunHelper exposing (getNoon, sunDeclination)
 import SuncalcEquinox exposing (Model)
 
 

@@ -8,6 +8,7 @@ module MnToHrMnSc exposing (mnToHrMn)
 mnToHrMn : Float -> String
 mnToHrMn mns =
     let
+        mna : Float
         mna =
             if mns >= 0 then
                 mns
@@ -15,12 +16,15 @@ mnToHrMn mns =
             else
                 1440 + mns
 
+        lmins : Int
         lmins =
             remainderBy 60 (floor mna)
 
+        lhrs : Int
         lhrs =
             floor (mna / 60.0)
 
+        lsec : Int
         lsec =
             floor (60 * mna - toFloat (3600 * lhrs + 60 * lmins))
     in
