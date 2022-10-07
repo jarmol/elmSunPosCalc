@@ -1,4 +1,4 @@
-module SunHelper exposing (InputData, atmosRefract, civTwlMns, decHrToTime, fJD, getDayLength, getDecVar, getInputValue, getJDN, getNoon, refractCorrectAltitude, solAzimuth, solZenith, sunDeclination, sunRise, sunSet)
+module SunHelper exposing (InputData, atmosRefract, civTwlMns, decHrToTime, fJD, getDayLength, getDecVar, getInputValue, getJDN, getNoon, refractCorrectAltitude, solAzimuth, solZenith, sunDeclination, sunRise, sunSet, cutDec4, cutDec6, cutNr)
 
 import CommonModel exposing (InputData)
 import GregorJDN exposing (jdateGr, jdnGr)
@@ -477,8 +477,38 @@ refractCorrectAltitude inputData =
         + atmosRefract inputData
 
 
+-- Helper functions
 
--- Help functions
+-- Format Decimal numbers
+
+cutNr : Int -> Float -> String
+cutNr decpart xnr =
+    let
+        snr =
+           String.fromFloat xnr
+    in
+    if String.contains "e-" snr
+    then snr
+    else
+            String.left
+            ((String.indexes "." snr 
+            |> List.head
+            |> Maybe.withDefault 0
+            )   
+            + decpart
+            + 1
+            )
+            snr 
+
+
+cutDec6 =
+    cutNr 6
+
+
+cutDec4 =
+    cutNr 4
+
+
 -- coversion degrees to radians
 
 toRad : Float -> Float

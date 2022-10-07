@@ -2,7 +2,6 @@ module Main exposing (InputData, Msg, main)
 
 import Browser
 import CommonModel exposing (InputData)
-import DecimalFormat exposing (cutDec3, cutDec6)
 import Html exposing (Html, div, h1, h2, input, p, span, text)
 import Html.Attributes exposing (placeholder, style, type_, value)
 import Html.Events exposing (onInput)
@@ -25,6 +24,8 @@ import SunHelper
         , sunDeclination
         , sunRise
         , sunSet
+        , cutDec4
+        , cutDec6
         )
 
 
@@ -228,10 +229,10 @@ viewCalculated inputData =
             , " Noon Time         = " ++ mnToHrMn (getNoon inputData) ++ locTZ inputData
             , noonToEvening inputData
             , " Civil Twilight    = " ++ mnToHrMn (civTwlMns inputData 1) ++ locTZ inputData
-            , " Solar Azimuth     = " ++ cutDec3 (solAzimuth inputData) ++ "°"
-            , " Air refraction    = " ++ cutDec3 (atmosRefract inputData) ++ "°"
-            , " Sun Altitude      = " ++ cutDec3 (90.0 - solZenith inputData) ++ "°  without air-refraction"
-            , " Sun Altitude      = " ++ cutDec3 (refractCorrectAltitude inputData) ++ "° Corrected with air-refraction"
+            , " Solar Azimuth     = " ++ cutDec4 (solAzimuth inputData) ++ "°"
+            , " Air refraction    = " ++ cutDec4 (atmosRefract inputData) ++ "°"
+            , " Sun Altitude      = " ++ cutDec4 (90.0 - solZenith inputData) ++ "°  without air-refraction"
+            , " Sun Altitude      = " ++ cutDec4 (refractCorrectAltitude inputData) ++ "° Corrected with air-refraction"
             ]
     in
     div [ style "color" "green", style "font-size" "1.4em" ]
