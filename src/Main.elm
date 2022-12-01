@@ -1,17 +1,16 @@
-module Main exposing (InputData, Msg, main)
+module Main exposing (..)
 
 import Browser
-import CommonModel exposing (InputData)
-import Html exposing (Html, div, h1, h2, input, p, span, text)
-import Html.Attributes exposing (placeholder, style, type_, value)
+import DecimalFormat exposing (cutDec3, cutDec6)
+import Html exposing (..)
+import Html.Attributes exposing (..)
 import Html.Events exposing (onInput)
 import MnToHrMnSc exposing (mnToHrMn)
-import String exposing (fromInt)
+import String exposing (fromFloat, fromInt)
 import SunHelper
     exposing
         ( atmosRefract
         , civTwlMns
-        , decHrToTime
         , fJD
         , getDayLength
         , getDecVar
@@ -24,19 +23,19 @@ import SunHelper
         , sunDeclination
         , sunRise
         , sunSet
-        , cutDec4
-        , cutDec6
         )
 
+-- This version has results very near to official sunrise, sunset times
+-- and daylength.
 
-
--- Initial data set to Autumn equinox date 2022-9-23
--- and time 01:04:27 UTC
+-- File saved in https://ellie-app.com/7drvTVwxKGVa1
+-- and https://ellie-app.com/7drL34ytZTWa1
+-- Calculates some parametres of the solar position
+-- This code is compatible with Elm 0.19.1
 -- © 2022  Jarmo Lammi
 -- MAIN
 
 
-main : Program () InputData Msg
 main =
     Browser.sandbox { init = init, update = update, view = view }
 
@@ -45,13 +44,22 @@ main =
 -- MODEL
 
 
-type alias InputData =
-    CommonModel.InputData
+type alias Model =
+    { year : String
+    , month : String
+    , day : String
+    , hour : String
+    , minute : String
+    , second : String
+    , latitude : String
+    , longitude : String
+    , timezone : String
+    }
 
 
-init : InputData
+init : Model
 init =
-    InputData "2022" "09" "23" "1" "04" "27" "60.0" "25.0" "3"
+    Model "2022" "12" "1" "10" "12" "16" "65.85" "24.18" "2"
 
 
 
@@ -70,71 +78,71 @@ type Msg
     | Timezone String
 
 
-update : Msg -> InputData -> InputData
-update msg inputData =
+update : Msg -> Model -> Model
+update msg model =
     case msg of
         Year year ->
-            { inputData | year = year }
+            { model | year = year }
 
         Month month ->
-            { inputData | month = month }
+            { model | month = month }
 
         Daynumber day ->
-            { inputData | day = day }
+            { model | day = day }
 
         Hour hour ->
-            { inputData | hour = hour }
+            { model | hour = hour }
 
         Minute minute ->
-            { inputData | minute = minute }
+            { model | minute = minute }
 
         Second second ->
-            { inputData | second = second }
+            { model | second = second }
 
         Latitude latitude ->
-            { inputData | latitude = latitude }
+            { model | latitude = latitude }
 
         Longitude longitude ->
-            { inputData | longitude = longitude }
+            { model | longitude = longitude }
 
         Timezone timezone ->
-            { inputData | timezone = timezone }
+            { model | timezone = timezone }
 
 
 
 -- VIEW
 
 
-view : InputData -> Html Msg
-view inputData =
+view : Model -> Html Msg
+view model =
     div [ style "margin-left" "10%", style "margin-right" "20%" ]
         [ h1 [] [ text "Sun Position Calculator" ]
         , span [ style "background-color" "blue", style "color" "white" ]
             [ text "  Year "
-            , viewInput "number" "Give year" inputData.year Year
+            , viewInput "number" "Give year" model.year Year
             , text "  Month    "
-            , viewInput "number" "Month" inputData.month Month
+            , viewInput "number" "Month" model.month Month
             , text "  Day   "
-            , viewInput "number" "Day" inputData.day Daynumber
+            , viewInput "number" "Day" model.day Daynumber
             , p [] []
             , text "  Hours UTC "
-            , viewInput "number" "Hour" inputData.hour Hour
+            , viewInput "number" "Hour" model.hour Hour
             , text "  Minutes  "
-            , viewInput "number" "Minute" inputData.minute Minute
+            , viewInput "number" "Minute" model.minute Minute
             , text "  Seconds  "
-            , viewInput "number" "Second" inputData.second Second
+            , viewInput "number" "Second" model.second Second
             , h2 [ style "color" "black" ] [ text "Location " ]
             , text " Latitude "
-            , viewInput "text" "Latitude" inputData.latitude Latitude
+            , viewInput "text" "Latitude" model.latitude Latitude
             , text "  Longitude "
-            , viewInput "text" "Longitude" inputData.longitude Longitude
+            , viewInput "text" "Longitude" model.longitude Longitude
             , text "  Timezone  "
-            , viewInput "number" "Timezone" inputData.timezone Timezone
-            , viewValidation inputData
-            , viewResults inputData
-            , viewJD inputData
-            , viewCalculated inputData
-            , viewFooter
+            , viewInput "number" "Timezone" model.timezone Timezone
+            , viewValidation model
+            , viewResults model
+            , viewJD model
+            , viewDeclination model
+            , viewFooter model
             ]
         ]
 
@@ -144,169 +152,176 @@ viewInput t p v toMsg =
     input [ type_ t, placeholder p, value v, style "width" "65px", onInput toMsg ] []
 
 
-viewValidation : InputData -> Html msg
-viewValidation inputData =
-    let
-        validationResult : String -> String -> Html msg
-        validationResult color remark =
-            div [ style "color" color ] [ text remark ]
-    in
+viewValidation : Model -> Html msg
+viewValidation model =
     if
-        getInputValue inputData.month
+        getInputValue model.month
             > 0
-            && getInputValue inputData.month
+            && getInputValue model.month
             < 13
-            && getInputValue inputData.day
+            && getInputValue model.day
             > 0
-            && getInputValue inputData.day
+            && getInputValue model.day
             < 32
     then
-        validationResult "blue" "Date maybe Ok"
+        div [ style "color" "blue" ] [ text "Date entry OK" ]
 
     else
-        validationResult "red" "Date is incorrect!"
+        div [ style "color" "red" ] [ text "Incorrect month or day" ]
 
 
-viewResults : InputData -> Html msg
-viewResults inputData =
+viewResults : Model -> Html msg
+viewResults model =
     div [ style "color" "orange", style "background-color" "black" ]
         [ h2 [] [ text "DATE AND LOCATION USED BELOW" ]
         , p []
             [ text
                 ("Year  "
-                    ++ inputData.year
+                    ++ model.year
                     ++ ", month    "
-                    ++ inputData.month
+                    ++ model.month
                     ++ " and day  "
-                    ++ inputData.day
+                    ++ model.day
                 )
             ]
         , p []
             [ text
                 (" Hours UTC "
-                    ++ inputData.hour
+                    ++ model.hour
                     ++ " Minutes "
-                    ++ inputData.minute
+                    ++ model.minute
                     ++ " Seconds "
-                    ++ inputData.second
+                    ++ model.second
                 )
             ]
         , p []
             [ text
                 ("  Latitude "
-                    ++ inputData.latitude
+                    ++ model.latitude
                     ++ "°  Longitude "
-                    ++ inputData.longitude
+                    ++ model.longitude
                     ++ "°  Timezone "
-                    ++ inputData.timezone
+                    ++ model.timezone
                     ++ " h"
                 )
             ]
         ]
 
 
-viewJD : InputData -> Html msg
-viewJD mod =
+viewJD : Model -> Html msg
+viewJD model =
     div [ style "color" "red", style "background-color" "lightblue" ]
-        [ text ("JDN " ++ fromInt (getJDN mod))
-        , p [] [ text (" JD = " ++ cutDec6 (fJD mod)) ]
+        [ p [] [ text ("JDN " ++ fromInt (getJDN model)) ]
+        , text (" JD = " ++ cutDec6 (fJD model))
         ]
 
 
-viewCalculated : InputData -> Html msg
-viewCalculated inputData =
-    let
-        viewCalculatedItem : String -> Html msg
-        viewCalculatedItem content =
-            p [] [ text content ]
-
-        items : List String
-        items =
-            [ " Sun Declination   = " ++ cutDec6 (sunDeclination inputData) ++ "°"
-            , " Day Length        = " ++ decHrToTime (getDayLength inputData)
-            , " Civil Twilight    = " ++ mnToHrMn (civTwlMns inputData -1) ++ locTZ inputData
-            , morningToNoon inputData
-            , " Noon Time         = " ++ mnToHrMn (getNoon inputData) ++ locTZ inputData
-            , noonToEvening inputData
-            , " Civil Twilight    = " ++ mnToHrMn (civTwlMns inputData 1) ++ locTZ inputData
-            , " Solar Azimuth     = " ++ cutDec4 (solAzimuth inputData) ++ "°"
-            , " Air refraction    = " ++ cutDec4 (atmosRefract inputData) ++ "°"
-            , " Sun Altitude      = " ++ cutDec4 (90.0 - solZenith inputData) ++ "°  without air-refraction"
-            , " Sun Altitude      = " ++ cutDec4 (refractCorrectAltitude inputData) ++ "° Corrected with air-refraction"
+viewDeclination : Model -> Html msg
+viewDeclination model =
+    div [ style "color" "red", style "font-size" "1.4em" ]
+        [ p [] [ text (" Sun Declination   = " ++ cutDec6 (sunDeclination model) ++ "°") ]
+        , p [] [ text (" Day Length        = " ++ mnToHrMn (60 * getDayLength model)) ]
+        , p [] [ text (" Civil Twilight    = " ++ mnToHrMn (civTwlMns model -1) ++ locTZ model) ]
+        , p [] [ text (morningToNoon model) ]
+        , p [] [ text (" Noon Time         = " ++ mnToHrMn (getNoon model) ++ locTZ model) ]
+        , p [] [ text (noonToEvening model) ]
+        , p [] [ text (" Civil Twilight    = " ++ mnToHrMn (civTwlMns model 1) ++ locTZ model) ]
+        , p [] [ text (" Solar Azimuth     = " ++ cutDec3 (solAzimuth model) ++ "°") ]
+        , p [] [ text (" Air refraction    = " ++ cutDec3 (atmosRefract model) ++ "°") ]
+        , p []
+            [ text
+                (" Sun Altitude      = "
+                    ++ cutDec3 (90.0 - solZenith model)
+                    ++ "°  without air-refraction"
+                )
             ]
-    in
-    div [ style "color" "green", style "font-size" "1.4em" ]
-        (List.map viewCalculatedItem items)
+        , p []
+            [ text
+                (" Sun Altitude      = "
+                    ++ cutDec3 (refractCorrectAltitude model)
+                    ++ "° Corrected with air-refraction"
+                )
+            ]
+        ]
 
 
-morningToNoon : InputData -> String
 morningToNoon mod =
     let
-        geoLat : Float
-        geoLat =
-            getDecVar mod.latitude
-
-        declination : Float
-        declination =
-            sunDeclination mod
-    in
-    if declination < 0.0 && geoLat > (90.83 + declination) then
-        " Arctic winter, no sunrise"
-
-    else if declination < 0.0 && geoLat < (-89.17 - declination) then
-        " Antarctic midsummer, no sunset"
-
-    else if declination > 0.0 && geoLat > (89.17 - declination) then
-        " Arctic summer, no sunset"
-
-    else
-        let
-            dayLength : Float
-            dayLength =
-                getDayLength mod
-        in
-        if dayLength > 0.0 && dayLength < 24.0 then
+        a1 =
             " Sunrise Time      = " ++ mnToHrMn (sunRise mod) ++ locTZ mod
 
-        else
-            let
-                a0 : String
-                a0 =
-                    " Daylength Exception: "
-            in
-            a0 ++ String.fromFloat dayLength
+        a2 =
+            " Arctic winter, no sunrise"
 
+        a3 =
+            " Arctic summer, no sunset"
 
-noonToEvening : InputData -> String
-noonToEvening mod =
-    let
-        geoLat : Float
+        a4 =
+            " Antarctic midsummer, no sunset"
+
+        a0 =
+            " Daylength Exception: "
+
         geoLat =
             getDecVar mod.latitude
 
-        declination : Float
+        declination =
+            sunDeclination mod
+
+        dayLength =
+            getDayLength mod
+    in
+    if declination < 0.0 && geoLat > (90.83 + declination) then
+        a2
+
+    else if declination < 0.0 && geoLat < (-89.17 - declination) then
+        a4
+
+    else if declination > 0.0 && geoLat > (89.17 - declination) then
+        a3
+
+    else if dayLength > 0.0 && dayLength < 24.0 then
+        a1
+
+    else
+        a0 ++ String.fromFloat dayLength
+
+
+noonToEvening mod =
+    let
+        a1 =
+            " Sunset Time      = " ++ mnToHrMn (sunSet mod) ++ locTZ mod
+
+        a2 =
+            " Arctic winter, no Sunrise"
+
+        a3 =
+            " Polar summer, no sunset"
+
+        a4 =
+            " No Sunset, Summer in Antarctis"
+
+        geoLat =
+            getDecVar mod.latitude
+
         declination =
             sunDeclination mod
     in
     if declination < 0.0 && geoLat > (90.8 + declination) then
-        " Arctic winter, no Sunrise"
+        a2
 
     else if declination < 0.0 && geoLat < -89.2 - declination then
-        " No Sunset, Summer in Antarctis"
+        a4
 
     else if declination > 0.0 && geoLat > (89.2 - declination) then
-        " Polar summer, no sunset"
+        a3
 
     else
-        " Sunset Time      = " ++ mnToHrMn (sunSet mod) ++ locTZ mod
+        a1
 
 
-
--- viewFooter : InputData -> Html msg
-
-
-viewFooter : Html msg
-viewFooter =
+viewFooter : Model -> Html msg
+viewFooter model =
     div [ style "color" "black", style "font-size" "1.0em" ]
         [ p [ style "margin-right" "50%" ]
             [ text
@@ -323,6 +338,6 @@ viewFooter =
         ]
 
 
-locTZ : InputData -> String
+locTZ : Model -> String
 locTZ mod =
     " UTC +" ++ mod.timezone ++ " h local time"
