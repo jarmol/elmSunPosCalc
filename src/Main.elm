@@ -172,7 +172,9 @@ viewValidation model =
 
 viewResults : Model -> Html msg
 viewResults model =
-    div [ style "color" "orange", style "background-color" "black" ]
+    div [ style "color" "orange"
+        , style "background-color" "black"
+        , style "padding" "15px" ]
         [ h2 [] [ text "DATE AND LOCATION USED BELOW" ]
         , p []
             [ text
@@ -210,16 +212,16 @@ viewResults model =
 
 viewJD : Model -> Html msg
 viewJD model =
-    div [ style "color" "red", style "background-color" "lightblue" ]
-        [ p [] [ text ("JDN " ++ fromInt (getJDN model)) ]
-        , text (" JD = " ++ cutDec6 (fJD model))
+    div [ style "padding" "10px", style "background-color" "blue" ]
+        [ p [] [ text ("Julian Day Number JDN " ++ fromInt (getJDN model)) ]
+        , text ("Julian Date JD = " ++ cutDec6 (fJD model))
         ]
 
 
 viewDeclination : Model -> Html msg
 viewDeclination model =
-    div [ style "color" "red", style "font-size" "1.4em" ]
-        [ p [] [ text (" Sun Declination   = " ++ cutDec6 (sunDeclination model) ++ "°") ]
+    div [ style "color" "black", style "font-size" "1.4em" ]
+        [ p [] [ text (" Sun Declination   = " ++ cutDec3 (sunDeclination model) ++ "°") ]
         , p [] [ text (" Day Length        = " ++ mnToHrMn (60 * getDayLength model)) ]
         , p [] [ text (" Civil Twilight    = " ++ mnToHrMn (civTwlMns model -1) ++ locTZ model) ]
         , p [] [ text (morningToNoon model) ]
