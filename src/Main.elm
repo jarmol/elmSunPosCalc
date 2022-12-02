@@ -43,16 +43,20 @@ main =
 
 -- MODEL
 
+type alias Date = String
+type alias Time = String
+type alias GeoLocation = String
+
 
 type alias Model =
-    { year : String
-    , month : String
-    , day : String
-    , hour : String
-    , minute : String
-    , second : String
-    , latitude : String
-    , longitude : String
+    { year : Date
+    , month : Date
+    , day : Date
+    , hour : Time
+    , minute : Time
+    , second : Time
+    , latitude  : GeoLocation
+    , longitude : GeoLocation
     , timezone : String
     }
 
@@ -138,7 +142,8 @@ view model =
             , viewInput "text" "Longitude" model.longitude Longitude
             , text "  Timezone  "
             , viewInput "number" "Timezone" model.timezone Timezone
-            , viewValidation model
+            , viewDateValidation model
+            , viewTimeValidation model
             , viewResults model
             , viewJD model
             , viewDeclination model
@@ -152,8 +157,8 @@ viewInput t p v toMsg =
     input [ type_ t, placeholder p, value v, style "width" "65px", onInput toMsg ] []
 
 
-viewValidation : Model -> Html msg
-viewValidation model =
+viewDateValidation : Model -> Html msg
+viewDateValidation model =
     if
         getInputValue model.month
             > 0
@@ -168,6 +173,29 @@ viewValidation model =
 
     else
         div [ style "color" "red" ] [ text "Incorrect month or day" ]
+
+
+
+viewTimeValidation : Model -> Html msg 
+viewTimeValidation model =
+    if  
+        getInputValue model.hour
+            >= 0 
+            && getInputValue model.hour
+            < 24
+            && getInputValue model.minute
+            >= 0 
+            && getInputValue model.minute
+            < 60
+            && getInputValue model.second
+            >= 0
+            && getInputValue model.second
+            < 60
+    then
+        div [ style "color" "blue" ] [ text " Time entry OK" ]
+
+    else
+        div [ style "color" "red" ] [ text "Incorrect time" ]
 
 
 viewResults : Model -> Html msg
