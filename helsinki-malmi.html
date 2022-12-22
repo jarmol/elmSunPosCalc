@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- THIS WORKS  1.12.2022 -->
+
+<head>
+    <meta charset="utf-8">
+    <meta name="description" content="Embedded Elm-language Application, using Elm-architecture">
+    <meta name="keywords" content="Elm version 0.19.0, Sunposition calculation">
+    <meta name="author" content="Jarmo Lammi">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sunposition Calculator in Elm 0.19.0</title>
+
+    <style>
+      .result {
+        background-color: white;
+        font-size: 1.6em;
+        color: orange;
+      }
+    </style>
+</head>
+
+<body>
+    <div id="Main"></div>
+
+    <script src="helsinki-malmi.js"></script>
+
+    <script>
+        const myDiv = document.getElementById("Main");
+        const app = Elm.Main.init({ node: myDiv });
+    </script>
+
+<p>You can download the Elm-source  code from my
+<a href="https://github.com/jarmol/elmSunposCalculator/blob/master/src/Main.elm">Github site</a>
+
+<p>Katso kuukauden kalenterisivu
+<a href="calendar.html">täältä!</a>
+</body>
+
+</html>
