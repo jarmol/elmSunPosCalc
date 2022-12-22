@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- THIS WORKS  18.12.2022 -->
+
+<head>
+    <meta charset="utf-8">
+    <meta name="description" content="Embedded Elm-language Application, using Elm-architecture">
+    <meta name="keywords" content="Elm version 0.19.0, Calendar">
+    <meta name="author" content="Justin Mimbs">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar example to Elm 0.19.0</title>
+
+</head>
+
+<body>
+    <div id="Calendar"></div>
+
+    <script src="calendar.js"></script>
+
+    <script>
+        const myDiv = document.getElementById("Calendar");
+        const app = Elm.Calendar.init({ node: myDiv });
+    </script>
+<p>You can download the Elm code from
+<a href="https://github.com/justinmimbs/date/blob/master/examples/Calendar.elm">Github site</a>
+<p>Katso auringon nousu- ja laskuajat
+<a href="torniossa.html">Torniossa!</a>
+ja <a href="helsinki-malmi.html">Helsinki Malmi-lentokentällä</a>.
+</body>
+</html>
