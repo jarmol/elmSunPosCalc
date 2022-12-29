@@ -1,35 +1,25 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<!-- THIS WORKS  1.12.2022 -->
-
+<html>
 <head>
-    <meta charset="utf-8">
-    <meta name="description" content="Embedded Elm-language Application, using Elm-architecture">
-    <meta name="keywords" content="Elm version 0.19.0, Sunposition calculation">
-    <meta name="author" content="Jarmo Lammi">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sunposition Calculator in Elm 0.19.0</title>
-
-    <style>
-      .result {
-        background-color: white;
-        font-size: 1.6em;
-        color: orange;
-      }
-    </style>
+  <meta charset="UTF-8">
+  <title>Main</title>
+  <script src="calendar.js"></script>
+  <link rel="stylesheet" href="navistyle.css">
 </head>
 
 <body>
-    <div id="Main"></div>
 
-    <script src="elm.min.js"></script>
+  <div id="myapp"></div>
+  <script>
+  var app = Elm.Calendar.init({
+    node: document.getElementById('myapp')
+  });
+  </script>  
 
-    <script>
-        const myDiv = document.getElementById("Main");
-        const app = Elm.Main.init({ node: myDiv });
-    </script>
-<p>You can download the Elm code from my <a href="https://github.com/jarmol/elmSunposCalculator">Github site</a>
+  <ul>
+  <li><a href="https://suncalc.lammi.cc/calendar.html">Home</a></li>
+  <li><a href="https://stainless.lammi.cc/">Stainless</a></li>
+  <li><a href="https://suncalc.lammi.cc/torniossa.html">Tornio</a></li>
+  <li><a href="https://suncalc.lammi.cc/helsinki-malmi.html">Helsinki</a></li>
+</ul>
 </body>
-
 </html>
