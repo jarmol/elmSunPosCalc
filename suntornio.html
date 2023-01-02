@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<head>
+   <title>
+    Suncalculator - Tornio
+   </title>
+</head>
+<body>
+  <h1>Current time Suncalculator</h1>
+  <h2> Tornio, Finland</h2>
+  <div id="elm-code-is-loaded-here"></div>
+		
+  <script src="suntornio.js"></script>
+
+  <script>
+     var app = Elm.PortExamples.init({
+        node: document.getElementById("elm-code-is-loaded-here")
+      });  
+
+     app.ports.sendData.subscribe(function(data) {
+        console.log("Data from Elm: ", data);
+
+     app.ports.receiveData.send(Date.now().toString())
+       }
+     ); // Must be sent as a string!
+
+  </script>
+  <p>J. Lammi 2023</p>
+</body>
+<!--  This works! Suncalculator for Tornio -->
+</html>
