@@ -22,28 +22,27 @@ type alias Model =
 
 view : Model -> Html Msg
 view model =
-    div [ style "margin-left" "10%", style "margin-right" "20%" ]
+    div [ style "margin-left" "10%"
+        , style "margin-right" "20%"
+        , style "font-size" "120%" ]
         [ button [ onClick SendDataToJS ]
             [ text "Get date & time from JavaScript!" ]
         , br [] []
         , text ("Posix-time received from JavaScript: " ++ model ++ " ms")
         , br [] []
-        , text ("Year: " ++ (toYearString <| posTime model))
+        , text ("Date: " ++ (toYearString <| posTime model)
+        ++ "-" ++ (toMonthString <| posTime model)
+        ++ "-" ++ (toDayString <| posTime model))
         , br [] []
-        , text ("Month: " ++ (toMonthString <| posTime model))
+        , text (" Time: " ++ (toHourString <| posTime model)
+        ++ ":" ++ (toMinuteString <| posTime model)
+        ++ ":" ++ (toSecondString <| posTime model))
         , br [] []
-        , text ("Day: " ++ (toDayString <| posTime model))
-        , text
-            (" = JDN "
-                ++ fromInt (jdn (year model) (monthNr model) (day model))
+        , text (" Julian Day Number (JDN) = "
+               ++ fromInt (jdn (year model) (monthNr model) (day model))
             )
         , br [] []
-        , text (" Hour: " ++ (toHourString <| posTime model))
-        , br [] []
-        , text (" Minute: " ++ (toMinuteString <| posTime model))
-        , br [] []
-        , text (" Second: " ++ (toSecondString <| posTime model))
-        , text (" = JDN  " ++ fromFloat (jdnSecondly model))
+        , text (" Julian Date (JD) = " ++ fromFloat (jdnSecondly model))
         , br [] []
         , text (" Century: " ++ fromFloat (getCentury model))
         , br [] []
@@ -53,7 +52,7 @@ view model =
         , br [] []
         , text (" Solar Zenith     = " ++ fx6 (solZenith model))
         , br [] []
-        , text (" HA Sunrise = " ++ fromFloat (getHA model))
+        , text (" HA Sunrise = " ++ fx6 (getHA model))
         , p [ style "color" "red" ]
             [ text
                 (" Noon Time "
@@ -97,12 +96,20 @@ viewFooter model =
     div [ style "color" "black", style "font-size" "1.0em" ]
         [ p [ style "margin-right" "50%" ]
             [ text
-                ("This programm contains the basic functions to be used in calculation of solar positions,"
-                    ++ " Sunrise and Sunset times for the given geographic location, date and time."
+                (
+                """
+                This programm displays the results calculated
+                 in real time for solar positions,
+                 Sunrise and Sunset times, for the given
+                 geographic location, date and time.
+                
+                """
                 )
             ]
-        , p [] [ text "The code is written in Elm-programming language version 0.19.1" ]
-        , p [] [ text "J. Lammi © 2020 - 2023" ]
+        , text "The code is written in "
+        , a [href "https://elm-lang.org/"] [text "Elm-language"]
+        , text  " version 0.19.1"
+        , p [] [ text "Jarmo Lammi © 2020 - 2023" ]
         ]
 
 
