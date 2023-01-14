@@ -1,8 +1,8 @@
 port module PortExamples exposing (main)
 
 import Browser
-import Html exposing (..)
-import Html.Attributes exposing (..)
+import Html exposing (Html, a, br, button, div, p, text)
+import Html.Attributes exposing (href, style)
 import Html.Events exposing (onClick)
 import String exposing (fromFloat, fromInt, toInt)
 import Time exposing (..)
@@ -22,24 +22,37 @@ type alias Model =
 
 view : Model -> Html Msg
 view model =
-    div [ style "margin-left" "10%"
+    div
+        [ style "margin-left" "10%"
         , style "margin-right" "20%"
-        , style "font-size" "120%" ]
+        , style "font-size" "120%"
+        ]
         [ button [ onClick SendDataToJS ]
             [ text "Get date & time from JavaScript!" ]
         , br [] []
         , text ("Posix-time received from JavaScript: " ++ model ++ " ms")
         , br [] []
-        , text ("Date: " ++ (toYearString <| posTime model)
-        ++ "-" ++ (toMonthString <| posTime model)
-        ++ "-" ++ (toDayString <| posTime model))
+        , text
+            ("Date: "
+                ++ (toYearString <| posTime model)
+                ++ "-"
+                ++ (toMonthString <| posTime model)
+                ++ "-"
+                ++ (toDayString <| posTime model)
+            )
         , br [] []
-        , text (" Time: " ++ (toHourString <| posTime model)
-        ++ ":" ++ (toMinuteString <| posTime model)
-        ++ ":" ++ (toSecondString <| posTime model))
+        , text
+            (" Time: "
+                ++ zeroTimes (toHourString <| posTime model)
+                ++ ":"
+                ++ zeroTimes (toMinuteString <| posTime model)
+                ++ ":"
+                ++ zeroTimes (toSecondString <| posTime model)
+            )
         , br [] []
-        , text (" Julian Day Number (JDN) = "
-               ++ fromInt (jdn (year model) (monthNr model) (day model))
+        , text
+            (" Julian Day Number (JDN) = "
+                ++ fromInt (jdn (year model) (monthNr model) (day model))
             )
         , br [] []
         , text (" Julian Date (JD) = " ++ fromFloat (jdnSecondly model))
@@ -48,9 +61,9 @@ view model =
         , br [] []
         , text (" Right Ascension RA = " ++ fx6 (rectAsc model))
         , br [] []
-        , text (" Sun Declination = " ++ fx6 (sunDeclination model))
+        , text (" Sun Declination = " ++ fx6 (sunDeclination model) ++ "°")
         , br [] []
-        , text (" Solar Zenith     = " ++ fx6 (solZenith model))
+        , text (" Solar Zenith     = " ++ fx3 (solZenith model) ++ "°")
         , br [] []
         , text (" HA Sunrise = " ++ fx6 (getHA model))
         , p [ style "color" "red" ]
@@ -59,8 +72,9 @@ view model =
                     ++ mnToHrMn (getNoon model)
                     ++ " UT + "
                     ++ fromFloat geoLocation.timezone
-                    ++ " h, Longitude "
+                    ++ " h ( Longitude "
                     ++ fromFloat geoLocation.longitude
+                    ++ " )"
                 )
             ]
         , p [ style "color" "red" ]
@@ -75,18 +89,23 @@ view model =
         , p [ style "color" "red" ] [ text <| riseStr model ]
         , p [ style "color" "red" ] [ text <| sunsetStr model ]
         , p [ style "color" "red" ]
-            [ text (" Sun Altitude " ++ fx6 (solElev model) ++ " ( without refraction )") ]
+            [ text
+                (" Sun Altitude "
+                    ++ fx3 (solElev model)
+                    ++ "° ( without refraction )"
+                )
+            ]
         , p [ style "color" "red" ]
             [ text
                 (" Sun Altitude "
-                    ++ fx6 (refractCorrectAltitude model)
-                    ++ " ( air refraction "
+                    ++ fx3 (refractCorrectAltitude model)
+                    ++ "° ( air refraction "
                     ++ fx6 (atmosRefract model)
                     ++ " )"
                 )
             ]
         , p [ style "color" "red" ]
-            [ text (" Sun Azimuth " ++ fx6 (solAzimuth model)) ]
+            [ text (" Sun Azimuth " ++ fx3 (solAzimuth model) ++ "°") ]
         , viewFooter model
         ]
 
@@ -96,7 +115,6 @@ viewFooter model =
     div [ style "color" "black", style "font-size" "1.0em" ]
         [ p [ style "margin-right" "50%" ]
             [ text
-                (
                 """
                 This programm displays the results calculated
                  in real time for solar positions,
@@ -104,11 +122,14 @@ viewFooter model =
                  geographic location, date and time.
                 
                 """
-                )
+            ]
+        , p []
+            [ a [ href "https://aa.quae.nl/en/reken/zonpositie.html" ] [ text "Astronomical" ]
+            , text " calculations"
             ]
         , text "The code is written in "
-        , a [href "https://elm-lang.org/"] [text "Elm-language"]
-        , text  " version 0.19.1"
+        , a [ href "https://elm-lang.org/" ] [ text "Elm-language" ]
+        , text " version 0.19.1"
         , p [] [ text "Jarmo Lammi © 2020 - 2023" ]
         ]
 
@@ -156,6 +177,7 @@ toYearString msec =
     fromInt (toYear utc (millisToPosix msec))
 
 
+year : Model -> Int
 year mod =
     let
         msec =
@@ -164,6 +186,7 @@ year mod =
     toYear utc (millisToPosix msec)
 
 
+monthNr : Model -> Int
 monthNr mod =
     let
         msec =
@@ -176,6 +199,7 @@ toDayString msec =
     fromInt (toDay utc (millisToPosix msec))
 
 
+day : Model -> Int
 day mod =
     let
         msec =
@@ -188,6 +212,7 @@ toHourString msec =
     fromInt (toHour utc (millisToPosix msec))
 
 
+hour : Model -> Int
 hour mod =
     let
         msec =
@@ -208,6 +233,7 @@ toMinuteString msec =
     fromInt (toMinute utc (millisToPosix msec))
 
 
+minute : Model -> Int
 minute mod =
     let
         msec =
@@ -265,12 +291,11 @@ getCentury mod =
 
 
 
--- Sun true anomality, OK tested 21.10.19
-
-
-sunTrueAnom : Model -> Float
-sunTrueAnom mod =
-    meanAnomalSun mod + sunEqCntr mod
+{- Not used!
+   trueAnomalySun : Model -> Float
+   trueAnomalySun mod =
+       meanAnomalSun mod + sunEquationOfCenter mod
+-}
 
 
 meanAnomalSun : Model -> Float
@@ -291,8 +316,8 @@ meanAnomalSun mod =
     a + cent * (b + cent * c) |> decNorm360
 
 
-meanLongitSun : Model -> Float
-meanLongitSun mod =
+meanLongitudeSun : Model -> Float
+meanLongitudeSun mod =
     let
         cent =
             getCentury mod
@@ -311,15 +336,15 @@ meanLongitSun mod =
 
 sunTrueLong : Model -> Float
 sunTrueLong mod =
-    meanLongitSun mod + sunEqCntr mod
+    meanLongitudeSun mod + sunEquationOfCenter mod
 
 
 
 -- Sun apparent longitude
 
 
-appLongSun : Model -> Float
-appLongSun mod =
+apparentLongitudeSun : Model -> Float
+apparentLongitudeSun mod =
     let
         cent =
             getCentury mod
@@ -327,8 +352,8 @@ appLongSun mod =
     sunTrueLong mod - 5.69e-3 - 4.78e-3 * sinDeg (125.04 - 1934.136 * cent)
 
 
-sunEqCntr : Model -> Float
-sunEqCntr mod =
+sunEquationOfCenter : Model -> Float
+sunEquationOfCenter mod =
     let
         mAnomalSun =
             meanAnomalSun mod
@@ -385,8 +410,8 @@ meanObliqEclip mod =
 -- Corrected obliquity, OK 22.10.19
 
 
-obliqCorr : Model -> Float
-obliqCorr mod =
+correctedObliquity : Model -> Float
+correctedObliquity mod =
     let
         cent =
             getCentury mod
@@ -400,10 +425,10 @@ rectAsc mod =
             getCentury mod
 
         oblCorr =
-            obliqCorr mod
+            correctedObliquity mod
 
         appLongS =
-            appLongSun mod
+            apparentLongitudeSun mod
     in
     atan2Deg (cosDeg oblCorr * sinDeg appLongS) (cosDeg appLongS)
 
@@ -418,7 +443,7 @@ sunDeclination mod =
         cent =
             getCentury mod
     in
-    asinDeg (sinDeg (obliqCorr mod) * sinDeg (appLongSun mod))
+    asinDeg (sinDeg (correctedObliquity mod) * sinDeg (apparentLongitudeSun mod))
 
 
 
@@ -591,7 +616,7 @@ variableY mod =
             getCentury mod
 
         x =
-            tanDeg (obliqCorr mod / 2.0)
+            tanDeg (correctedObliquity mod / 2.0)
     in
     x * x
 
@@ -602,7 +627,7 @@ equatTime mod =
             variableY mod
 
         meanLongS =
-            meanLongitSun mod
+            meanLongitudeSun mod
 
         eOrbitEx =
             eccentEarthOrbit mod
@@ -760,6 +785,15 @@ zeroFill x =
         String.fromInt x
 
 
+zeroTimes : String -> String
+zeroTimes s =
+    if String.length s == 1 then
+        "0" ++ s
+
+    else
+        s
+
+
 posTime : String -> Int
 posTime posTimeString =
     Maybe.withDefault -1 (String.toInt posTimeString)
@@ -859,12 +893,12 @@ decNorm360 =
     \arg -> toFloat (remainderBy 360 (floor arg)) + frac arg
 
 
+fx3 x =
+    round (1.0e3 * x) |> toFloat |> (\t -> t / 1.0e3) |> fromFloat
+
+
 fx6 x =
     round (1.0e6 * x) |> toFloat |> (\t -> t / 1.0e6) |> fromFloat
-
-
-fx9 x =
-    round (1.0e9 * x) |> toFloat |> (\t -> t / 1.0e9) |> fromFloat
 
 
 
