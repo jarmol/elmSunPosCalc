@@ -1,0 +1,35 @@
+h1 {font-family: Arial, Helvetica, sans-serif;}
+.vsx {width: 5em; margin-left: 30px;}
+.kkx {width: 5em; margin-left: 15px;}
+.pvx {width: 5em; margin-left: 35px;}
+.minutes {width: 5em;}
+.dlst {margin-left: 4em;}
+body {width: 55%; margin-left: 10%;
+        background-color: #c8dec8;
+        background-image: url("gradient.png");
+        background-repeat: repeat-x;
+     } 
+span {color: yellow}
+p { color: white;
+    background-color: blue; 
+    border: dotted thin yellow; padding: 12px;
+}
+
+p.foot { color: black;
+background-color: white;
+}
+
+table {width: 85%;
+        border: 2px solid white;
+		border-radius: 10px; margin: auto auto}
+th  {border: 2px solid black; background-color: #274e86;
+	  padding: 5px; border-radius: 6px;
+	  font:16px Verdana,sans-serif;
+	  font-weight: bold;}
+
+td  {border: 1px solid yellow; background-color: #996633;
+	  padding: 5px}
+table.wide {width: 98%; border-radius: 2px;
+    border: 1px solid blue;
+    background-color: #333300}
+td.wide {background-color: #808080}
