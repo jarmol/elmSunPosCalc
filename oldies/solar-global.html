@@ -12,7 +12,7 @@
     <h1>Solar Calculator</h1>
     </header>
 
-    <form  action="getJDayLocal()">
+    <form  action="" >
     <br>Input year:
         <input type="number" id="vsx" class="vsx" value="2023">
         <br>Input month:
@@ -21,7 +21,7 @@
         <input type="number" id="pvx" class="pvx" value="20">
         <br>Input minutes:&nbsp;
         <input type="number" id="minutes" class="minutes" value="1404">
-        <input type="checkbox" id="dlst" class="dlst"> DLST
+        <input type="checkbox" id="dlst" class="dlst"> DLS
     </form>
 
         <br>Select City: 
@@ -44,7 +44,52 @@
         <button id='nappula' onclick="calculate()">Calculate</button>
         <button id='malli' onclick="window.location.href='suncalchelp.png';">Input help</button>
                 
-   <p  id="demo1">Calculation results:</p>
+
+   <table class="wide">
+         <tr>
+         <td class='wide' id='City' ></td>
+         <td class='wide' id='Timezone'></td>
+         <td class='wide' id='Latitude'>: </td> 
+        </tr>
+        <tr><td class='wide' id='Day'></td>
+        <td class="wide" id='DLST'></td>
+        <td class='wide' id='mins'></td>
+        </tr>
+        </table>
+
+   <table class="wide">
+        <tr><th> Solar Declination</th>
+        <td id='Declinat'> </td>
+        <tr><th> Atmospheric Refraction</th> 
+            <td id='Refract'> </td>
+        <tr><th> Solar Elevation</th>
+            <td id='Elevat'> </td>
+        </tr>
+        <tr><th> Solar Azimuth</th> 
+            <td id='Azim'></td></tr>
+        <tr><th> Earth Distance to Sun</th>
+            <td id='Sundist'></td></tr>
+   </table>
+ 
+   <table class="wide"><tbody>
+        <tr><th> Sunrise</th>
+            <td id='Rise'></td>
+            <th> &#x2606;
+              Civil Twilight</th>
+            <td id='Beginmorn'></td>
+        </tr>
+        <tr><th> Sunset</th>
+            <td id='Sunset'></td>
+            <th> &#x2606;
+              Civil Twilight</th>
+            <td id='Beginnight'></td>
+        <tr><th> Noon</th>
+            <td id='Noon'></td>
+            <th> &#x2606;
+	      Day Length</th>
+            <td id='Daylength'></td>
+        </tr></tbody>
+   </table>
 
 <script>
 function setnow() {
@@ -66,46 +111,68 @@ function setnow() {
     return date
 }
 
+   var cities = [
+          {name:"Utsjoki", latitude:69.76, longitude:27.01, tzone:2},
+          {name:"Tornio", latitude:65.85, longitude:24.18, tzone:2},
+          {name:"Oulu", latitude:65.02, longitude:25.5, tzone:2},
+          {name:"Helsinki", latitude:60.18, longitude:24.94, tzone:2},
+          {name:"Stockholm", latitude:59.33, longitude:18.05, tzone:1},
+          {name:"Berlin", latitude: 52.52, longitude:13.38, tzone:1},
+          {name:"Paris", latitude: 48.85, longitude: 2.35, tzone:1},
+          {name:"London", latitude:51.5, longitude:0.13, tzone:0},
+          {name:"New York", latitude: 40.72, longitude: -74.02, tzone: -4},
+          {name:"Murcia Spain", latitude: 37.99, longitude: -1.13, tzone: 1},
+          {name:"Cape Town", latitude:-33.96, longitude:18.60, tzone:2}
+          ]
+
+
 function setNoon(tnoon) {
     document.getElementById("minutes").value = (Math.round(tnoon));
+   }
+
+function getCity() {
+      nrCity = document.getElementById("nrCity").value;
+        titleToConsole(cities[nrCity]);
+      //return cities.name
+   }
+
+
+const degmark = function(ptr) {
+        let mlat = (ptr.latitude  > 0) ? 'N' : 'S';
+        let mlon = (ptr.longitude > 0) ? 'E' : 'W';
+        return [mlat, mlon];
+      }
+
+
+function titleToConsole(ptr) {
+    let mloc = degmark(ptr);
+    document.getElementById("City").innerHTML = `City: ${ptr.name}`;
+    document.getElementById("Timezone").innerHTML = `&#x2606; Timezone 
+      ${ptr.tzone} h`
+    document.getElementById("Latitude").innerHTML = `&#x2606; Latitude
+      ${ptr.latitude} &deg; ${mloc[0]}
+        &#x2606; Longitude
+        ${ptr.longitude}  &deg; ${ mloc[1]}`
+        
+    return
 }
+
 
 function calculate() {
 
-    var cities = [
-        {name:"Utsjoki", latitude:69.76, longitude:27.01, tzone:2},
-        {name:"Tornio", latitude:65.85, longitude:24.18, tzone:2},
-        {name:"Oulu", latitude:65.02, longitude:25.5, tzone:2},
-        {name:"Helsinki", latitude:60.18, longitude:24.94, tzone:2},   // Kaisaniemi sääasema
-        {name:"Stockholm", latitude:59.33, longitude:18.05, tzone:1},
-        {name:"Berlin", latitude: 52.52, longitude:13.38, tzone:1},
-        {name:"Paris", latitude: 48.85, longitude: 2.35, tzone:1},
-        {name:"London", latitude:51.5, longitude:0.13, tzone:0},
-        {name:"New York", latitude: 40.72, longitude: -74.02, tzone: -4},
-        {name:"Murcia Spain", latitude: 37.99, longitude: -1.13, tzone: 1},
-        {name:"Cape Town", latitude:-33.96, longitude:18.60, tzone:2}
-        ];
-
-//      var nrCity = 3; // city index for Helsinki selected
-
-//      nrCity = document.getElementById("nrCity").value;
-//      titleToConsole(cities[nrCity]);
-
-//function titleToConsole(ptr) {
-//    console.log(ptr.name, ptr.latitude, ptr.longitude, ptr.tzone);
-//}
+    getCity();
 
     var timeForm = function(decimHours) {
             // Convert decimal hours to time string
             if (isNaN(decimHours)) { return 'Not defined!'};
-              var hh = Math.floor(24*decimHours);
-              var mm = Math.round(60*(24*decimHours - hh));
-            //  return hh + 'h ' + mm + 'min';
+              let hh = Math.floor(24*decimHours);
+              let mm = Math.round(60*(24*decimHours - hh));
               return `${hh} h ${mm} min`;
 
             }
-var leadZero = function(hh, mm) {
-    var zs;
+
+const leadZero = function(hh, mm) {
+//  var zs;
 
 var doit =  function(tval) {
         var tz;
@@ -113,9 +180,10 @@ var doit =  function(tval) {
         return (tz);
     };
 
-    zs = doit(hh) + ':' + doit(mm);
+    let zs = doit(hh) + ':' + doit(mm);
     return zs
-};
+}
+
 
 var mntohrmn = function(mins) {
     var hr = Math.floor(mins/60);
@@ -130,13 +198,6 @@ var daydectohrmn = function(decday) {
 }
 
 
-    var degmark = function(ptr) {
-        var mlat = (ptr.latitude  > 0) ? 'N' : 'S';
-        var mlon = (ptr.longitude > 0) ? 'E' : 'W';
-        return [mlat, mlon];
-      }
-
-        var star ='&#x2606;';
         var years  = document.getElementById("vsx");
         var year   = years.value;
         var months = document.getElementById("kkx");
@@ -145,14 +206,20 @@ var daydectohrmn = function(decday) {
         var day  = days.value;
         var mins = document.getElementById("minutes").value;
         // if (dlstime) {mins -= 60} // true time is 1 h less
-        console.log('Month', month, ' Day ', day);
+        document.getElementById("Day").innerHTML =
+        ` ${year}-${month}-${day}`;
+        dlstimes = document.getElementById("dlst");
+        dlstime = dlstimes.checked;
+        document.getElementById("DLST").innerHTML = `DLS = ${dlstime}`;
+        document.getElementById("mins").innerHTML =
+        `Minutes since midnigh ${mins} ( ${mntohrmn(mins)} )
+         ${Date()}` ; 
 
 // Julian day
         const jd1 = (Y, M, D, mns) => {
         let hrs = Math.floor(mns/60);
         let mnt = mns % 60;
         let millisecs = new Date(Y, M-1, D, hrs, mnt).getTime()
-        console.log('Unix time: ', millisecs);
         let x = millisecs/1000/86400
         let jd = x + 2440587.5;
         return jd
@@ -163,22 +230,13 @@ var daydectohrmn = function(decday) {
         var ptr = cities[nrCity];
         var mloc = degmark(ptr);
         const jdcent0 = 2451545; // 1.1.2000
-        var months = document.getElementById("kkx");
-        var days = document.getElementById("pvx");
-        var years = document.getElementById("vsx");
-        var dlstimes = document.getElementById("dlst");
-        var dlstime = dlstimes.checked;
         var addDlst = (dlstime) ? 1 : 0;
         var x = document.getElementById("minutes").value;
         
         function  getJDayLocal() { return jd1(+years.value, +months.value, +days.value, +x)};
         var jDayLocal = getJDayLocal()
         var jdtzcor = jDayLocal + addDlst/24;
-        console.log('JD + dlst ', jdtzcor);
-        console.log('TZ', ptr.tzone, 'DLST', dlstime, '+', addDlst);
         let centFract = (jdtzcor - jdcent0)/36525;
-            console.log('Recent century ', centFract);
-
         // Lambdas 6.9.2016
         const pi = Math.PI;
         const radTan = (alfa) => (Math.tan(pi * alfa / 180));
@@ -193,12 +251,11 @@ var daydectohrmn = function(decday) {
 
         // Orbital Excentricity of  Earth
         var eOrbitEccentric = 0.016708634 - centFract * (0.000042037 + 0.0000001267 * centFract);
-//          console.log('Orbital Eccentricity of Earth ', eOrbitEccentric.toFixed(4));
 
         // Sun Equation of Center = The difference between the true anomaly and the mean anomaly
         var sunEqCtr= radSin(mAnomSun(centFract)) * (1.914602 - centFract * (0.004817 + 0.000014 * centFract))
-             + radSin(2 * mAnomSun(centFract)) * (0.019993 - 0.000101 * centFract) + radSin(3 * mAnomSun(centFract)) * 0.000289;
-//           console.log('Sun Equation of Center ', sunEqCtr.toFixed(3));
+             + radSin(2 * mAnomSun(centFract)) * (0.019993 - 0.000101 * centFract)
+             + radSin(3 * mAnomSun(centFract)) * 0.000289;
 
         // lambda 10.11.2016
         const sunTrueAnom = (cent) => mAnomSun(cent) + sunEqCtr;
@@ -209,7 +266,6 @@ var daydectohrmn = function(decday) {
                 return(1.000001018 * (1 - k2 * k2)) / (1 + k2 * radCos(sunTrueAnom(cent)));
         }
 
-          console.log('Earth Distance to Sun', sunDistEarth(centFract));
 
         const obliqCorr = (cent) => (23 + (26 + (21.448 - cent * (46.815 + cent * (0.00059 - cent * 0.001813)))/60)/60
             + 0.00256 * radCos(125.04 - 1934.136 * cent));
@@ -233,7 +289,6 @@ var daydectohrmn = function(decday) {
              // Equation of time units minutes
             var z = Math.tan(degToRad(obliqCorr(cent)/2));
             var y = z*z, i2 = mLongSun(cent), k2 = eOrbitEccentric, j2 = mAnomSun(cent);
-            console.log('mLongSun', i2.toFixed(3)); // Testi OK 23.6.2018
             return (4 * radToDeg( y * radSin(2*i2 )
                  - 2 * k2 * radSin(j2)
                  + 4*k2*y*radSin(j2) * radCos(2*i2)
@@ -245,7 +300,7 @@ var daydectohrmn = function(decday) {
              var b3 = cityPtr.latitude, t2 = sunDeclination(centFract);
              let z = radCos(90 + twl) / (radCos(b3)*radCos(t2)) - radTan(b3)*radTan(t2);
              if (z < -1.0) z = -1.0 // Sun is all day up
-                return radToDeg(Math.acos(z));
+             return radToDeg(Math.acos(z));
              }
 
              const solNoon = function(cityPtr) {
@@ -261,7 +316,6 @@ var daydectohrmn = function(decday) {
              }
 
              const twlCivilRise = function(cityPtr) {
-             // = x2 - w2*4/1440
              const civilTwl = 6.0;
              var x2 = solNoon(cityPtr);
              var w2 = sunRiseHA(cityPtr, civilTwl);
@@ -269,14 +323,12 @@ var daydectohrmn = function(decday) {
             }
 
              const sunSet = function(cityPtr) {
-             // = x2 - w2*4/1440
              var x2 = solNoon(cityPtr), w2 = sunRiseHA(cityPtr);
 
              return x2 + w2*4/1440;
              }
 
              const twlCivilSunset = function(cityPtr) {
-             // =X2-W2*4/1440
              const civilTwl = 6.0;
              var x2 = solNoon(cityPtr), w2 = sunRiseHA(cityPtr, civilTwl);
              return x2 + w2*4/1440;
@@ -287,7 +339,6 @@ var daydectohrmn = function(decday) {
 
              const trueSolTime = function() {
                // True solar time (minutes), needed only here!
-                var mins = document.getElementById('minutes').value;
                 var e2 = mins/60/24, v2 = equatTime(centFract), b4 = longitude, b5 = tzone;
                 return (e2*1440 + v2 + 4*b4 - 60*b5) % 1440;
                }
@@ -304,6 +355,7 @@ var daydectohrmn = function(decday) {
 
                return z;
             }
+
 
             var atmosRefract = function(cityPtr) {
             var atRef;
@@ -343,57 +395,24 @@ var daydectohrmn = function(decday) {
             return azim;
           }
 
-        var tulokset =  `<table class="wide">
-         <tr>
-         <td class='wide'>City: ${ptr.name}</td>
-         <td class='wide'></td>
-        <td class='wide'> 
-           ${star} Latitude  ${ptr.latitude}&deg; ${mloc[0]}
-           ${star} Longitude ${ptr.longitude}&deg; ${mloc[1]} <br>
-           ${star} Timezone ${ptr.tzone} h
-        </td>
-        </tr>
-        <tr><td class='wide'> Date ${day}.${month}.${year}</td>
-        <td class="wide"> DLST: + 1 h, ${dlstime}
-        </td> <td class='wide'>Time since midnight ${mins} minutes (${mntohrmn(mins)})<br>
-        ${Date()}</td></tr>
-        </table>`;
 
-    var tulokset2 = `<table><tr><th> Solar Declination</th>
-        <td> ${sunDeclination(centFract).toFixed(2)} &deg;</td>
-        <tr><th> Atmospheric Refraction</th> <td>${atmosRefract(ptr).toFixed(3)} &deg;</td>
-        <tr><th> Solar Elevation</th> <td>${corSolElev(ptr).toFixed(2)} &deg;</td>
-        </tr>
-        <tr><th> Solar Azimuth</th> <td>${solAzimuth(ptr).toFixed(2)} &deg;</td>
-        <tr><th> Earth Distance to Sun</th><td>${sunDistEarth(centFract).toFixed(4)} AU</td>
-        <table><tbody>
-        <tr><th> Sunrise</th> <td>${daydectohrmn(sunRise(ptr) + addDlst/24)}</td>
-            <th> ${star}
-              Civil Twilight</th> <td>${daydectohrmn(twlCivilRise(ptr) + addDlst/24)}</td>
-        </tr>
-        <tr><th> Sunset</th> <td>${daydectohrmn(sunSet(ptr) + addDlst/24)}</td>
-            <th> ${star}
-              Civil Twilight</th> <td>${daydectohrmn(twlCivilSunset(ptr) + addDlst/24)}</td>
-        <tr><th> Noon</th> <td>${daydectohrmn(solNoon(ptr) + addDlst/24)}</td>
-            <th> ${star}
-	      Day Length</th> <td>${timeForm(sunSet(ptr) - sunRise(ptr))}</td>
-        </tr></tbody>
-        </table>`;
 
-        document.getElementById("demo1").innerHTML = tulokset + tulokset2;
+document.getElementById("Declinat").innerHTML = `${sunDeclination(centFract).toFixed(2)} °`;
+document.getElementById("Refract").innerHTML = `${atmosRefract(ptr).toFixed(3)} °`;
+document.getElementById("Elevat").innerHTML = `${corSolElev(ptr).toFixed(2)} °`;
+document.getElementById("Azim").innerHTML = `${solAzimuth(ptr).toFixed(2)} &deg;`;
+document.getElementById("Sundist").innerHTML = `${sunDistEarth(centFract).toFixed(4)} AU`;
+document.getElementById("Rise").innerHTML = ` ${daydectohrmn(sunRise(ptr) + addDlst/24)}`;
+document.getElementById("Sunset").innerHTML = ` ${daydectohrmn(sunSet(ptr) + addDlst/24)}`;
+document.getElementById("Noon").innerHTML = ` ${daydectohrmn(solNoon(ptr) + addDlst/24)}`;
+document.getElementById("Beginmorn").innerHTML = ` ${daydectohrmn(twlCivilRise(ptr) + addDlst/24)}`;
+document.getElementById("Beginnight").innerHTML = ` ${daydectohrmn(twlCivilSunset(ptr) + addDlst/24)}`;
+document.getElementById("Daylength").innerHTML = ` ${timeForm(sunSet(ptr) - sunRise(ptr))}`;
 
-        var ptr = cities[nrCity];
-        //console.log('Solar Declination ', sunDeclination(centFract).toFixed(2));
-        console.log('Hour angle ', hourAngle(ptr).toFixed(2));
-        //console.log('Solar Zenith ', solZenith(ptr).toFixed(2));
-        //console.log('Solar elevation ', (90 - solZenith(ptr)).toFixed(2));
-        //console.log('Sunlight duration time ', 8*sunRiseHA(ptr).toFixed(1),
-        // ' min ( ', timeForm(sunRiseHA(ptr)/15/12),' )');
-        var xnoon = 1440*solNoon(ptr);
-        console.log('xnoon', xnoon);
-        return xnoon;
+
 } // End of Calculation
-   </script>
+</script>
+
 <div class="footnote" id="footnote">
 <script>
   var d = document.lastModified;
@@ -404,4 +423,3 @@ var daydectohrmn = function(decday) {
 </div>
 </body>
 </html>
-
