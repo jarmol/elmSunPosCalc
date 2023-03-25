@@ -28,8 +28,9 @@ th  {border: 2px solid black; background-color: #274e86;
 	  font-weight: bold;}
 
 td  {border: 1px solid yellow; background-color: #996633;
-	  padding: 5px}
-table.wide {width: 98%; border-radius: 2px;
+	  padding: 10px}
+table.wide {width: 98%; border-radius: 12px;
     border: 1px solid blue;
-    background-color: #333300}
-td.wide {background-color: #808080}
+    background-color: #333300;
+    color: white}
+td.wide {background-color: #808080; color: white; padding: 10px}
