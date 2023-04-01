@@ -1,0 +1,18 @@
+Here's what's happening in this code:
+
+    We start by defining a list of colors using List.range and List.map.
+    We then call a helper function called plotPoints with the starting x and y
+    coordinates, the list of colors, and an empty list to accumulate the plotted points.
+    In plotPoints, we use pattern matching to check if the colors list is empty. If it is,
+    we return the accumulated points list (acc).
+    If the colors list is not empty, we take the head of the list and assign it to color,
+     and the rest of the list to rest.
+    We then calculate the x and y coordinates for the current point using the input x and
+     y parameters, and create an SVG circle element with the current color and coordinates.
+    Finally, we call plotPoints again with the updated x coordinate (x + 20),
+     the same y coordinate (y), the rest of the colors list, and the current point added
+     to the accumulated points list (point :: acc).
+
+    This recursive approach eliminates the need for repetitive calls to plotPoint, and 
+    instead uses a loop-like structure to iterate through the list of colors and plot
+     the points.
