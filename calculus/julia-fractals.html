@@ -1,48 +1,185 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Julia Set</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+* {box-sizing: border-box}
+body {font-family: Verdana, sans-serif; margin:0}
+.mySlides {display: none}
+img {vertical-align: middle;}
+
+/* Slideshow container */
+.slideshow-container {
+  max-width: 800px;
+  position: relative;
+  margin: auto;
+}
+
+/* Next & previous buttons */
+.prev, .next {
+  cursor: pointer;
+  position: absolute;
+  top: 50%;
+  width: auto;
+  padding: 16px;
+  margin-top: -22px;
+  color: white;
+  font-weight: bold;
+  font-size: 18px;
+  transition: 0.6s ease;
+  border-radius: 0 3px 3px 0;
+  user-select: none;
+}
+
+/* Position the "next button" to the right */
+.next {
+  right: 0;
+  border-radius: 3px 0 0 3px;
+}
+
+/* On hover, add a black background color with a little bit see-through */
+.prev:hover, .next:hover {
+  background-color: rgba(0,0,0,0.8);
+}
+
+/* Caption text */
+.text {
+  color: #f2f2f2;
+  font-size: 15px;
+  padding: 8px 12px;
+  position: absolute;
+  bottom: 8px;
+  width: 100%;
+  text-align: center;
+}
+
+/* Number text (1/3 etc) */
+.numbertext {
+  color: #f2f2f2;
+  font-size: 12px;
+  padding: 8px 12px;
+  position: absolute;
+  top: 0;
+}
+
+/* The dots/bullets/indicators */
+.dot {
+  cursor: pointer;
+  height: 15px;
+  width: 15px;
+  margin: 0 2px;
+  background-color: #bbb;
+  border-radius: 50%;
+  display: inline-block;
+  transition: background-color 0.6s ease;
+}
+
+.active, .dot:hover {
+  background-color: #717171;
+}
+
+/* Fading animation */
+.fade {
+  animation-name: fade;
+  animation-duration: 1.5s;
+}
+
+@keyframes fade {
+  from {opacity: .4} 
+  to {opacity: 1}
+}
+
+/* On smaller screens, decrease text size */
+@media only screen and (max-width: 300px) {
+  .prev, .next,.text {font-size: 11px}
+}
+</style>
 </head>
 <body>
-<h1>Fractals of Julia Set</h1>
-<figure>
-<img src="https://suncalc.lammi.cc/images/julia_0.376_-0.244.png" alt="Julia c = (0.376, -0.244)">
-<figcaption>
-     Julia fractal c = (0.376, -0.244) © 2023 Jarmo Lammi
-</figcaption>
-</figure>
+<h1 style="margin-left: 5%">Fractals of Julia Set</h1>
+<!-- Slideshow container -->
+<div class="slideshow-container">
 
-<figure>
-<img src="https://suncalc.lammi.cc/images/julia_0.361_-0.112.png" alt="Julia c = (0.361, -0.112)">
-<figcaption>
-     Julia fractal c = (0.361, -0.112) © 2023 Jarmo Lammi
-</figcaption>
-</figure>
+  <!-- Full-width images with number and caption text -->
+  <div class="mySlides fade">
+    <div class="numbertext">1 / 4</div>
+    <img src="https://suncalc.lammi.cc/images/julia_0.376_-0.244.png" style="width:100%">
+    <div class="text">Julia fractal c = (0.376, -0.244) © 2023 Jarmo Lammi </div>
+  </div>
 
-<figure>
-<img src="https://suncalc.lammi.cc/images/julia_-0.1568444_-0.6497077.png" alt="Julia c = (0.1568444, -0.6497077)">
-<figcaption>
-     Julia fractal c = (0.1568444, -0.6497077) © 2023 Jarmo Lammi
-</figcaption>
-</figure>
+  <div class="mySlides fade">
+    <div class="numbertext">2 / 4</div>
+    <img src="https://suncalc.lammi.cc/images/julia_0.361_-0.112.png" style="width:100%">
+    <div class="text">Julia fractal c = (0.361, -0.112) © 2023 Jarmo Lammi</div>
+  </div>
 
-<figure>
-<img src="https://suncalc.lammi.cc/images/julia_-0.750240_0.127655.png" alt="Julia c = (-0.750240, 0.127655)">
-<figcaption>
-     Julia fractal c = (-0.750240 , 0.1277655) © 2023 Jarmo Lammi
-</figcaption>
-</figure>
-<p>---------------</p>
-I have made the above fractal pictures using the <b>Scale</b> program
-by Michael Fogleman 
-<a href="https://www.michaelfogleman.com/projects/scale/">(Beautiful fractals for macOS)</a>
+  <div class="mySlides fade">
+    <div class="numbertext">3 / 4</div>
+    <img src="https://suncalc.lammi.cc/images/julia_-0.1568444_-0.6497077.png" style="width:100%">
+    <div class="text">Julia fractal c = (0.1568444, -0.6497077) © 2023 Jarmo Lammi </div>
+  </div>
+
+  <div class="mySlides fade">
+    <div class="numbertext">4 / 4</div>
+  <img src="https://suncalc.lammi.cc/images/julia_-0.750240_0.127655.png" style="width:100%">
+    <div class="text">Julia fractal c = (-0.750240, 0.127655) © 2023 Jarmo Lammi </div>
+  </div>
+
+  <!-- Next and previous buttons -->
+  <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
+  <a class="next" onclick="plusSlides(1)">&#10095;</a>
+</div>
+<br>
+
+<!-- The dots/circles -->
+<div style="text-align:center">
+  <span class="dot" onclick="currentSlide(1)"></span>
+  <span class="dot" onclick="currentSlide(2)"></span>
+  <span class="dot" onclick="currentSlide(3)"></span>
+  <span class="dot" onclick="currentSlide(4)"></span>
+</div>
+
+<div style="margin-left:5%">
+  I have made the above fractal pictures using the <b>Scale</b> program
+  by Michael Fogleman 
+  <a href="https://www.michaelfogleman.com/projects/scale/">(Beautiful fractals for macOS)</a>
 
 <h2>About fractals of Julia Set</h2>
-Read about the <a href="https://tinyurl.com/My-Julia-Set">mathematic backgound of Julia set</a> and general about 
+  Read about the <a href="https://tinyurl.com/My-Julia-Set">mathematic background of Julia set</a> and general about 
 <a href="https://en.wikipedia.org/wiki/Fractal">fractals</a>.
 <p>
-More about fractal-generating software in
+  More about fractal-generating software in
 <a href="https://en.wikipedia.org/wiki/Fractal-generating_software">Wikipedia</a>
+</div>
+
+<script>
+let slideIndex = 1;
+showSlides(slideIndex);
+
+function plusSlides(n) {
+  showSlides(slideIndex += n);
+}
+
+function currentSlide(n) {
+  showSlides(slideIndex = n);
+}
+
+function showSlides(n) {
+  let i;
+  let slides = document.getElementsByClassName("mySlides");
+  let dots = document.getElementsByClassName("dot");
+  if (n > slides.length) {slideIndex = 1}
+  if (n < 1) {slideIndex = slides.length}
+  for (i = 0; i < slides.length; i++) {
+    slides[i].style.display = "none";
+  }
+  for (i = 0; i < dots.length; i++) {
+    dots[i].className = dots[i].className.replace(" active", "");
+  }
+  slides[slideIndex-1].style.display = "block";
+  dots[slideIndex-1].className += " active";
+}
+</script>
+
 </body>
 </html>
-
