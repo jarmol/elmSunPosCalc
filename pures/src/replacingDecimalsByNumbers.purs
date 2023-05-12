@@ -58,7 +58,7 @@ main  =
      <> toFixed 6 meanLongitude <> "°"
   log $  "Mean longitude normalized "
      <> toFixed 6 (normLongit) <> "°"
-  log $  "Earth orbit eccentrity " <> toFixed 6 orbitEccentrity
+  log $  "Earth orbit eccentrity " <> orbitEccentrity
   log $ "Sun eq. of center "
      <> toFixed 6 sunEquationCenter
   log $ "Sun true longitude "
@@ -69,10 +69,8 @@ main  =
     <> toFixed 5 apparLongitNormal <> "°"
   log $ "Mean oblique ecliptic "
     <> toFixed 5 meanObliqueEcliptic <> "°"
-  log $ "Corrected obliquity "
-    <> toFixed 5 correctedOblique <> "°"
-  log $ "Sun declination "
-    <> toFixed 5 declinationSun <> "°"
+  log $ "Corrected obliquity " <> correctedOblique <> "°"
+  log $ "Sun declination " <> declinationSun <> "°"
   log $ "Variable Y = " <> varY
   log $ "Time Equation " <> timeEquation
     <> " minutes"
@@ -97,7 +95,8 @@ meanLongitude = fromNumber (calcSunML cent2)
 normLongit = modulo meanLongitude (fromNumber 360.0) :: Decimal
 
 -- excepted 0,016699
-orbitEccentrity = fromNumber (eccentEarthOrbit cent2) :: Decimal
+orbitEccentrity =
+  toStringWith (fixed 6) (eccentEarthOrbit cent2) :: String
 
 -- expected 1,6509793
 sunEquationCenter = fromNumber (sunEqCntr cent2) :: Decimal
@@ -121,11 +120,11 @@ meanObliqueEcliptic =
 
 -- Corrected oblique, expect 23,43839
 correctedOblique =
-  fromNumber (obliqCorr cent2) :: Decimal
+  toStringWith (fixed 5) (obliqCorr cent2) :: String
   
 -- Sun declination
 declinationSun =
-  fromNumber (sunDeclination cent2) :: Decimal
+  toStringWith (fixed 5) (sunDeclination cent2) :: String
 
 -- variable Y, expected 0.043031
 varY =
