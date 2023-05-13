@@ -83,6 +83,8 @@ main  =
   log $ "Sunset in Tornio " <> sunsetMinutes
   log $ "Sunset time " <> mnsToHrMnSc sunsetTornio
   log $ "Daylength " <> mnsToHrMnSc dayLength
+  log $ "True solar time "
+    <> toStringWith (fixed 4) trueSolarTime
 
 -- expected 119.338928
 normAnomal = modulo meanAnomal (fromNumber 360.0) :: Decimal
@@ -140,6 +142,11 @@ srHourAngle =
 
 -- Daylength in minutes, expected 1064.14 
 dayLength = sunriseHA * 8.0 :: Number
+
+-- True solar time, expected 187,9477
+trueSolarTime :: Number
+trueSolarTime =
+  trueSolTime cent2 1 27 58 2.0 24.18  
 
 
 -- Noon time minutes expected 740 -> 12:20
@@ -399,6 +406,21 @@ risetMns  cnt geoLong timeZone rsOption =
         c = if rsOption then 1.0
             else -1.0
     in  noon + 4.0 * c * getHA
+
+
+-- True Solar Time
+
+trueSolTime :: Number -> Int -> Int -> Int -> Number -> Number -> Number
+trueSolTime cnt hr mn sc tz longit =
+    let
+        e2 =
+            (fromNumber 60.0) * ((fromInt hr) + (fromNumber tz)) + (fromInt mn)
+            + (fromInt sc) / (fromNumber 60.0) :: Decimal
+
+        v2 =
+            equatTime cnt :: Number
+    in
+        (toNumber e2) + v2 + 4.0 * longit - 60.0 * tz
 
 
 -- Converts minutes to hh:mm:ss
