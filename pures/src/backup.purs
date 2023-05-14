@@ -86,7 +86,10 @@ main  =
   log $ "True solar time "
     <> toStringWith (fixed 4) trueSolarTime
   log $ "Hour angle 2 " <> toString hourAngle2
-  log $ "Solar Zenith " <> toStringWith (fixed 4) solarZenith
+  log $ "Solar Zenith "
+    <> toStringWith (fixed 4) solarZenith <> "°"
+  log $ "Solar elevation "
+    <> toStringWith (fixed 4) solarElevation <> "°"
 
 -- expected 119.338928
 normAnomal = modulo meanAnomal (fromNumber 360.0) :: Decimal
@@ -157,6 +160,10 @@ hourAngle2 =
 -- Solar Zenith (degrees),expected 90.8318
 solarZenith =
   solZenith 65.85 cent2 :: Number
+
+-- Sun altitude at the time set, exception -0.8318
+solarElevation = 90.0 - solarZenith :: Number
+
 
 solZenith :: Number -> Number -> Number
 solZenith lat cnt =
