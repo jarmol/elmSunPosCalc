@@ -86,6 +86,7 @@ main  =
   log $ "True solar time "
     <> toStringWith (fixed 4) trueSolarTime
   log $ "Hour angle 2 " <> toString hourAngle2
+  log $ "Solar Zenith " <> toStringWith (fixed 4) solarZenith
 
 -- expected 119.338928
 normAnomal = modulo meanAnomal (fromNumber 360.0) :: Decimal
@@ -152,6 +153,21 @@ trueSolarTime =
 -- Hour angle, expected -133,01308
 hourAngle2 =
   hourAngle cent2 1 27 58 2.0 24.18 :: Number
+
+-- Solar Zenith (degrees),expected 90.8318
+solarZenith =
+  solZenith 65.85 cent2 :: Number
+
+solZenith :: Number -> Number -> Number
+solZenith lat cnt =
+    let
+        b3 = lat
+
+        t2 =
+            sunDeclination cnt
+    in
+    acosDeg (sinDeg b3 * sinDeg t2 + cosDeg b3 * cosDeg t2 * cosDeg hourAngle2)
+
 
 -- Noon time minutes expected 740 -> 12:20
 minutesNoon = getNoon cent2 24.18 2.0 :: Number
@@ -487,5 +503,4 @@ acosDeg =
 
 tanDeg :: Number -> Number
 tanDeg x = tan (pi*x/180.0)
-
 
