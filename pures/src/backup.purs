@@ -3,7 +3,7 @@ module Solar.Test.Main where
 import Prelude
 import Effect (Effect)
 import Effect.Console (log)
-import Data.Number (sin, cos, asin, acos, tan, pi, floor, round, remainder)
+import Data.Number (pow, sin, cos, asin, acos, tan, pi, floor, round, remainder)
 import Data.Number.Format (toString, toStringWith, fixed)
 import Data.Decimal (Decimal, fromInt, fromNumber, toNumber, toFixed, modulo)
 import TryPureScript (render, withConsole)
@@ -174,6 +174,50 @@ solZenith lat cnt =
             sunDeclination cnt
     in
     acosDeg (sinDeg b3 * sinDeg t2 + cosDeg b3 * cosDeg t2 * cosDeg hourAngle2)
+
+
+
+-- Atmospheric Refraction, expected 0.397418
+
+
+atmosRefract :: Number -> Number -> Number
+atmosRefract lat cnt =
+    let
+        solElev =
+            90.0 - (solZenith lat cnt)
+    in
+    if solElev > 85.0 then
+        0.0
+
+    else if solElev > 5.0 then
+        (58.1
+            / tanDeg solElev
+            - 0.07
+            / pow (tanDeg solElev) 3.0
+            + 8.6e-5
+            / pow (tanDeg solElev) 5.0
+        )
+            / 3600.0
+
+    else if solElev > -0.575 then
+        (1735.0
+            + solElev
+            * (-518.2
+                + solElev
+                * (103.4 + solElev * (-12.79 + solElev * 0.711))
+              )
+        )
+            / 3600.0
+
+    else
+        -20.772 / tanDeg solElev / 3600.0
+
+
+refractCorrectAltitude lat cnt =
+    90.0
+        - solZenith lat cnt
+        + atmosRefract lat cnt
+
 
 
 -- Noon time minutes expected 740 -> 12:20
