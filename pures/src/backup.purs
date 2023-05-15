@@ -90,6 +90,11 @@ main  =
     <> toStringWith (fixed 4) solarZenith <> "°"
   log $ "Solar elevation "
     <> toStringWith (fixed 4) solarElevation <> "°"
+  log $ "Atmospheric refraction "
+    <> toStringWith (fixed 6) atmosphericRefraction
+  log $ "Refraction-corrected altitude "
+    <> toStringWith (fixed 6) refractCorrectedAltitude
+    <> "°"
 
 -- expected 119.338928
 normAnomal = modulo meanAnomal (fromNumber 360.0) :: Decimal
@@ -164,6 +169,15 @@ solarZenith =
 -- Sun altitude at the time set, exception -0.8318
 solarElevation = 90.0 - solarZenith :: Number
 
+-- Atmospheric refraction, expected 0.397418
+
+atmosphericRefraction =
+  atmosRefract 65.85 cent2 :: Number
+
+-- Refraction corrected altitude, expected -0.43438
+refractCorrectedAltitude =
+  refractCorrectAltitude 65.85 cent2 :: Number
+
 
 solZenith :: Number -> Number -> Number
 solZenith lat cnt =
@@ -178,7 +192,6 @@ solZenith lat cnt =
 
 
 -- Atmospheric Refraction, expected 0.397418
-
 
 atmosRefract :: Number -> Number -> Number
 atmosRefract lat cnt =
@@ -213,6 +226,8 @@ atmosRefract lat cnt =
         -20.772 / tanDeg solElev / 3600.0
 
 
+
+refractCorrectAltitude :: Number -> Number -> Number
 refractCorrectAltitude lat cnt =
     90.0
         - solZenith lat cnt
