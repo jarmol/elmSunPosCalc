@@ -235,6 +235,39 @@ refractCorrectAltitude lat cnt =
 
 
 
+--  Solar Azimuth angle clockwise from north
+
+
+preAzimuth lat cnt  =
+    let
+        b3 =
+            lat
+
+        ad =
+            solZenith lat cnt
+
+        t =
+            sunDeclination cnt
+    in
+    acosDeg ((sinDeg b3 * cosDeg ad - sinDeg t) / (cosDeg b3 * sinDeg ad))
+
+
+solAzimuth lat cnt hr mn sc tz longit =
+    let
+        preAz =
+            preAzimuth lat cnt
+
+        ac =
+            hourAngle  cnt hr mn sc tz longit
+    in
+    if ac > 0.0 then
+        toNumber (modulo (fromNumber (preAz + 180.0)) (fromNumber 360.0))
+
+    else
+        toNumber (modulo (fromNumber (540.0 - preAz)) (fromNumber 360.0))
+
+
+
 -- Noon time minutes expected 740 -> 12:20
 minutesNoon = getNoon cent2 24.18 2.0 :: Number
 
