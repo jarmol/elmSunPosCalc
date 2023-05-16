@@ -93,8 +93,8 @@ main  =
   log $ "Atmospheric refraction "
     <> toStringWith (fixed 6) atmosphericRefraction
   log $ "Refraction-corrected altitude "
-    <> toStringWith (fixed 6) refractCorrectedAltitude
-    <> "°"
+    <> toStringWith (fixed 6) refractCorrectedAltitude <> "°"
+  log $ "Solar azimuth " <> toStringWith (fixed 5) solarAzimuth <> "°"
 
 -- expected 119.338928
 normAnomal = modulo meanAnomal (fromNumber 360.0) :: Decimal
@@ -178,6 +178,10 @@ atmosphericRefraction =
 refractCorrectedAltitude =
   refractCorrectAltitude 65.85 cent2 :: Number
 
+-- Solar azimuth, expected 44.62545
+
+solarAzimuth = solAzimuth 65.85 cent2 1 27 58 2.0 24.18 :: Number
+
 
 solZenith :: Number -> Number -> Number
 solZenith lat cnt =
@@ -237,7 +241,7 @@ refractCorrectAltitude lat cnt =
 
 --  Solar Azimuth angle clockwise from north
 
-
+preAzimuth :: Number -> Number -> Number
 preAzimuth lat cnt  =
     let
         b3 =
@@ -252,6 +256,7 @@ preAzimuth lat cnt  =
     acosDeg ((sinDeg b3 * cosDeg ad - sinDeg t) / (cosDeg b3 * sinDeg ad))
 
 
+solAzimuth :: Number -> Number -> Int -> Int -> Int -> Number -> Number -> Number
 solAzimuth lat cnt hr mn sc tz longit =
     let
         preAz =
@@ -548,8 +553,9 @@ intToNumber n =
     toNumber (fromInt n)
     
 
--- Hour Angle degr. OK tested 17.11.2019
+-- Hour Angle degr
 
+hourAngle :: Number -> Int -> Int -> Int -> Number -> Number -> Number
 hourAngle cnt hr mn sc tz longit =
     let
         tSt =
