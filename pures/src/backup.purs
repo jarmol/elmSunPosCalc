@@ -76,8 +76,8 @@ main  =
     <> " minutes"
   log $ "Sunrise HA " <> srHourAngle
   log $ "Noon time minutes since midnight "
-    <> show minutesNoon
-  log $ "Noon time " <> mnsToHrMnSc minutesNoon
+    <> toStringWith (fixed 5) minutesNoon
+  log $ "Noon time " <>  mnsToHrMnSc minutesNoon
   log $ "Sunrise in Tornio " <> sunriseMinutes
   log $ "Sunrise time " <> mnsToHrMnSc sunriseTornio
   log $ "Sunset in Tornio " <> sunsetMinutes
@@ -575,12 +575,16 @@ hourAngle cnt hr mn sc tz longit =
 mnsToHrMnSc :: Number -> String
 mnsToHrMnSc mns =
   let
+    pre0 t = if t < 10.0 then "0" else ""
     hr = floor (mns / 60.0)
+    hr0 = pre0 hr
     mn = floor (mns - 60.0 * hr)
+    mn0 = pre0 mn
     sc = round (remainder (mns * 60.0) 60.0)
+    sc0 = pre0 sc
   in
-    toString hr <> ":" <> toString mn <> ":"
-    <> toString sc
+    hr0 <> toString hr <> ":" <> mn0 <> toString mn <> ":"
+    <> sc0 <> toString sc
 
 
 
