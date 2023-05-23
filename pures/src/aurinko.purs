@@ -3,10 +3,9 @@ module Solar.Test.Main where
 import Prelude
 import Effect (Effect)
 import Effect.Console (log)
-import Data.Int (toNumber) as I
+import Data.Int (toNumber)
 import Data.Number (pow, sin, cos, asin, acos, tan, pi, floor, round, remainder)
 import Data.Number.Format (toString, toStringWith, fixed)
-import Data.Decimal (Decimal, fromInt, fromNumber, toFixed, modulo, toNumber) as D
 import TryPureScript (render, withConsole)
 
 -- Defining infix operator same as in Elm '//'for division of integers
@@ -49,8 +48,8 @@ main  =
   log $  show ((jdnGr 2025 1 1) - (jdnGr 2024 1 1)) <> " days"
   log $  "Julian day " <> (stringA 2023 5 5)
          <> " 1:27:58 JD = " 
-         <>  D.toFixed 6 (jdateGr 2023 5 5 1 27 58)
-  log $  "Century " <> D.toFixed 9 cent -- 0.233389763
+         <>  toStringWith (fixed 6) (jdateGr 2023 5 5 1 27 58)
+  log $  "Century " <> toStringWith (fixed 9) cent -- 0.233389763
   log $  "Mean anomaly of Sun "
      <> toStringWith (fixed 6) meanAnomal <> "°"
   log $ "Mean anomaly normalized  "
@@ -101,7 +100,7 @@ normAnomal = decmod meanAnomal :: Number
 
 -- excepted 8682.677609
 
-meanLongitude = calcSunML cent2
+meanLongitude = calcSunML cent2 :: Number
 
 --  normalized expected 42,677609
 normLongit = decmod meanLongitude :: Number
@@ -266,10 +265,10 @@ solAzimuth lat cnt hr mn sc tz longit =
             hourAngle  cnt hr mn sc tz longit
     in
     if ac > 0.0 then
-        D.toNumber (D.modulo (D.fromNumber (preAz + 180.0)) (D.fromNumber 360.0))
+        decmod (preAz + 180.0)
 
     else
-        D.toNumber (D.modulo (D.fromNumber (540.0 - preAz)) (D.fromNumber 360.0))
+        decmod (540.0 - preAz)
 
 
 
@@ -306,41 +305,37 @@ printAB j m t =
 
 
 -- JD + UTC time
-jdateGr :: Int -> Int -> Int -> Int -> Int -> Int -> D.Decimal
+jdateGr :: Int -> Int -> Int -> Int -> Int -> Int -> Number
 jdateGr y m d hr mn sc =
     let
         jdn :: Int
         jdn =
             jdnGr y m d
     in
-        D.fromInt jdn
-        + D.fromInt ( hr - 12 )
-        / D.fromInt 24
-        + D.fromInt mn
-        / D.fromInt 1440
-        + D.fromInt sc
-        / D.fromNumber 86400.0
+        toNumber jdn
+        + toNumber ( hr - 12 )
+        / toNumber 24
+        + toNumber mn
+        / toNumber 1440
+        + toNumber sc
+        / 86400.0
         
 
-cent :: D.Decimal
+cent :: Number
 cent = getCent (jdateGr 2023 5 5 1 27 58)
 
-cent2 = D.toNumber cent :: Number
+cent2 =  cent :: Number
 
-getCent :: D.Decimal -> D.Decimal
+getCent :: Number -> Number
 getCent jd =
     let
-        jD2000 = D.fromInt 2451545
+        jD2000 = toNumber 2451545
     in
-        (jd - jD2000 ) / D.fromNumber 36525.0
+        (jd - jD2000 ) / 36525.0
 
 
 meanAnomal = (meanAnomalSun cent2) :: Number
 
-modDec :: D.Decimal -> Int -> String
-modDec x b = 
-        if x < D.fromInt b then D.toFixed 6 x
-        else modDec (x - (D.fromInt b)) b
         
 meanAnomalSun :: Number -> Number
 meanAnomalSun cnt =
@@ -538,20 +533,15 @@ trueSolTime :: Number -> Int -> Int -> Int -> Number -> Number -> Number
 trueSolTime cnt hr mn sc tz longit =
     let
         e2 =
-            60.0 * ((intToNumber hr) + tz)
-            + (intToNumber mn)
-            + (intToNumber sc) / 60.0 :: Number
+            60.0 * ((toNumber hr) + tz)
+            + (toNumber mn)
+            + (toNumber sc) / 60.0 :: Number
 
         v2 =
             equatTime cnt :: Number
     in
         e2 + v2 + 4.0 * longit - 60.0 * tz
 
-
-intToNumber :: Int -> Number
-intToNumber n =
-    I.toNumber n
-    
 
 -- Hour Angle degr
 
