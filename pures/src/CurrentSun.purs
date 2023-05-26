@@ -44,15 +44,30 @@ getDate  = do
     cHour = fromEnum $ hour currentTime :: Int
     cMinute = fromEnum $ minute currentTime :: Int
     cSecond = fromEnum $ second currentTime :: Int
-    cent2 = getCent (jdateGr currYear currMonth currDay cHour cMinute cSecond) :: Number
-    declinationSun = toStringWith (fixed 5) (sunDeclination cent2) :: String
+    cent1 = getCent (jdateGr currYear currMonth currDay cHour cMinute cSecond) :: Number
+    declinationSun = toStringWith (fixed 5) (sunDeclination cent1) :: String
+    timeEquat = toStringWith (fixed 5) (equatTime cent1) :: String
+    sunriseHA = srHA cent1 90.833 :: Number -- zenith at sunrise
+    minutesNoon = getNoon cent1 24.18 2.0 :: Number
+    sunriseTornio = sunRise cent1 24.18 2.0 :: Number
+    sunsetTornio  = sunSet cent1 24.18 2.0 :: Number
+    dayLength = sunriseHA * 8.0 :: Number
+    
+
   log $  "Current Julian day " <> (stringA currYear currMonth currDay )
     <> " " <> show cHour <> ":" <> show cMinute <> ":" <> show cSecond
     <> " JD = " 
     <>  toStringWith (fixed 6) (jdateGr currYear currMonth currDay cHour cMinute cSecond)
-    <> "\nCentury " <> toStringWith (fixed 9) cent2
+    <> "\nCentury " <> toStringWith (fixed 9) cent1
     <> "\nSun declination " <> declinationSun <> "°"
-  
+    <> "\nTime Equation " <> timeEquat <> " minutes"
+    <> "\nSunrise HA " <> (toStringWith (fixed 5) sunriseHA)
+    <> "\nNoon time " <>  mnsToHrMnSc minutesNoon
+    <> "\nSunrise time " <> mnsToHrMnSc sunriseTornio
+    <> "\nSunset time " <> mnsToHrMnSc sunsetTornio
+    <> "\nDaylength " <> mnsToHrMnSc dayLength
+
+
 main :: Effect Unit
 main  =
   render =<< withConsole do
@@ -61,13 +76,6 @@ main  =
   getDate
 
 
-  log $ "Time Equation " <> timeEquation
-    <> " minutes"
-  log $ "Sunrise HA " <> srHourAngle
-  log $ "Noon time " <>  mnsToHrMnSc minutesNoon
-  log $ "Sunrise time " <> mnsToHrMnSc sunriseTornio
-  log $ "Sunset time " <> mnsToHrMnSc sunsetTornio
-  log $ "Daylength " <> mnsToHrMnSc dayLength
   log $ "True solar time "
     <> toStringWith (fixed 4) trueSolarTime
   log $ "Hour angle 2 " <> toString hourAngle2
@@ -124,19 +132,19 @@ correctedOblique =
 --  toStringWith (fixed 5) (sunDeclination cent) :: String
 
 -- variable Y, expected 0.043031
-varY =
-  toStringWith (fixed 6) (variableY cent2) :: String
+--varY =
+--  toStringWith (fixed 6) (variableY cent2) :: String
   
 -- Equation of time, expected 3.23768
 timeEquation =
   toStringWith (fixed 5) (equatTime cent2) :: String
   
 -- HA of sunrise, expected 133.01725
-srHourAngle =
-  toStringWith (fixed 5) (sunriseHA) :: String
+--srHourAngle =
+--  toStringWith (fixed 5) (sunriseHA) :: String
 
 -- Daylength in minutes, expected 1064.14 
-dayLength = sunriseHA * 8.0 :: Number
+
 
 -- True solar time, expected 187.9477 (elm 187.9243526802112)
 trueSolarTime :: Number
@@ -478,7 +486,7 @@ srHA cnt zenith =
 
 
 
-sunriseHA = srHA cent2 90.833 :: Number -- zenith at sunrise
+-- sunriseHA = srHA cent2 90.833 :: Number -- zenith at sunrise
 
 
 -- Noon time as minutes since midnight
