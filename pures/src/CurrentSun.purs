@@ -31,55 +31,36 @@ negdiv :: Int -> Int -> Int
 negdiv n  m = if n < 0 then -(div (-n) m)
               else div n m
 
-printCurrentDate :: Effect Unit
-printCurrentDate = do
-  currentDate <- nowDate
-  let 
-    currentYear = fromEnum $ year currentDate :: Int 
-    currentMonth = fromEnum $ month currentDate :: Int 
-    currentDay = fromEnum $ day currentDate :: Int 
-  log $ "Date " <> show currentYear
-    <> "-" <> show currentMonth <> "-" <> show currentDay 
-
-
-printCurrentTime :: Effect Unit
-printCurrentTime = do
-  currentTime <- nowTime
-  let
-    currentHour = fromEnum $ hour currentTime :: Int
-    currentMinute = fromEnum $ minute currentTime :: Int
-    currentSecond = fromEnum $ second currentTime :: Int
-  log $ "Time " <> show currentHour <> ":" <> show currentMinute
-    <> ":" <> show currentSecond <> " UTC"
-
 getDate :: Effect Unit
 getDate  = do
   currDate <- nowDate
   let
     currYear = fromEnum $ year currDate :: Int
     currMonth = fromEnum $ month currDate :: Int
-    currDay = fromEnum $ day currDate :: Int 
-    cent3 = getCent (jdateGr currYear currMonth currDay 10 20 1) :: Number
+    currDay = fromEnum $ day currDate :: Int
+    
+  currentTime <- nowTime
+  let
+    cHour = fromEnum $ hour currentTime :: Int
+    cMinute = fromEnum $ minute currentTime :: Int
+    cSecond = fromEnum $ second currentTime :: Int
+    cent2 = getCent (jdateGr currYear currMonth currDay cHour cMinute cSecond) :: Number
+    declinationSun = toStringWith (fixed 5) (sunDeclination cent2) :: String
   log $  "Current Julian day " <> (stringA currYear currMonth currDay )
-    <> " 10:20:01 JD = " 
-    <>  toStringWith (fixed 6) (jdateGr currYear currMonth currDay 10 20 1)
-    <> "\nCentury " <> toStringWith (fixed 9) cent3
+    <> " " <> show cHour <> ":" <> show cMinute <> ":" <> show cSecond
+    <> " JD = " 
+    <>  toStringWith (fixed 6) (jdateGr currYear currMonth currDay cHour cMinute cSecond)
+    <> "\nCentury " <> toStringWith (fixed 9) cent2
+    <> "\nSun declination " <> declinationSun <> "°"
   
 main :: Effect Unit
 main  =
   render =<< withConsole do
   log $  "SOLAR CALCULATOR"
-  printCurrentDate
-  printCurrentTime
+ 
   getDate
 
-{-  log $  "Julian day " <> (stringA 2023 5 5)
-         <> " 10:20:01 JD = " 
-         <>  toStringWith (fixed 6) (jdateGr 2023 5 5 10 20 1) -}
-         
-  log $  "Century " <> toStringWith (fixed 9) cent
 
-  log $ "Sun declination " <> declinationSun <> "°"
   log $ "Time Equation " <> timeEquation
     <> " minutes"
   log $ "Sunrise HA " <> srHourAngle
@@ -139,8 +120,8 @@ correctedOblique =
   toStringWith (fixed 5) (obliqCorr cent2) :: String
   
 -- Sun declination
-declinationSun =
-  toStringWith (fixed 5) (sunDeclination cent2) :: String
+-- declinationSun =
+--  toStringWith (fixed 5) (sunDeclination cent) :: String
 
 -- variable Y, expected 0.043031
 varY =
