@@ -52,6 +52,7 @@ getDate  = do
     sunriseTornio = sunRise cent1 24.18 2.0 :: Number
     sunsetTornio  = sunSet cent1 24.18 2.0 :: Number
     dayLength = sunriseHA * 8.0 :: Number
+    trueSolarTime = trueSolTime cent1 cHour cMinute cSecond 2.0 24.18 :: Number
     
 
   log $  "Current Julian day " <> (stringA currYear currMonth currDay )
@@ -66,6 +67,8 @@ getDate  = do
     <> "\nSunrise time " <> mnsToHrMnSc sunriseTornio
     <> "\nSunset time " <> mnsToHrMnSc sunsetTornio
     <> "\nDaylength " <> mnsToHrMnSc dayLength
+    <> "\nTrue solar time "
+    <> toStringWith (fixed 4) trueSolarTime
 
 
 main :: Effect Unit
@@ -76,8 +79,6 @@ main  =
   getDate
 
 
-  log $ "True solar time "
-    <> toStringWith (fixed 4) trueSolarTime
   log $ "Hour angle 2 " <> toString hourAngle2
   log $ "Solar Zenith "
     <> toStringWith (fixed 4) solarZenith <> "°"
@@ -147,9 +148,7 @@ timeEquation =
 
 
 -- True solar time, expected 187.9477 (elm 187.9243526802112)
-trueSolarTime :: Number
-trueSolarTime =
-  trueSolTime cent2 10 20 1 2.0 24.18  
+  
 
 -- Hour angle, expected -133,01308
 hourAngle2 =
@@ -265,22 +264,6 @@ solAzimuth lat cnt hr mn sc tz longit =
         decmod (540.0 - preAz)
 
 
-
--- Noon time minutes expected 740 -> 12:20
-minutesNoon = getNoon cent2 24.18 2.0 :: Number
-
--- Sunrise in minutes -> expected 3:27:55
-sunriseTornio = sunRise cent2 24.18 2.0 :: Number
-
-sunriseMinutes =
-  toStringWith (fixed 4) sunriseTornio :: String
-
---Sunset time in minutes -> expected 21:12:04
-sunsetTornio = 
-  sunSet cent2 24.18 2.0 :: Number
- 
-sunsetMinutes =
-  toStringWith (fixed 4) sunsetTornio :: String
 
 stringA :: Int -> Int -> Int -> String
 stringA j m t =
