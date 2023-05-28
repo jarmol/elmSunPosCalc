@@ -7,7 +7,7 @@ import Effect (Effect)
 import Effect.Console (log)
 import Effect.Now (nowDate, nowTime)
 import Data.Int (toNumber)
-import Data.Number (pow, sin, cos, asin, acos, tan, pi, floor, round, remainder)
+import Data.Number (sin, cos, asin, acos, tan, pi, floor, round, remainder)
 import Data.Number.Format (toString, toStringWith, fixed)
 import TryPureScript (render, withConsole)
 
@@ -53,12 +53,17 @@ getDate  = do
     sunsetTornio  = sunSet cent1 24.18 2.0 :: Number
     dayLength = sunriseHA * 8.0 :: Number
     trueSolarTime = trueSolTime cent1 cHour cMinute cSecond 2.0 24.18 :: Number
-    
+    hourAngle1 = hourAngle cent1 cHour cMinute cSecond 2.0 24.18 :: Number
+    b3 = 65.85
+    t2 = sunDeclination cent1
+    solarZenith = acosDeg (sinDeg b3 * sinDeg t2 + cosDeg b3 * cosDeg t2 * cosDeg hourAngle1) :: Number
+    solarElevation = 90.0 - solarZenith :: Number
 
-  log $  "Current Julian day " <> (stringA currYear currMonth currDay )
-    <> " " <> show cHour <> ":" <> show cMinute <> ":" <> show cSecond
-    <> " JD = " 
-    <>  toStringWith (fixed 6) (jdateGr currYear currMonth currDay cHour cMinute cSecond)
+  log $  "Date " <> (stringA currYear currMonth currDay )
+    <> " Time " <> show cHour <> ":" <> show cMinute <> ":" <> show cSecond
+    <> "\nCurrent Julian day JD = " 
+    <>  toStringWith (fixed 6)
+        (jdateGr currYear currMonth currDay cHour cMinute cSecond)
     <> "\nCentury " <> toStringWith (fixed 9) cent1
     <> "\nSun declination " <> declinationSun <> "°"
     <> "\nTime Equation " <> timeEquat <> " minutes"
@@ -67,8 +72,10 @@ getDate  = do
     <> "\nSunrise time " <> mnsToHrMnSc sunriseTornio
     <> "\nSunset time " <> mnsToHrMnSc sunsetTornio
     <> "\nDaylength " <> mnsToHrMnSc dayLength
-    <> "\nTrue solar time "
-    <> toStringWith (fixed 4) trueSolarTime
+    <> "\nTrue solar time " <> toStringWith (fixed 4) trueSolarTime
+    <> "\nHour angle 2 " <> toStringWith (fixed 5) hourAngle1
+    <> "\nSolar Zenith " <> toStringWith (fixed 4) solarZenith
+    <> "\nSolar elevation " <> toStringWith (fixed 4) solarElevation <> "°"
 
 
 main :: Effect Unit
@@ -78,10 +85,7 @@ main  =
  
   getDate
 
-
-  log $ "Hour angle 2 " <> toString hourAngle2
-  log $ "Solar Zenith "
-    <> toStringWith (fixed 4) solarZenith <> "°"
+{-
   log $ "Solar elevation "
     <> toStringWith (fixed 4) solarElevation <> "°"
   log $ "Atmospheric refraction "
@@ -89,7 +93,7 @@ main  =
   log $ "Refraction-corrected altitude "
     <> toStringWith (fixed 6) refractCorrectedAltitude <> "°"
   log $ "Solar azimuth " <> toStringWith (fixed 5) solarAzimuth <> "°"
-
+-}
 -- expected 119.338928
 normAnomal = decmod meanAnomal :: Number
 
@@ -151,10 +155,11 @@ timeEquation =
   
 
 -- Hour angle, expected -133,01308
-hourAngle2 =
-  hourAngle cent2 10 20 1 2.0 24.18 :: Number
+--hourAngle2 =
+--  hourAngle cent2 cHour cMinute cSecond 2.0 24.18 :: Number
 
 -- Solar Zenith (degrees),expected 90.8318
+{-
 solarZenith =
   solZenith 65.85 cent2 :: Number
 
@@ -174,16 +179,14 @@ refractCorrectedAltitude =
 
 solarAzimuth = solAzimuth 65.85 cent2 10 20 1 2.0 24.18 :: Number
 
-
+{-
 solZenith :: Number -> Number -> Number
 solZenith lat cnt =
     let
         b3 = lat
-
-        t2 =
-            sunDeclination cnt
+        t2 = sunDeclination cnt
     in
-    acosDeg (sinDeg b3 * sinDeg t2 + cosDeg b3 * cosDeg t2 * cosDeg hourAngle2)
+    acosDeg (sinDeg b3 * sinDeg t2 + cosDeg b3 * cosDeg t2 * cosDeg hourAngle1)
 
 
 
@@ -262,7 +265,7 @@ solAzimuth lat cnt hr mn sc tz longit =
 
     else
         decmod (540.0 - preAz)
-
+-}
 
 
 stringA :: Int -> Int -> Int -> String
