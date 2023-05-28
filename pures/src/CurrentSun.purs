@@ -1,7 +1,7 @@
 module Solar.Current.Main where
 
 import Prelude
-import Data.DateTime
+import Data.DateTime (year, month, day, hour, minute, second)
 import Data.Enum (fromEnum)
 import Effect (Effect)
 import Effect.Console (log)
