@@ -7,7 +7,7 @@ import Effect (Effect)
 import Effect.Console (log)
 import Effect.Now (nowDate, nowTime)
 import Data.Int (toNumber)
-import Data.Number (sin, cos, asin, acos, tan, pi, floor, round, remainder)
+import Data.Number (pow, sin, cos, asin, acos, tan, pi, floor, round, remainder)
 import Data.Number.Format (toString, toStringWith, fixed)
 import TryPureScript (render, withConsole)
 
@@ -58,6 +58,9 @@ getDate  = do
     t2 = sunDeclination cent1
     solarZenith = acosDeg (sinDeg b3 * sinDeg t2 + cosDeg b3 * cosDeg t2 * cosDeg hourAngle1) :: Number
     solarElevation = 90.0 - solarZenith :: Number
+    atmosphericRefraction = atmosRefract solarElevation :: Number
+    refractCorrectAltitude = solarElevation + atmosphericRefraction
+
 
   log $  "Date " <> (stringA currYear currMonth currDay )
     <> " Time " <> show cHour <> ":" <> show cMinute <> ":" <> show cSecond
@@ -76,6 +79,10 @@ getDate  = do
     <> "\nHour angle 2 " <> toStringWith (fixed 5) hourAngle1
     <> "\nSolar Zenith " <> toStringWith (fixed 4) solarZenith
     <> "\nSolar elevation " <> toStringWith (fixed 4) solarElevation <> "°"
+    <> "\nAtmospheric refraction "
+    <> toStringWith (fixed 4) atmosphericRefraction <> "°"
+    <> "\nRefraction corrected elevation "
+    <> toStringWith (fixed 4) refractCorrectAltitude <> "°"
 
 
 main :: Effect Unit
@@ -86,37 +93,11 @@ main  =
   getDate
 
 {-
-  log $ "Solar elevation "
-    <> toStringWith (fixed 4) solarElevation <> "°"
-  log $ "Atmospheric refraction "
-    <> toStringWith (fixed 6) atmosphericRefraction
   log $ "Refraction-corrected altitude "
     <> toStringWith (fixed 6) refractCorrectedAltitude <> "°"
   log $ "Solar azimuth " <> toStringWith (fixed 5) solarAzimuth <> "°"
--}
--- expected 119.338928
-normAnomal = decmod meanAnomal :: Number
 
--- excepted 8682.677609
 
-meanLongitude = calcSunML cent2 :: Number
-
---  normalized expected 42,677609
-normLongit = decmod meanLongitude :: Number
-
--- excepted 0,016699
-orbitEccentrity =
-  toStringWith (fixed 6) (eccentEarthOrbit cent2) :: String
-
--- expected 1,6509793
-sunEquationCenter = toStringWith (fixed 6) (sunEqCntr cent2) :: String
-
--- Sun true longitude, expected 44,32858
-sunTrueLongitude = trueLongSun cent2 :: Number
-
-sunTrueLongitudeNormal =
-  decmod sunTrueLongitude :: Number
-  
 apparentLongitude =
   appLongSun cent2 :: Number
 
@@ -131,7 +112,7 @@ meanObliqueEcliptic =
 -- Corrected oblique, expect 23,43839
 correctedOblique =
   toStringWith (fixed 5) (obliqCorr cent2) :: String
-  
+
 -- Sun declination
 -- declinationSun =
 --  toStringWith (fixed 5) (sunDeclination cent) :: String
@@ -143,23 +124,9 @@ correctedOblique =
 -- Equation of time, expected 3.23768
 timeEquation =
   toStringWith (fixed 5) (equatTime cent2) :: String
-  
--- HA of sunrise, expected 133.01725
---srHourAngle =
---  toStringWith (fixed 5) (sunriseHA) :: String
-
--- Daylength in minutes, expected 1064.14 
 
 
--- True solar time, expected 187.9477 (elm 187.9243526802112)
-  
 
--- Hour angle, expected -133,01308
---hourAngle2 =
---  hourAngle cent2 cHour cMinute cSecond 2.0 24.18 :: Number
-
--- Solar Zenith (degrees),expected 90.8318
-{-
 solarZenith =
   solZenith 65.85 cent2 :: Number
 
@@ -167,19 +134,19 @@ solarZenith =
 solarElevation = 90.0 - solarZenith :: Number
 
 -- Atmospheric refraction, expected 0.397418
+-}
 
-atmosphericRefraction =
-  atmosRefract 65.85 cent2 :: Number
 
+{-
 -- Refraction corrected altitude, expected -0.43438
 refractCorrectedAltitude =
-  refractCorrectAltitude 65.85 cent2 :: Number
+  refractCorrectAltitude 65.85 cent1 :: Number
 
 -- Solar azimuth, expected 44.62545
 
 solarAzimuth = solAzimuth 65.85 cent2 10 20 1 2.0 24.18 :: Number
 
-{-
+
 solZenith :: Number -> Number -> Number
 solZenith lat cnt =
     let
@@ -188,16 +155,12 @@ solZenith lat cnt =
     in
     acosDeg (sinDeg b3 * sinDeg t2 + cosDeg b3 * cosDeg t2 * cosDeg hourAngle1)
 
-
+-}
 
 -- Atmospheric Refraction
 
-atmosRefract :: Number -> Number -> Number
-atmosRefract lat cnt =
-    let
-        solElev =
-            90.0 - (solZenith lat cnt)
-    in
+atmosRefract :: Number -> Number
+atmosRefract solElev =
     if solElev > 85.0 then
         0.0
 
@@ -225,12 +188,7 @@ atmosRefract lat cnt =
         -20.772 / tanDeg solElev / 3600.0
 
 
-
-refractCorrectAltitude :: Number -> Number -> Number
-refractCorrectAltitude lat cnt =
-    90.0
-        - solZenith lat cnt
-        + atmosRefract lat cnt
+{-
 
 
 
