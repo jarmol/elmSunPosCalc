@@ -41,29 +41,35 @@ getDate  = do
     
   currentTime <- nowTime
   let
+    geoLat = 65.85
+    geoLong = 24.18
+    timeZone = 2.0
     cHour = fromEnum $ hour currentTime :: Int
     cMinute = fromEnum $ minute currentTime :: Int
     cSecond = fromEnum $ second currentTime :: Int
     cent1 = getCent (jdateGr currYear currMonth currDay cHour cMinute cSecond) :: Number
-    declinationSun = toStringWith (fixed 5) (sunDeclination cent1) :: String
+    decl = sunDeclination cent1
+    declinationSun = toStringWith (fixed 5) (decl) :: String
     timeEquat = toStringWith (fixed 5) (equatTime cent1) :: String
     sunriseHA = srHA cent1 90.833 :: Number -- zenith at sunrise
-    minutesNoon = getNoon cent1 24.18 2.0 :: Number
-    sunriseTornio = sunRise cent1 24.18 2.0 :: Number
-    sunsetTornio  = sunSet cent1 24.18 2.0 :: Number
+    minutesNoon = getNoon cent1 geoLong timeZone :: Number
+    sunriseTornio = sunRise cent1 geoLong timeZone :: Number
+    sunsetTornio  = sunSet cent1 geoLong timeZone :: Number
     dayLength = sunriseHA * 8.0 :: Number
-    trueSolarTime = trueSolTime cent1 cHour cMinute cSecond 2.0 24.18 :: Number
-    hourAngle1 = hourAngle cent1 cHour cMinute cSecond 2.0 24.18 :: Number
-    b3 = 65.85
+    trueSolarTime = trueSolTime cent1 cHour cMinute cSecond 2.0 geoLong :: Number
+    hourAngle1 = hourAngle cent1 cHour cMinute cSecond 2.0 geoLong :: Number
+    b3 = geoLat
     t2 = sunDeclination cent1
-    solarZenith = acosDeg (sinDeg b3 * sinDeg t2 + cosDeg b3 * cosDeg t2 * cosDeg hourAngle1) :: Number
+    solarZenith = 
+      acosDeg (sinDeg b3 * sinDeg t2 + cosDeg b3 * cosDeg t2 * cosDeg hourAngle1) :: Number
     solarElevation = 90.0 - solarZenith :: Number
     atmosphericRefraction = atmosRefract solarElevation :: Number
     refractCorrectAltitude = solarElevation + atmosphericRefraction
-
+    preAzim = preAzimuth b3 solarZenith decl
+    solAzim = solAzimuth preAzim hourAngle1
 
   log $  "Date " <> (stringA currYear currMonth currDay )
-    <> " Time " <> show cHour <> ":" <> show cMinute <> ":" <> show cSecond
+    <> " Time UTC " <> show cHour <> ":" <> show cMinute <> ":" <> show cSecond
     <> "\nCurrent Julian day JD = " 
     <>  toStringWith (fixed 6)
         (jdateGr currYear currMonth currDay cHour cMinute cSecond)
@@ -71,9 +77,9 @@ getDate  = do
     <> "\nSun declination " <> declinationSun <> "°"
     <> "\nTime Equation " <> timeEquat <> " minutes"
     <> "\nSunrise HA " <> (toStringWith (fixed 5) sunriseHA)
-    <> "\nNoon time " <>  mnsToHrMnSc minutesNoon
-    <> "\nSunrise time " <> mnsToHrMnSc sunriseTornio
-    <> "\nSunset time " <> mnsToHrMnSc sunsetTornio
+    <> "\nNoon time " <>  mnsToHrMnSc minutesNoon <> " UTC+2h"
+    <> "\nSunrise time " <> mnsToHrMnSc sunriseTornio <> " UTC+2h"
+    <> "\nSunset time " <> mnsToHrMnSc sunsetTornio <> " UTC+2h"
     <> "\nDaylength " <> mnsToHrMnSc dayLength
     <> "\nTrue solar time " <> toStringWith (fixed 4) trueSolarTime
     <> "\nHour angle 2 " <> toStringWith (fixed 5) hourAngle1
@@ -83,6 +89,7 @@ getDate  = do
     <> toStringWith (fixed 4) atmosphericRefraction <> "°"
     <> "\nRefraction corrected elevation "
     <> toStringWith (fixed 4) refractCorrectAltitude <> "°"
+    <> "\nSolar azimuth " <> toStringWith (fixed 4) solAzim <> "°"
 
 
 main :: Effect Unit
@@ -92,70 +99,7 @@ main  =
  
   getDate
 
-{-
-  log $ "Refraction-corrected altitude "
-    <> toStringWith (fixed 6) refractCorrectedAltitude <> "°"
-  log $ "Solar azimuth " <> toStringWith (fixed 5) solarAzimuth <> "°"
-
-
-apparentLongitude =
-  appLongSun cent2 :: Number
-
--- expect 44.32024  
-apparLongitNormal =
-  decmod apparentLongitude :: Number
-  
--- Mean oblique ecliptic, expected 23,43626
-meanObliqueEcliptic =
-  meanObliqEclip cent2 :: Number
-
--- Corrected oblique, expect 23,43839
-correctedOblique =
-  toStringWith (fixed 5) (obliqCorr cent2) :: String
-
--- Sun declination
--- declinationSun =
---  toStringWith (fixed 5) (sunDeclination cent) :: String
-
--- variable Y, expected 0.043031
---varY =
---  toStringWith (fixed 6) (variableY cent2) :: String
-  
--- Equation of time, expected 3.23768
-timeEquation =
-  toStringWith (fixed 5) (equatTime cent2) :: String
-
-
-
-solarZenith =
-  solZenith 65.85 cent2 :: Number
-
--- Sun altitude at the time set, exception -0.8318
-solarElevation = 90.0 - solarZenith :: Number
-
--- Atmospheric refraction, expected 0.397418
--}
-
-
-{-
--- Refraction corrected altitude, expected -0.43438
-refractCorrectedAltitude =
-  refractCorrectAltitude 65.85 cent1 :: Number
-
--- Solar azimuth, expected 44.62545
-
-solarAzimuth = solAzimuth 65.85 cent2 10 20 1 2.0 24.18 :: Number
-
-
-solZenith :: Number -> Number -> Number
-solZenith lat cnt =
-    let
-        b3 = lat
-        t2 = sunDeclination cnt
-    in
-    acosDeg (sinDeg b3 * sinDeg t2 + cosDeg b3 * cosDeg t2 * cosDeg hourAngle1)
-
--}
+  log $ "\nJarmo Lammi © 2023"
 
 -- Atmospheric Refraction
 
@@ -188,42 +132,22 @@ atmosRefract solElev =
         -20.772 / tanDeg solElev / 3600.0
 
 
-{-
-
-
 
 --  Solar Azimuth angle clockwise from north
 
-preAzimuth :: Number -> Number -> Number
-preAzimuth lat cnt  =
-    let
-        b3 =
-            lat
-
-        ad =
-            solZenith lat cnt
-
-        t =
-            sunDeclination cnt
-    in
-    acosDeg ((sinDeg b3 * cosDeg ad - sinDeg t) / (cosDeg b3 * sinDeg ad))
+preAzimuth :: Number -> Number -> Number -> Number
+preAzimuth lat zenith decl =
+    acosDeg ((sinDeg lat * cosDeg zenith - sinDeg decl) / (cosDeg lat * sinDeg zenith))
 
 
-solAzimuth :: Number -> Number -> Int -> Int -> Int -> Number -> Number -> Number
-solAzimuth lat cnt hr mn sc tz longit =
-    let
-        preAz =
-            preAzimuth lat cnt
-
-        ac =
-            hourAngle  cnt hr mn sc tz longit
-    in
-    if ac > 0.0 then
+solAzimuth :: Number -> Number -> Number
+solAzimuth preAz hrAngle =
+    if hrAngle > 0.0 then
         decmod (preAz + 180.0)
 
     else
         decmod (540.0 - preAz)
--}
+
 
 
 stringA :: Int -> Int -> Int -> String
