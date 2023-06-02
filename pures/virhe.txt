@@ -1,0 +1,41 @@
+Warning found:
+at src/Main.purs:17:1 - 17:20 (line 17, column 1 - line 17, column 20)
+
+  The inferred kind for the data declaration Query contains polymorphic kinds.
+  Consider adding a top-level kind signature as a form of documentation.
+                                     
+    data Query :: forall k. k -> Type
+                                     
+
+in type constructor Query
+
+See https://github.com/purescript/documentation/blob/master/errors/MissingKindDeclaration.md for more information,
+or to contribute content related to this warning.
+
+
+Error found:
+in module Main
+at src/Main.purs:35:36 - 35:41 (line 35, column 36 - line 35, column 41)
+
+  Could not match kind
+              
+    t8 -> Type
+              
+  with kind
+        
+    Type
+        
+
+while checking that type Query
+  has kind Type
+while inferring the kind of ComponentHTML Query
+while inferring the kind of State -> ComponentHTML Query
+in value declaration render
+
+See https://github.com/purescript/documentation/blob/master/errors/KindsDoNotUnify.md for more information,
+or to contribute content related to this error.
+
+
+[error] Failed to build.
+raija@raija-Lenovo-G50-30:~/mypurs/oaihalo$ 
+
