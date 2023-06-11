@@ -1,13 +1,13 @@
 module Main where
 
 import Prelude
-import Data.Array (filter, range)
+import Data.Array (filter, range, zip)
 import Data.Foldable (foldl)
 import Effect (Effect)
 import Effect.Console (logShow, log)
-import Data.Number (sin, cos, tan, pi, isFinite)
+import Data.Number (sin, cos, tan, pi)
 import Data.Number.Format (toStringWith, fixed)
-
+import Data.Tuple (Tuple)
 import TryPureScript (render, withConsole)
 
 a :: Int -> String
@@ -56,13 +56,17 @@ evens :: Array Int
 evens = map (\n -> if mod n 2 == 0 then n else 0) ar10
 
 
+pigrades :: Array (Tuple String Number)
+pigrades = zip pidivs pipern
+
 main :: Effect Unit
 main = render =<< withConsole do
   logShow ( map a [1,2,3] )
   log $ "Squares " <> show (map b ar10)
   log $ "Inverted " <> show inverts
   log $ "π/n in grades " <> show pipern
-  log $ "π/n table " <> show pidivs
+  log $ "π/n array " <> show pidivs
+  log $ "π/n = grades " <> show pigrades
   log $ "sin(π/n) array " <> show fixsinvals
   log $ "cos(π/n) array " <> show fixcosvals
   log $ "tan(π/n) array " <> show fixtanvals
