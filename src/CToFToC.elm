@@ -68,11 +68,13 @@ viewResult model =
    div  [ style "color" "green" ] 
    [h2 [] [text  "Temperature Units Conversion" ]]
    ,table [style "font-size" "120%"][ 
-   tr [ style "color" "blue" ] [ text ("Temperature " ++ maybeDecVar model.inputC
-       ++ " °C = " ++ isLegalC (maybeDecVar model.inputC) (calcF model) )]
+   tr [ style "color" "blue" ]
+   [ text ("Temperature " ++ maybeDecVar model.inputC
+        ++ " °C = " ++ isLegalC model )]
    
-  ,tr [ style "color" "blue" ] [ text ("Temperature " ++ maybeDecVar model.inputF
-       ++ " °F = " ++ isLegalF (maybeDecVar model.inputF) (calcC model) )]
+  ,tr [ style "color" "blue" ]
+  [ text ("Temperature " ++ maybeDecVar model.inputF
+       ++ " °F = " ++ isLegalF model )]
  ]]
 
 
@@ -87,20 +89,17 @@ maybeDecVar x =
         "???"
 
 
-isLegal : String -> Bool
-isLegal givenInput =
-  if givenInput /= "???" then True else False
+isLegalC : Model -> String
+isLegalC model =
+        if maybeDecVar model.inputC /= "???"
+        then calcF model ++ " °F"
+        else "??? °F"  
 
 
-isLegalC : String -> String -> String
-isLegalC givenInputC calculatedF =
-        if isLegal givenInputC then calculatedF ++ " °F" else "??? °F"  
-
-
-isLegalF : String -> String -> String
-isLegalF givenInputF calculatedC=
-        if isLegal givenInputF
-        then calculatedC ++ " °C"
+isLegalF : Model -> String
+isLegalF model =
+        if maybeDecVar model.inputF /= "???"
+        then calcC model ++ " °C"
         else "??? °C" 
 
 
