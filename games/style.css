@@ -12,10 +12,12 @@ p {
 
 .immutable {
     color: red;
+    font-size: 2em
 }
 
 .mutable {
     color: black;
+    font-size: 2em
 }
 
 tr:first-child td {
