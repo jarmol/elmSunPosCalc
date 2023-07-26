@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<body>
+<div style="margin: 5%; font-size: 125%">
+<h2 style="color: blue">The shortest distances between locations</h2>
+
+<script>
+showCity("Helsinki", 60.167, 24.95, "New York", 40.7167, -74.0167);
+showCity("Helsinki", 60.167, 24.95, "Berlin", 52.517, 13.383);
+showCity("Helsinki", 60.167, 24.95, "Wien", 48.217, 16.367); 
+showCity("Helsinki", 60.167, 24.95, "Tokyo", 35.683 , 139.70);
+
+function showCity(city1, latit1, longit1, city2, latit2, longit2)
+{
+    document.write("<p>City " + city1
+    + " ( Latitude " + latit1 + '&deg;'
+    + " Longitude " + longit1 + '&deg; )');
+    document.write('<p> City ' + city2
+    + " ( Latitude " + latit2 + '&deg;'
+    + " Longitude " + longit2 + '&deg; )');
+
+    dist = haversine(latit1, longit1, latit2, longit2);
+
+    document.write('<p> Distance from ' + city1 + " to "
+            + city2 + ' ' + dist);
+
+    bearing = newBearing(latit1, longit1, latit2, longit2);
+    document.write('<p> Initial bearing ' + bearing);
+
+    backBear = newBearing(latit2, longit2, latit1, longit1);
+    document.write('<p> Back bearing ' + backBear);
+    document.write("<hr>")
+}
+
+
+function haversine(lat1, lon1, lat2, lon2)
+    {   
+        // distance between latitudes
+        // and longitudes
+        let dLat = (lat2 - lat1) * Math.PI / 180.0;
+        let dLon = (lon2 - lon1) * Math.PI / 180.0;
+    
+        // convert to radians
+        φ1 = lat1 * Math.PI / 180.0;
+        φ2 = lat2 * Math.PI / 180.0;
+    
+        // apply formulae
+        let a = Math.pow(Math.sin(dLat / 2), 2) +
+                Math.pow(Math.sin(dLon / 2), 2) *
+                Math.cos(φ1) *
+                Math.cos(φ2);
+        let radius = 6371; // Earth radius km
+        let c = 2 * Math.asin(Math.sqrt(a));
+        let fix1 = (x) => Math.round(10*x)*0.1;
+        dist = fix1(radius * c); 
+        return dist + " km"
+    }
+
+function newBearing(lat1, lon1, lat2, lon2) {
+    let radians = (v) => v*Math.PI/180;
+    let φ1 = radians(lat1);
+    let φ2 = radians(lat2);
+    let λ1 = radians(lon1);
+    let λ2 = radians(lon2);
+    let  y = Math.sin(λ2-λ1) * Math.cos(φ2);
+    let  x = Math.cos(φ1)*Math.sin(φ2) -
+         Math.sin(φ1)*Math.cos(φ2)*Math.cos(λ2-λ1);
+    let  θ = Math.atan2(y, x);
+    let fix2 = (v) => Math.round(100*v)*0.01;
+    var g = (θ*180/Math.PI + 360) % 360; // in degrees
+
+    var wordHeading = ""
+        if (g >  30 && g <  60) wordHeading = "North-East ↗️ "
+        if (g >  60 && g < 120) wordHeading = "East ➡️ "
+        if (g > 120 && g < 150) wordHeading = "South-East ↘️ "
+        if (g > 150 && g < 210) wordHeading = "South ⬇️ "
+        if (g > 210 && g < 240) wordHeading = "South-West ↙️ "
+        if (g > 240 && g < 300) wordHeading = "⬅️  West"
+        if (g > 300 && g < 330) wordHeading = "North-West ↖️ "
+        if (g > 330 && g < 360) wordHeading = "North ⬆️ "
+        if (g >=  0 && g <  30) wordHeading = "North ⬆️ "
+
+    return (fix2(g) + '° ' + wordHeading);
+}
+
+</script>
+
+<a href="https://www.movable-type.co.uk/scripts/latlong.html">About bearings and distances"</a>
+</div>
+&copy; J. Lammi 2023
+</body>
+</html> 
