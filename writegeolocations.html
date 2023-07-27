@@ -1,13 +1,19 @@
 <!DOCTYPE html>
 <html>
+<head>
+   <title>Distances and Bearings</title>
+</head>
 <body>
 <div style="margin: 5%; font-size: 125%">
 <h2 style="color: blue">The shortest distances between locations</h2>
 
 <script>
-showCity("Helsinki", 60.167, 24.95, "New York", 40.7167, -74.0167);
+showCity("Helsinki", 60.167, 24.95, "New York", 40.717, -74.0167);
+showCity("Helsinki", 60.167, 24.95, "London  ", 51.500, 0.133);
 showCity("Helsinki", 60.167, 24.95, "Berlin", 52.517, 13.383);
 showCity("Helsinki", 60.167, 24.95, "Wien", 48.217, 16.367); 
+showCity("Helsinki", 60.167, 24.95, "Tallin", 59.433, 24.750); 
+showCity("Helsinki", 60.167, 24.95, "Stockholm", 59.333, 18.067); 
 showCity("Helsinki", 60.167, 24.95, "Tokyo", 35.683 , 139.70);
 
 function showCity(city1, latit1, longit1, city2, latit2, longit2)
@@ -51,9 +57,9 @@ function haversine(lat1, lon1, lat2, lon2)
                 Math.cos(φ2);
         let radius = 6371; // Earth radius km
         let c = 2 * Math.asin(Math.sqrt(a));
-        let fix1 = (x) => Math.round(10*x)*0.1;
-        dist = fix1(radius * c); 
-        return dist + " km"
+        let dist = radius* c;
+        distFix1 = parseFloat(dist.toFixed(1)); 
+        return distFix1 + " km"
     }
 
 function newBearing(lat1, lon1, lat2, lon2) {
@@ -66,7 +72,6 @@ function newBearing(lat1, lon1, lat2, lon2) {
     let  x = Math.cos(φ1)*Math.sin(φ2) -
          Math.sin(φ1)*Math.cos(φ2)*Math.cos(λ2-λ1);
     let  θ = Math.atan2(y, x);
-    let fix2 = (v) => Math.round(100*v)*0.01;
     var g = (θ*180/Math.PI + 360) % 360; // in degrees
 
     var wordHeading = ""
@@ -80,12 +85,15 @@ function newBearing(lat1, lon1, lat2, lon2) {
         if (g > 330 && g < 360) wordHeading = "North ⬆️ "
         if (g >=  0 && g <  30) wordHeading = "North ⬆️ "
 
-    return (fix2(g) + '° ' + wordHeading);
+    return (parseFloat(g.toFixed(2)) + '° ' + wordHeading);
 }
 
 </script>
 
-<a href="https://www.movable-type.co.uk/scripts/latlong.html">About bearings and distances"</a>
+<ul>
+    <li><a href="https://www.movable-type.co.uk/scripts/latlong.html">About bearings and distances</a></li>
+    <li><a href="https://www.timeanddate.com/worldclock/distanceresult.html?p1=101&p2=179">Compare this!</a></li>
+</ul>
 </div>
 &copy; J. Lammi 2023
 </body>
