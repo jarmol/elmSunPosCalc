@@ -13,7 +13,8 @@ import Browser
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onInput)
-
+import FormatNumber exposing(format)
+import FormatNumber.Locales exposing (Decimals(..), Locale, System(..), frenchLocale)
 
 
 -- MAIN
@@ -77,11 +78,7 @@ getDecVar x =
 
 calcDist : Model -> String
 calcDist mod =
-    let
-        decFix2 =
-            \x -> (100 * (x + 0.005) |> floor |> toFloat) / 100.0
-    in
-    String.fromFloat <| decFix2 (distance mod)
+    format { frenchLocale | decimals = Exact 2 , decimalSeparator = "." } ( distance mod )
 
 
 view : Model -> Html Msg
@@ -165,35 +162,34 @@ distance mod =
 bearing : Model -> String
 bearing mod =
     let radians = \v -> v * pi / 180.0
-        φ1 = radians(getDecVar mod.currLat )    
-        φ2 = radians(getDecVar mod.destLat )
-        λ1 = radians(getDecVar mod.currLon )
-        λ2 = radians(getDecVar mod.destLon )
-    in  bearCommon φ2 φ1 λ2 λ1
+        lat1 = radians(getDecVar mod.currLat )    
+        lat2 = radians(getDecVar mod.destLat )
+        lon1 = radians(getDecVar mod.currLon )
+        lon2 = radians(getDecVar mod.destLon )
+    in  bearCommon lat2 lat1 lon2 lon1
 
 
 backBear : Model -> String
 backBear mod =
     let radians = \v -> v * pi / 180.0
-        φ2 = radians(getDecVar mod.currLat )    
-        φ1 = radians(getDecVar mod.destLat )
-        λ2 = radians(getDecVar mod.currLon )
-        λ1 = radians(getDecVar mod.destLon )
-    in  bearCommon φ2 φ1 λ2 λ1
+        lat2 = radians(getDecVar mod.currLat )    
+        lat1 = radians(getDecVar mod.destLat )
+        lon2 = radians(getDecVar mod.currLon )
+        lon1 = radians(getDecVar mod.destLon )
+    in  bearCommon lat2 lat1 lon2 lon1
 
 
 bearCommon fi2 fi1 lm2 lm1 =
-    let φ2 = fi2
-        φ1 = fi1
-        λ2 = lm2
-        λ1 = lm1
-        y = (sin (λ2 - λ1)) * (cos φ2)    
-        x = (cos(φ1) * sin(φ2)) - (sin(φ1) * cos(φ2) * cos(λ2-λ1))
+    let lat2 = fi2
+        lat1 = fi1
+        lon2 = lm2
+        lon1 = lm1
+        y = (sin (lon2 - lon1)) * (cos lat2)    
+        x = (cos(lat1) * sin(lat2)) - (sin(lat1) * cos(lat2) * cos(lon2-lon1))
         θ = atan2 y x 
         dθ = if θ < 0 then 360.0 else 0.0 
-        decFix2  =
-            \v -> (100 * (v + 0.005) |> floor |> toFloat) / 100.0
-    in  (String.fromFloat <| decFix2 (θ*180.0/pi + dθ)) ++ "° " ++ heading (θ*180.0/pi + dθ)
+    in  format { frenchLocale | decimals = Exact 2 , decimalSeparator = "." }
+        (θ*180.0/pi + dθ) ++ "° " ++ heading (θ*180.0/pi + dθ)
 
 heading : Float -> String
 heading g =
@@ -212,6 +208,3 @@ square : Float -> Float
 square x =
     x * x
 
-
-fx3 x =
-    round (1.0e3 * x)
