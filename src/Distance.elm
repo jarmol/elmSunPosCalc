@@ -37,7 +37,7 @@ type alias Model =
 
 init : Model
 init =
-    Model "60.17" "24.95" "65.85" "24.18"
+    Model "60.17" "24.95" "40.72" "-74.02"
 
 
 
@@ -169,13 +169,8 @@ bearing mod =
         φ2 = radians(getDecVar mod.destLat )
         λ1 = radians(getDecVar mod.currLon )
         λ2 = radians(getDecVar mod.destLon )
-        y = (sin (λ2 - λ1)) * (cos φ2)     
-        x = (cos(φ1) * sin(φ2)) - (sin(φ1) * cos(φ2) * cos(λ2-λ1))
-        θ = atan2 y x
-        dθ = if θ < 0 then 360.0 else 0.0
-        decFix2  =
-            \v -> (100 * (v + 0.005) |> floor |> toFloat) / 100.0
-    in  (String.fromFloat <| decFix2  (θ*180.0/pi + dθ)) ++ "° " ++ heading (θ*180.0/pi + dθ) 
+    in  bearCommon φ2 φ1 λ2 λ1
+
 
 backBear : Model -> String
 backBear mod =
@@ -184,6 +179,14 @@ backBear mod =
         φ1 = radians(getDecVar mod.destLat )
         λ2 = radians(getDecVar mod.currLon )
         λ1 = radians(getDecVar mod.destLon )
+    in  bearCommon φ2 φ1 λ2 λ1
+
+
+bearCommon fi2 fi1 lm2 lm1 =
+    let φ2 = fi2
+        φ1 = fi1
+        λ2 = lm2
+        λ1 = lm1
         y = (sin (λ2 - λ1)) * (cos φ2)    
         x = (cos(φ1) * sin(φ2)) - (sin(φ1) * cos(φ2) * cos(λ2-λ1))
         θ = atan2 y x 
@@ -191,7 +194,6 @@ backBear mod =
         decFix2  =
             \v -> (100 * (v + 0.005) |> floor |> toFloat) / 100.0
     in  (String.fromFloat <| decFix2 (θ*180.0/pi + dθ)) ++ "° " ++ heading (θ*180.0/pi + dθ)
-
 
 heading : Float -> String
 heading g =
