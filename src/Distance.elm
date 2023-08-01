@@ -1,25 +1,31 @@
 module Distance exposing (main)
 
 {-| Calculates the distance between the given two locations on Earth.
-The locations are defined through the geographic coordinates 
+The locations are defined through the geographic coordinates
 latitude and longitude in the unit degree.
+<https://ellie-app.com/nwGccLspGGPa1>
+
 
 # Usage
+
 -- Input the current and destination as location points
 -- (latitude, longitude)
+
 -}
 
 import Browser
-import Html exposing (..)
-import Html.Attributes exposing (..)
+import FormatNumber exposing (format)
+import FormatNumber.Locales exposing (Decimals(..), System(..), frenchLocale)
+import Html exposing (Html, div, h2, input, table, text, tr)
+import Html.Attributes exposing (placeholder, style, type_, value)
 import Html.Events exposing (onInput)
-import FormatNumber exposing(format)
-import FormatNumber.Locales exposing (Decimals(..), Locale, System(..), frenchLocale)
+
 
 
 -- MAIN
 
 
+main : Program () Model Msg
 main =
     Browser.sandbox { init = init, update = update, view = view }
 
@@ -71,6 +77,7 @@ update msg model =
 
 -- VIEW
 
+
 getDecVar : String -> Float
 getDecVar x =
     Maybe.withDefault 0 (String.toFloat x)
@@ -78,7 +85,7 @@ getDecVar x =
 
 calcDist : Model -> String
 calcDist mod =
-    format { frenchLocale | decimals = Exact 2 , decimalSeparator = "." } ( distance mod )
+    format { frenchLocale | decimals = Exact 2, decimalSeparator = "." } (distance mod)
 
 
 view : Model -> Html Msg
@@ -121,6 +128,8 @@ viewResult model =
 
 -- Footer text
 
+
+viewFooter : Html Msg
 viewFooter =
     div
         [ style "margin-left" "0.5cm"
@@ -128,7 +137,6 @@ viewFooter =
         ]
         [ text "© Jarmo Lammi 2023"
         ]
-
 
 
 distance : Model -> Float
@@ -157,54 +165,123 @@ distance mod =
                 )
             )
 
+
+
 --- bearing mod
+
 
 bearing : Model -> String
 bearing mod =
-    let radians = \v -> v * pi / 180.0
-        lat1 = radians(getDecVar mod.currLat )    
-        lat2 = radians(getDecVar mod.destLat )
-        lon1 = radians(getDecVar mod.currLon )
-        lon2 = radians(getDecVar mod.destLon )
-    in  bearCommon lat2 lat1 lon2 lon1
+    let
+        radians =
+            \v -> v * pi / 180.0
+
+        lat1 =
+            radians (getDecVar mod.currLat)
+
+        lat2 =
+            radians (getDecVar mod.destLat)
+
+        lon1 =
+            radians (getDecVar mod.currLon)
+
+        lon2 =
+            radians (getDecVar mod.destLon)
+    in
+    bearCommon lat2 lat1 lon2 lon1
 
 
 backBear : Model -> String
 backBear mod =
-    let radians = \v -> v * pi / 180.0
-        lat2 = radians(getDecVar mod.currLat )    
-        lat1 = radians(getDecVar mod.destLat )
-        lon2 = radians(getDecVar mod.currLon )
-        lon1 = radians(getDecVar mod.destLon )
-    in  bearCommon lat2 lat1 lon2 lon1
+    let
+        radians =
+            \v -> v * pi / 180.0
+
+        lat2 =
+            radians (getDecVar mod.currLat)
+
+        lat1 =
+            radians (getDecVar mod.destLat)
+
+        lon2 =
+            radians (getDecVar mod.currLon)
+
+        lon1 =
+            radians (getDecVar mod.destLon)
+    in
+    bearCommon lat2 lat1 lon2 lon1
 
 
+bearCommon : Float -> Float -> Float -> Float -> String
 bearCommon fi2 fi1 lm2 lm1 =
-    let lat2 = fi2
-        lat1 = fi1
-        lon2 = lm2
-        lon1 = lm1
-        y = (sin (lon2 - lon1)) * (cos lat2)    
-        x = (cos(lat1) * sin(lat2)) - (sin(lat1) * cos(lat2) * cos(lon2-lon1))
-        θ = atan2 y x 
-        dθ = if θ < 0 then 360.0 else 0.0 
-    in  format { frenchLocale | decimals = Exact 2 , decimalSeparator = "." }
-        (θ*180.0/pi + dθ) ++ "° " ++ heading (θ*180.0/pi + dθ)
+    let
+        lat2 =
+            fi2
+
+        lat1 =
+            fi1
+
+        lon2 =
+            lm2
+
+        lon1 =
+            lm1
+
+        y =
+            sin (lon2 - lon1) * cos lat2
+
+        x =
+            (cos lat1 * sin lat2) - (sin lat1 * cos lat2 * cos (lon2 - lon1))
+
+        brn =
+            atan2 y x
+
+        db =
+            if brn < 0 then
+                360.0
+
+            else
+                0.0
+    in
+    format { frenchLocale | decimals = Exact 2, decimalSeparator = "." }
+        (brn * 180.0 / pi + db)
+        ++ "° "
+        ++ heading (brn * 180.0 / pi + db)
+
 
 heading : Float -> String
 heading g =
-        if (g > 30) && (g < 75) then "North-East ↗️"
-        else if (g > 75) && (g < 105) then "East ➡️"
-        else if (g > 105) && (g < 150) then "South-East ↘️"
-        else if (g > 150) && (g < 210) then "South ⬇️"
-        else if (g > 210) && (g < 255) then "South-West ↙️"
-        else if (g > 255) && (g < 285) then "West ⬅️"
-        else if (g > 285) && (g < 330) then "North-West ↖️"
-        else if (g > 330) && (g < 360) then "North ⬆️"
-        else if (g > 0) && (g < 30) then "North ⬆️"
-        else "⁉"
+    if (g > 30) && (g < 75) then
+        "North-East ↗️"
+
+    else if (g > 75) && (g < 105) then
+        "East ➡️"
+
+    else if (g > 105) && (g < 150) then
+        "South-East ↘️"
+
+    else if (g > 150) && (g < 210) then
+        "South ⬇️"
+
+    else if (g > 210) && (g < 255) then
+        "South-West ↙️"
+
+    else if (g > 255) && (g < 285) then
+        "West ⬅️"
+
+    else if (g > 285) && (g < 330) then
+        "North-West ↖️"
+
+    else if (g > 330) && (g < 360) then
+        "North ⬆️"
+
+    else if (g > 0) && (g < 30) then
+        "North ⬆️"
+
+    else
+        "⁉"
+
 
 square : Float -> Float
 square x =
     x * x
-
