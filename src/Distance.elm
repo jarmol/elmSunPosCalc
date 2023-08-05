@@ -1,14 +1,13 @@
 module Distance exposing (main)
 
-{-| Calculates the distance between the given two locations on Earth.
+{-| Calculates the shortest distance between the given two locations on Earth.
 The locations are defined through the geographic coordinates
 latitude and longitude in the unit degree.
 <https://ellie-app.com/nwGccLspGGPa1>
 
-
 # Usage
 
--- Input the current and destination as location points
+-- Input the start and destination as geographic location points
 -- (latitude, longitude)
 
 -}
@@ -85,7 +84,12 @@ getDecVar x =
 
 calcDist : Model -> String
 calcDist mod =
-    format { frenchLocale | decimals = Exact 2, decimalSeparator = "." } (distance mod)
+    fix2 (distance mod)
+
+
+fix2 : Float -> String
+fix2 x =
+    format { frenchLocale | decimals = Exact 2, decimalSeparator = "." } x
 
 
 view : Model -> Html Msg
@@ -95,8 +99,8 @@ view model =
         , style "background" "linear-gradient(to bottom, #ccccff 0%, #ffffff 100%)"
         , style "margin" "2cm"
         ]
-        [ viewInput "text" "Start latit." model.currLat CurrLat
-        , viewInput "text" "Start longit." model.currLon CurrLon
+        [ viewInput "text" "Start A latit." model.currLat CurrLat
+        , viewInput "text" "Start A longit." model.currLon CurrLon
         , viewInput "text" "Dest latit." model.destLat DestLat
         , viewInput "text" "Dest longit." model.destLon DestLon
         , viewResult model
@@ -114,15 +118,49 @@ viewResult model =
     div [ style "margin-left" "0.5cm" ]
         [ div [ style "color" "green" ] [ h2 [] [ text "Distance Calculator" ] ]
         , table [ style "color" "darkCyan", style "font-size" "120%" ]
-            [ tr [] [ text ("Start Latitude " ++ model.currLat ++ "°") ]
-            , tr [] [ text ("Start Longitude " ++ model.currLon ++ "°") ]
-            , tr [ style "color" "blue" ] [ text ("End Latitude " ++ model.destLat ++ "°") ]
-            , tr [ style "color" "blue" ] [ text ("End Longitude " ++ model.destLon ++ "°") ]
+            [ tr [] [ text ("Start Ⓐ Latitude " ++ model.currLat ++ "°") ]
+            , tr [] [ text ("Start Ⓐ Longitude " ++ model.currLon ++ "°") ]
+            , tr [ style "color" "blue" ] [ text ("End Ⓑ Latitude " ++ model.destLat ++ "°") ]
+            , tr [ style "color" "blue" ] [ text ("End Ⓑ Longitude " ++ model.destLon ++ "°") ]
             , tr [] [ text ("Distance " ++ calcDist model ++ " km") ]
-            , tr [] [ text ("Bearing " ++ bearing model) ]
-            , tr [] [ text ("Back Bearing " ++ backBear model) ]
+            , tr [] [ text (opInitBearing model) ]
+            , tr [] [ text (opFinalA model) ]
+            , tr [] [ text (opBackBearing model) ]
+            , tr [] [ text (opFinalB model) ]
             ]
         ]
+
+
+opInitBearing : Model -> String
+opInitBearing mod =
+    "Initial Bearing to Ⓑ "
+        ++ fix2 (initBearing mod)
+        ++ "° "
+        ++ heading (initBearing mod)
+
+
+opFinalA : Model -> String
+opFinalA mod =
+    "Final Bearing to Ⓑ "
+        ++ fix2 (finalBearA mod)
+        ++ "° "
+        ++ heading (finalBearA mod)
+
+
+opFinalB : Model -> String
+opFinalB mod =
+    "Final Bearing to Ⓐ"
+        ++ fix2 (finalBearB  mod)
+        ++ "° "
+        ++ heading (finalBearB mod)
+
+
+opBackBearing : Model -> String
+opBackBearing mod =
+    "Back Bearing to Ⓐ "
+        ++ fix2 (backBear mod)
+        ++ "° "
+        ++ heading (backBear mod)
 
 
 
@@ -166,12 +204,8 @@ distance mod =
             )
 
 
-
---- bearing mod
-
-
-bearing : Model -> String
-bearing mod =
+initBearing : Model -> Float
+initBearing mod =
     let
         radians =
             \v -> v * pi / 180.0
@@ -191,7 +225,7 @@ bearing mod =
     bearCommon lat2 lat1 lon2 lon1
 
 
-backBear : Model -> String
+backBear : Model -> Float
 backBear mod =
     let
         radians =
@@ -212,7 +246,7 @@ backBear mod =
     bearCommon lat2 lat1 lon2 lon1
 
 
-bearCommon : Float -> Float -> Float -> Float -> String
+bearCommon : Float -> Float -> Float -> Float -> Float
 bearCommon fi2 fi1 lm2 lm1 =
     let
         lat2 =
@@ -237,17 +271,30 @@ bearCommon fi2 fi1 lm2 lm1 =
             atan2 y x
 
         db =
-            if brn < 0 then
+            if brn < 0.0 then
                 360.0
+
+            else if brn > 2.0 * pi then
+                -360
 
             else
                 0.0
     in
-    format { frenchLocale | decimals = Exact 2, decimalSeparator = "." }
-        (brn * 180.0 / pi + db)
-        ++ "° "
-        ++ heading (brn * 180.0 / pi + db)
+    (brn * 180.0 / pi) + db
 
+
+finalBearA : Model -> Float
+finalBearA mod =
+    let brndeg = 180.0 + (backBear mod)
+    in  if brndeg > 360.0 then brndeg - 360.0
+        else brndeg 
+
+
+finalBearB : Model -> Float
+finalBearB mod =
+    let brndeg = -180.0 + initBearing mod -- init bear A - 180
+    in  if brndeg < 0 then brndeg + 360.0
+        else brndeg
 
 heading : Float -> String
 heading g =
