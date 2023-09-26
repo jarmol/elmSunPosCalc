@@ -5,16 +5,12 @@ import Browser
 import Html exposing (Html, Attribute, div, h1, p, input, text)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onInput)
---import Parser exposing (Parser, (|.), (|=), succeed, symbol, int, float, spaces)
 import Parser exposing (Parser
   , getChompedString
   , chompWhile
   , andThen,(|.), (|=), succeed
   , problem, symbol
   , int, float, spaces)
-
--- import GeoParser exposing (parseLocation)
-
 
 
 -- MODEL
@@ -63,17 +59,13 @@ view model =
     ]]
 
 
--- module GeoParser exposing (parseLocation)
-
--- import Html exposing (h1, text, div, p)
-
-
 type alias GeoLocation =
   { latdeg : Int
   , latmin : Int
   , londeg : Int
   , lonmin : Int
   }
+
 
 geoLocation : Parser GeoLocation
 geoLocation =
@@ -117,9 +109,6 @@ rangeProblem from to = problem <|
     , String.fromInt to
     ]
 
-
-
-p1 = "( 10 15 S 24 51 W )"
 
 
 getFlagLat : String -> Int
