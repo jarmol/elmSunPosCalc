@@ -5,7 +5,7 @@ import DecimalFormat exposing (cutDec3, cutDec6)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onInput)
-import MnToHrMnSc exposing (mnToHrMn)
+-- import MnToHrMnSc exposing (mnToHrMn)
 import String exposing (fromFloat, fromInt)
 import SunHelper
     exposing
@@ -23,6 +23,7 @@ import SunHelper
         , sunDeclination
         , sunRise
         , sunSet
+        , mnToHrMn
         )
 
 -- This version has results very near to official sunrise, sunset times
@@ -63,7 +64,7 @@ type alias Model =
 
 init : Model
 init =
-    Model "2022" "12" "1" "10" "12" "16" "65.85" "24.18" "2"
+    Model "2023" "10" "28" "10" "07" "02" "65.85" "24.18" "2"
 
 
 
@@ -371,3 +372,5 @@ viewFooter model =
 locTZ : Model -> String
 locTZ mod =
     " UTC +" ++ mod.timezone ++ " h local time"
+
+
