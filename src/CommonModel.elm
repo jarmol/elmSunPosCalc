@@ -14,4 +14,3 @@ type alias InputData =
     , longitude : String
     , timezone : String
     }
-

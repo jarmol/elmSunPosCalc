@@ -5,7 +5,7 @@ The locations are defined through the geographic coordinates
 latitude and longitude in the unit degree.
 <https://ellie-app.com/nwGccLspGGPa1>
 
-# Usage
+Usage
 
 -- Input the start and destination as geographic location points
 -- (latitude, longitude)
@@ -14,7 +14,7 @@ latitude and longitude in the unit degree.
 
 import Browser
 import FormatNumber exposing (format)
-import FormatNumber.Locales exposing (Decimals(..), System(..), frenchLocale)
+import FormatNumber.Locales exposing (Decimals(..), frenchLocale)
 import Html exposing (Html, div, h2, input, table, text, tr)
 import Html.Attributes exposing (placeholder, style, type_, value)
 import Html.Events exposing (onInput)
@@ -150,7 +150,7 @@ opFinalA mod =
 opFinalB : Model -> String
 opFinalB mod =
     "Final Bearing to Ⓐ"
-        ++ fix2 (finalBearB  mod)
+        ++ fix2 (finalBearB mod)
         ++ "° "
         ++ heading (finalBearB mod)
 
@@ -207,18 +207,23 @@ distance mod =
 initBearing : Model -> Float
 initBearing mod =
     let
+        radians : Float -> Float
         radians =
             \v -> v * pi / 180.0
 
+        lat1 : Float
         lat1 =
             radians (getDecVar mod.currLat)
 
+        lat2 : Float
         lat2 =
             radians (getDecVar mod.destLat)
 
+        lon1 : Float
         lon1 =
             radians (getDecVar mod.currLon)
 
+        lon2 : Float
         lon2 =
             radians (getDecVar mod.destLon)
     in
@@ -228,18 +233,23 @@ initBearing mod =
 backBear : Model -> Float
 backBear mod =
     let
+        radians : Float -> Float
         radians =
             \v -> v * pi / 180.0
 
+        lat2 : Float
         lat2 =
             radians (getDecVar mod.currLat)
 
+        lat1 : Float
         lat1 =
             radians (getDecVar mod.destLat)
 
+        lon2 : Float
         lon2 =
             radians (getDecVar mod.currLon)
 
+        lon1 : Float
         lon1 =
             radians (getDecVar mod.destLon)
     in
@@ -249,27 +259,35 @@ backBear mod =
 bearCommon : Float -> Float -> Float -> Float -> Float
 bearCommon fi2 fi1 lm2 lm1 =
     let
+        lat2 : Float
         lat2 =
             fi2
 
+        lat1 : Float
         lat1 =
             fi1
 
+        lon2 : Float
         lon2 =
             lm2
 
+        lon1 : Float
         lon1 =
             lm1
 
+        y : Float
         y =
             sin (lon2 - lon1) * cos lat2
 
+        x : Float
         x =
             (cos lat1 * sin lat2) - (sin lat1 * cos lat2 * cos (lon2 - lon1))
 
+        brn : Float
         brn =
             atan2 y x
 
+        db : Float
         db =
             if brn < 0.0 then
                 360.0
@@ -285,16 +303,33 @@ bearCommon fi2 fi1 lm2 lm1 =
 
 finalBearA : Model -> Float
 finalBearA mod =
-    let brndeg = 180.0 + (backBear mod)
-    in  if brndeg > 360.0 then brndeg - 360.0
-        else brndeg 
+    let
+        brndeg : Float
+        brndeg =
+            180.0 + backBear mod
+    in
+    if brndeg > 360.0 then
+        brndeg - 360.0
+
+    else
+        brndeg
 
 
 finalBearB : Model -> Float
 finalBearB mod =
-    let brndeg = -180.0 + initBearing mod -- init bear A - 180
-    in  if brndeg < 0 then brndeg + 360.0
-        else brndeg
+    let
+        brndeg : Float
+        brndeg =
+            -180.0 + initBearing mod
+
+        -- init bear A - 180
+    in
+    if brndeg < 0 then
+        brndeg + 360.0
+
+    else
+        brndeg
+
 
 heading : Float -> String
 heading g =

@@ -1,4 +1,4 @@
-module Main exposing (main)
+module Helsinki exposing (main)
 
 -- Review made: npx elm-review src/Helsinki.elm
 
@@ -74,7 +74,7 @@ type alias Model =
 
 init : Model
 init =
-    Model "2023" "11" "6" "10" "06" "51" "65.85" "24.18" "2"
+    Model "2023" "11" "6" "10" "03" "51" "60.18" "24.93" "2"
 
 
 

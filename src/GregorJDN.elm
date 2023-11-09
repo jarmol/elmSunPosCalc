@@ -1,4 +1,4 @@
-module GregorJDN exposing (jdateGr, jdnGr, weekday, yearLength)
+module GregorJDN exposing (jdateGr, jdnGr)
 
 
 jdnGr : Int -> Int -> Int -> Int
@@ -12,45 +12,44 @@ jdnGr y m d =
         - 32075
 
 
-yearLength : Int -> Int
-yearLength y =
-    jdnGr (y + 1) 1 1 - jdnGr y 1 1
 
+{- yearLength : Int -> Int
+   yearLength y =
+       jdnGr (y + 1) 1 1 - jdnGr y 1 1
 
-weekday : Int -> Int -> Int -> String
-weekday y m d =
-    let 
-        dayNumber : Int
-        dayNumber =
-            remainderBy 7 (1 + jdnGr y m d)
-    in
-    case dayNumber of
-        0 ->
-            "Sunday"
+   weekday : Int -> Int -> Int -> String
+   weekday y m d =
+       let
+           dayNumber : Int
+           dayNumber =
+               remainderBy 7 (1 + jdnGr y m d)
+       in
+       case dayNumber of
+           0 ->
+               "Sunday"
 
-        1 ->
-            "Monday"
+           1 ->
+               "Monday"
 
-        2 ->
-            "Tuesday"
+           2 ->
+               "Tuesday"
 
-        3 ->
-            "Wednesday"
+           3 ->
+               "Wednesday"
 
-        4 ->
-            "Thursday"
+           4 ->
+               "Thursday"
 
-        5 ->
-            "Friday"
+           5 ->
+               "Friday"
 
-        6 ->
-            "Saturday"
+           6 ->
+               "Saturday"
 
-        _ ->
-            "Unknown day"
+           _ ->
+               "Unknown day"
 
-
-
+-}
 -- Finding Julian date given Julian day number and time of day
 
 
