@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Calculate prime factors</title></head>
+<body>
+<center>
+<h2><font color="red">Prime Factor Calculator</font></h2>
+<table border="2"><tr>
+<form name="bvi">
+<td>Give the number</td>
+<td>Found prime factors <td>
+<tr><td>
+<input type="text" name="composite" value="84894624407" size="15">
+</td>
+<td><input type="text" name="result" size="20"></td>
+</tr>
+<tr>
+<td><input type="button" value="Calculate" onclick="calculate(this.form)">
+<input type="reset" value="Clear"> </td>
+</form>
+</tr>
+</table>
+
+</center>
+
+<center>
+
+<hr>
+
+<p>View the <a href="https://www.geeksforgeeks.org/print-all-prime-factors-of-a-given-number/?ref=lbp">JS source</a></p>
+
+<form name="background">
+
+Select your favorite background color :
+<table border="0" cellpadding="3">
+<tr>
+
+<td align="center"><input type="button" value="green" onclick="vaihda_vari('#669999')"></td>
+<td align="center"><input type="button" value="white" onclick="vaihda_vari('#FFFFFF')"></td>
+<td align="center"><input type="button" value="grey" onclick="vaihda_vari('#C0C0C0')"></td>
+<td align="center"><input type="button" value="orange" onclick="vaihda_vari('#ff9900')"></td>
+<td align="center"><input type="button" value="l. blue" onclick="vaihda_vari('#8888ff')"></td>
+</tr>
+</table>
+</form>
+</center>
+
+</body>
+<script language="JavaScript">
+
+function calculate(form){
+var n = 0;
+var v = "";
+
+n = form.composite.value;
+
+       while (n % 2 == 0)
+        {
+            v = v + 2 + " " ;
+            n = Math.floor(n/2);
+        }
+
+
+        // n must be odd at this point. So we can skip
+        // one element (Note i = i +2)
+
+       for (let i = 3; i <= Math.sqrt(n); i = i + 2)
+        {
+                // While i divides n, print i and divide n
+                while (n % i == 0)
+                {
+			v = v + i + " "
+                        n = Math.floor(n/i);
+                }
+        }
+
+        // This condition is to handle the case when n
+        // is a prime number greater than 2
+        if (n > 2)
+		v = v + n + " "
+
+	form.result.value = v;
+
+}
+
+function vaihda_vari(hexNum)
+{
+ document.bgColor=hexNum
+}
+
+</script>
+
+<!-- view-source:https://web.archive.org/web/20060925122659/http://www.sci.fi/~benefon/body.html ->
+</html>
