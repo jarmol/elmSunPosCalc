@@ -45,7 +45,7 @@ init _ =
 
 type Msg
     = Roll
-    | NewFace Int
+    | NewSuit Int
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -53,11 +53,11 @@ update msg model =
     case msg of
         Roll ->
             ( model
-            , Random.generate NewFace (Random.int 0 3)
+            , Random.generate NewSuit (Random.int 0 3)
             )
 
-        NewFace newFace ->
-            ( Model newFace
+        NewSuit newSuit ->
+            ( Model newSuit
             , Cmd.none
             )
 
