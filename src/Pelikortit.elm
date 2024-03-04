@@ -137,7 +137,8 @@ view model =
             [ text (numerostaKortti model.cardSuit |> kortistaKuva) ]
         , p [ style "height" "80px", style "margin-left" "10%" ]
             [ button
-                [ style "height" "80px"
+                [ style "height" "60px"
+                , style "border-radius" "8px"
                 , style "font-size" "24px"
                 , style "background-color" "gold"
                 , onClick Roll
@@ -147,4 +148,5 @@ view model =
         , ul [] [
         li [] [a [href "https://github.com/jarmol/elmSunPosCalc/blob/master/src/Pelikortit.elm"][text "Source: Pelikortit.elm"]]
         , li [] [a [href "https://elm.dmy.fr/packages/elm/random/latest//"][text "Made with package elm / random 1.0.0"]]
+        , li [] [a [href "https://guide.elm-lang.org/effects/random.html"][text "Elm guide - Random"]]
         ]]
