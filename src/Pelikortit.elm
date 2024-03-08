@@ -1,9 +1,8 @@
 module Pelikortit exposing (main)
 
--- https://ckoster22.medium.com/randomness-in-elm-8e977457bf1b
 
 import Browser
-import Html exposing (Html, button, div, h1, p, text, a, li, ul)
+import Html exposing (Html, button, div, h1, h2, p, text, a, li, ul)
 import Html.Attributes exposing (style, href)
 import Html.Events exposing (onClick)
 import Random
@@ -25,27 +24,29 @@ main =
 
 
 -- MODEL
+ 
 
-
-type alias Model =
-    { cardSuit : Int
-    }
+type alias Model = {
+   randomPoint : ( Int, Int )
+   }
 
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Model 1
+    ( Model  (1, 1)
     , Cmd.none
     )
 
 
-
 -- UPDATE
-
 
 type Msg
     = Roll
-    | NewSuit Int
+    | NewPoint (Int,Int)
+
+randomPoint : Random.Generator ( Int, Int )
+randomPoint =
+    Random.pair (Random.int 1 4) (Random.int 1 13)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -53,13 +54,11 @@ update msg model =
     case msg of
         Roll ->
             ( model
-            , Random.generate NewSuit (Random.int 0 3)
-            )
+               ,Random.generate NewPoint randomPoint)
+            
 
-        NewSuit newSuit ->
-            ( Model newSuit
-            , Cmd.none
-            )
+        NewPoint newPoint ->
+            ( Model newPoint, Cmd.none)   
 
 
 
@@ -78,16 +77,16 @@ type Kortit
     | Risti
 
 
-numerostaKortti : Int -> Kortit
-numerostaKortti numero =
-    case numero of
-        0 ->
+numerostaKortti : Model -> Kortit
+numerostaKortti mod =
+    case (Tuple.first mod.randomPoint) of
+        1 ->
             Hertta
 
-        1 ->
+        2 ->
             Ruutu
 
-        2 ->
+        3 ->
             Pata
 
         _ ->
@@ -123,18 +122,36 @@ kartenFarbe karte =
             "black"
 
 
+kortinNumero : { a | randomPoint : ( b, Int ) } -> String
+kortinNumero mod =
+    case (Tuple.second mod.randomPoint) of
+        1 ->
+             "A"
+
+        11 ->
+              "J"
+
+        12 ->
+              "Q"
+
+        13 ->
+              "K"
+       
+        _  ->
+              String.fromInt (Tuple.second mod.randomPoint)
 
 -- VIEW
 
-
 view : Model -> Html Msg
-view model =
+view model = 
     div []
         [ h1
-            [ style "margin" "10%"
-            , style "color" (kartenFarbe (numerostaKortti model.cardSuit))
+            [ style "margin-left" "10%"
+            , style "color" (kartenFarbe (numerostaKortti model))
             ]
-            [ text (numerostaKortti model.cardSuit |> kortistaKuva) ]
+            [ text (numerostaKortti model |> kortistaKuva ) ]
+        , h2 [style "margin-left" "10%"]
+            [ text ("No: " ++ kortinNumero model) ]
         , p [ style "height" "80px", style "margin-left" "10%" ]
             [ button
                 [ style "height" "60px"
@@ -150,3 +167,6 @@ view model =
         , li [] [a [href "https://elm.dmy.fr/packages/elm/random/latest//"][text "Made with package elm / random 1.0.0"]]
         , li [] [a [href "https://guide.elm-lang.org/effects/random.html"][text "Elm guide - Random"]]
         ]]
+
+
+-- https://ckoster22.medium.com/randomness-in-elm-8e977457bf1b
