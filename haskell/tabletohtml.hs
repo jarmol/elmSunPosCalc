@@ -23,6 +23,7 @@ generateHtmlTable table =
     <> "table, td {border: 2px solid blue; border-collapse: collapse; font-size: 1.2em;}\n"
     <> "td {padding: 5px;}\n"
     <> "p {color: blue; font-size: 1.2em;}\n"
+    <> "hr {width: 40%; margin-left: 0%}"
     <> "</style>\n"
     <> "</head>\n"
     <> "<body>\n"
@@ -34,14 +35,14 @@ generateHtmlTable table =
 -- Function to generate HTML for a single row
 generateHtmlRow :: [Float] -> String
 generateHtmlRow row =
-    "  <tr >\n" ++
+    "<tr>\n" ++
     concatMap generateHtmlCell row ++
-    "  </tr>\n"
+    "</tr>\n"
 
 -- Function to generate HTML for a single cell
 generateHtmlCell :: Float -> String
 generateHtmlCell cell =
-    "  <td>" ++ formD cell ++ "</td>\n"
+    "<td>" ++ formD cell ++ "</td>\n"
 
 
 results =
@@ -64,5 +65,8 @@ main = do
     let hmin = head (results !! 1); hmax = head (results !! 6) -- Height [cm]
     let legend1 = "<p>Weights " ++ show wmin ++ " - " ++ show wmax ++ " kg</p>"
     let legend2 = "<p>Heights " ++ show hmin ++ " - " ++ show hmax ++ " cm</p>"
-    let htmlTable = generateHtmlTable results ++ legend1 ++ legend2 ++ "</body>"
+    let htmlTable = generateHtmlTable results ++ legend1 ++ legend2
     putStrLn htmlTable
+
+    putStrLn "<hr><br><a href=\"https://raw.githubusercontent.com/jarmol/elmSunPosCalc/refs/heads/master/haskell/tabletohtml.hs \">Haskell code</a>"
+    putStrLn "<p>Made with Haskell GHC 9.4.8</p>\n © Polarit 2024\n </body>"
