@@ -1,5 +1,17 @@
 import Text.Read.Lex (Number)
 import Numeric
+import MiniHtml (html_
+  , head_
+  , body_
+  , h1_
+  , title_
+  , style_
+  , table_
+  , tr_
+  , td_
+  ,a_
+  ,ul_
+  )
 
 -- Generate 2D-list
 -- row = height cm
@@ -15,35 +27,42 @@ bmi r c  =
 -- Function to generate HTML table from the 2D list
 generateHtmlTable :: [[Float]] -> String
 generateHtmlTable table =
-    "<html>\n<head>\n"
-    <> "<title>BMI-index</title>\n"
-    <> "<style>\n"
-    <> "body {margin-left: 5%; font-family: Arial, Helvetica, sans-serif;}\n"
-    <> "h1 {color: red;}\n"
-    <> "table, td {border: 2px solid blue; border-collapse: collapse; font-size: 1.2em;}\n"
-    <> "td {padding: 5px;}\n"
-    <> "p {color: blue; font-size: 1.2em;}\n"
-    <> "hr {width: 40%; margin-left: 0%}"
-    <> "</style>\n"
-    <> "</head>\n"
-    <> "<body>\n"
-    <> "<h1>BODY-MASS INDEX</h1>\n"
-    <> "<table>\n" ++
-    concatMap generateHtmlRow table ++
-    "</table>"
-
+    let wmin = head table !! 1; wmax = head table   !! 6 -- Weight [kg]
+        hmin = head (table !! 1) ; hmax = head ( table  !! 6) -- Height [cm]
+        legend1 = "<p>Weights " ++ show wmin ++ " - " ++ show wmax ++ " kg</p>"
+        legend2 = "<p>Heights " ++ show hmin ++ " - " ++ show hmax ++ " cm</p>"
+    in  html_
+     (  head_ 
+     (  title_ "BMI-index</title>"
+    <> style_
+     ( "body {margin-left: 5%; font-family: Arial, Helvetica, sans-serif;}"
+    <> "h1 {color: red;}"
+    <> "table, td {border: 2px solid blue; border-collapse: collapse; font-size: 1.2em;}"
+    <> "td {padding: 5px;}"
+    <> "p {color: blue; font-size: 1.2em;}"
+    <> "hr {width: 40%; margin-left: 0%;}"
+    <> "ul {font-size: 1.1em}"
+     )
+     )
+    <> body_
+     ( h1_ "BODY-MASS INDEX"
+    <> table_ ( concatMap generateHtmlRow table)
+    <> legend1 ++ legend2
+    <> "<hr><br>"
+    <> ul_ [a_ "https://raw.githubusercontent.com/jarmol/elmSunPosCalc/refs/heads/master/haskell/tabletohtml.hs" "Haskell code"
+      , a_ "https://hackage.haskell.org/package/ghc-9.4.8" "Made with Haskell GHC 9.4.8"]
+    <> " © Polarit 2024"
+     )
+     )
 -- Function to generate HTML for a single row
 generateHtmlRow :: [Float] -> String
 generateHtmlRow row =
-    "<tr>\n" ++
-    concatMap generateHtmlCell row ++
-    "</tr>\n"
+    tr_ (concatMap generateHtmlCell row)
 
 -- Function to generate HTML for a single cell
 generateHtmlCell :: Float -> String
 generateHtmlCell cell =
-    "<td>" ++ formD cell ++ "</td>\n"
-
+    td_ (formD cell)
 
 results =
     [[0,60,65,70,75,80,85]
@@ -61,12 +80,5 @@ formD v = showFFloat (Just 2) v ""
 -- Main function to display the HTML table
 main :: IO ()
 main = do
-    let wmin = head results !! 1; wmax = head results !! 6 -- Weight [kg]
-    let hmin = head (results !! 1); hmax = head (results !! 6) -- Height [cm]
-    let legend1 = "<p>Weights " ++ show wmin ++ " - " ++ show wmax ++ " kg</p>"
-    let legend2 = "<p>Heights " ++ show hmin ++ " - " ++ show hmax ++ " cm</p>"
-    let htmlTable = generateHtmlTable results ++ legend1 ++ legend2
+    let htmlTable = generateHtmlTable results
     putStrLn htmlTable
-
-    putStrLn "<hr><br><a href=\"https://raw.githubusercontent.com/jarmol/elmSunPosCalc/refs/heads/master/haskell/tabletohtml.hs \">Haskell code</a>"
-    putStrLn "<p>Made with Haskell GHC 9.4.8</p>\n © Polarit 2024\n </body>"
