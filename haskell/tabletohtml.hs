@@ -1,5 +1,7 @@
 import Text.Read.Lex (Number)
 import Numeric
+import Data.Text (pack,unpack,replace)
+import Data.Text.Internal (Text)
 import MiniHtml (html_
   , head_
   , body_
@@ -24,6 +26,8 @@ bmi r c  =
         h = head (results !! r)
     in  w / (h / 100)^2
 
+translate old new = replace (pack old) (pack new)
+
 -- Function to generate HTML table from the 2D list
 generateHtmlTable :: [[Float]] -> String
 generateHtmlTable table =
@@ -31,6 +35,8 @@ generateHtmlTable table =
         hmin = head (table !! 1) ; hmax = head ( table  !! 6) -- Height [cm]
         legend1 = "<p>Weights " ++ show wmin ++ " - " ++ show wmax ++ " kg</p>"
         legend2 = "<p>Heights " ++ show hmin ++ " - " ++ show hmax ++ " cm</p>"
+        tableHtml = concatMap generateHtmlRow table
+        modifiedTable = unpack $ translate "9.99" "cm \\ kg" (pack tableHtml)
     in  html_
      (  head_ 
      (  title_ "BMI-index</title>"
@@ -46,7 +52,7 @@ generateHtmlTable table =
      )
     <> body_
      ( h1_ "BODY-MASS INDEX"
-    <> table_ ( concatMap generateHtmlRow table)
+    <> table_ modifiedTable 
     <> legend1 ++ legend2
     <> "<hr><br>"
     <> ul_ [a_ "https://raw.githubusercontent.com/jarmol/elmSunPosCalc/refs/heads/master/haskell/tabletohtml.hs" "Haskell code"
@@ -65,7 +71,7 @@ generateHtmlCell cell =
     td_ (formD cell)
 
 results =
-    [[0,60,65,70,75,80,85]
+    [[9.99,60,65,70,75,80,85]
     ,[160,bmi 1 1,bmi 1 2,bmi 1 3,bmi 1 4,bmi 1 5,bmi 1 6]
     ,[165,bmi 2 1,bmi 2 2,bmi 2 3,bmi 2 4,bmi 2 5,bmi 2 6]
     ,[170,bmi 3 1,bmi 3 2,bmi 3 3,bmi 3 4,bmi 3 5,bmi 3 6]
