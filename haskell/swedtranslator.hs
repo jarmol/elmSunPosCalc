@@ -1,10 +1,10 @@
-module Translator (main)
+module Swedtranslator (main)
 where
 
 import Data.Text (pack, unpack, replace, Text)
 import Data.Char (toUpper, toLower, isUpper, isLower)
 import Observation (original)
-import Dictionary (translations)
+import SwedishDictionary (translations)
 
 
 -- Function to adjust the case of the translated word
