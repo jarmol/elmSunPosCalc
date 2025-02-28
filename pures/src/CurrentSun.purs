@@ -69,20 +69,17 @@ getDate  = do
     solAzim = solAzimuth preAzim hourAngle1
 
   log $  "Date " <> (stringA currYear currMonth currDay )
-    <> " Time UTC " <> show cHour <> ":" <> show cMinute <> ":" <> show cSecond
+      <> " Time UTC " <> show cHour <> ":" <> show cMinute <> ":" <> show cSecond
     <> "\nCurrent Julian day JD = " 
     <>  toStringWith (fixed 6)
         (jdateGr currYear currMonth currDay cHour cMinute cSecond)
     <> "\nCentury " <> toStringWith (fixed 9) cent1
     <> "\nSun declination " <> declinationSun <> "°"
-    <> "\nTime Equation " <> timeEquat <> " minutes"
     <> "\nSunrise HA " <> (toStringWith (fixed 5) sunriseHA)
     <> "\nNoon time " <>  mnsToHrMnSc minutesNoon <> " UTC+2h"
     <> "\nSunrise time " <> mnsToHrMnSc sunriseTornio <> " UTC+2h"
     <> "\nSunset time " <> mnsToHrMnSc sunsetTornio <> " UTC+2h"
     <> "\nDaylength " <> mnsToHrMnSc dayLength
-    <> "\nTrue solar time " <> toStringWith (fixed 4) trueSolarTime
-    <> "\nHour angle 2 " <> toStringWith (fixed 5) hourAngle1
     <> "\nSolar Zenith " <> toStringWith (fixed 4) solarZenith
     <> "\nSolar elevation " <> toStringWith (fixed 4) solarElevation <> "°"
     <> "\nAtmospheric refraction "
