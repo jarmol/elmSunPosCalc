@@ -7,6 +7,23 @@
          color: white;
          margin: 10%;
       }
+
+      a:link {
+         color: green;
+         background-color: transparent;
+         text-decoration: underline;
+      }
+
+      a:visited {
+         color: white;
+         background-color: transparent;
+         text-decoration: underline;
+      }
+
+      span {
+         color: yellowgreen;
+         font-size: 1.5em;
+      }
    </style>
    <title>
       Reloj Digital
@@ -26,8 +43,19 @@
       });
    </script>
 
-   <a href="https://raw.githubusercontent.com/jarmol/elmSunPosCalc/refs/heads/master/src/DigiClock.elm">
-      Elm source</a>
+   <span id="demo"></span>
+
+   <script>
+      const d = new Date();
+      let diff = d.getTimezoneOffset();
+      if ((-diff / 60 > 2) || (-diff / 60 < 1)) msg = "Ahora no estás en España!"; else msg = "---";
+      document.getElementById("demo").innerHTML =
+         "Su zona horario es UTC + " + (-diff / 60)
+         + "\n <br> Zona horario de verano en España UTC + 2 (CEST)"
+         + "<br> Zona con horario de invierno UTC + 1 (CET)"
+         + "<br>" + msg;
+   </script>
+
    <br>
    <hr>
 
@@ -35,6 +63,8 @@
       <img src="gb.gif" height="48px"></a>
    <p>FOTW Flags Of The World website at https://www.fotw.info/</p>
 
+   <a href="https://raw.githubusercontent.com/jarmol/elmSunPosCalc/refs/heads/master/src/DigiClock.elm">
+      Elm source</a>
    <p> © J. Lammi 2025</p>
 
 </body>

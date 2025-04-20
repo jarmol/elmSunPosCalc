@@ -7,9 +7,26 @@
          color: white;
          margin: 10%;
       }
+
+      a:link {
+         color: green;
+         background-color: transparent;
+         text-decoration: underline;
+      }
+
+      a:visited {
+         color: white;
+         background-color: transparent;
+         text-decoration: underline;
+      }
+
+      span {
+         color: yellowgreen;
+         font-size: 1.5em
+      }
    </style>
    <title>
-      Digital Clock - Tornio
+      Digital Clock
    </title>
 </head>
 
@@ -26,10 +43,26 @@
       });
    </script>
 
-   <a href="https://raw.githubusercontent.com/jarmol/elmSunPosCalc/refs/heads/master/src/DigiClock.elm">
-      Elm source</a>
+   <span id="demo"></span>
+
+   <script>
+      const d = new Date();
+      let diff = d.getTimezoneOffset();
+      if (-diff / 60 > 1) msg = "You are not in UK now!"; else msg = "---";
+      document.getElementById("demo").innerHTML =
+         "Your time zone is UTC + " + (-diff / 60)
+         + "<br>British Summer Time UTC + 1 (BST, DST)"
+         + "<br>" + msg;
+   </script>
+
    <br>
    <hr>
+   <!-- UTC+03:00 Hora de Verano del Este Europeo EEST -*>
+    -- UTC+02:00 Hora del este europeo EET
+    -- UTC+02:00 en Horario de Verano CEST 
+    -- Hora central europea de verano CEST
+    -- UTC+01:00 Hora central europea CET
+    -- UTC+01:00 Hora de Verano del Oeste Europeo BST, WEST -->
 
    <a href="digi-kello.html">
       <img src="fi.gif" height="48px"></a>
@@ -38,6 +71,8 @@
       <img src="es.gif" height="48px"></a>
    <p>FOTW Flags Of The World website at https://www.fotw.info/</p>
 
+   <a href="https://raw.githubusercontent.com/jarmol/elmSunPosCalc/refs/heads/master/src/DigiClock.elm">
+      Elm source</a>
    <p> © J. Lammi 2025</p>
 
 </body>

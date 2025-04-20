@@ -7,6 +7,23 @@
          color: white;
          margin: 10%;
       }
+
+      a:link {
+         color: yellowgreen;
+         background-color: transparent;
+         text-decoration: underline;
+      }
+
+      a:visited {
+         color: white;
+         background-color: transparent;
+         text-decoration: underline;
+      }
+
+      span {
+         color: yellowgreen;
+         font-size: 1.5em
+      }
    </style>
    <title>
       Digikello
@@ -27,15 +44,27 @@
       });
    </script>
 
-   <a href="https://raw.githubusercontent.com/jarmol/elmSunPosCalc/refs/heads/master/src/DigiClock.elm">
-      Elm-koodi</a>
-   <br>
+   <span id="demo"></span>
+
+   <script>
+      const d = new Date();
+      let diff = d.getTimezoneOffset();
+      if ((-diff / 60 > 3) || (-diff / 60 < 2)) msg =
+         " Olet nyt jossain muualla kuin Suomessa."; else msg = "---";
+      document.getElementById("demo").innerHTML =
+         "Olet aikavyöhykkeellä UTC + " + (-diff / 60)
+         + "<br>Kesäaika Suomessa UTC + 3 (EEST)"
+         + "<br>Talviaika Suomessa UTC + 2 (EET)"
+         + "<br>" + msg;
+   </script>
    <hr>
 
    <a href="digi-clock.html">
       <img src="gb.gif" height="48px"></a>
    <p>FOTW Flags Of The World website at https://www.fotw.info/</p>
 
+   <a href="https://raw.githubusercontent.com/jarmol/elmSunPosCalc/refs/heads/master/src/DigiClock.elm">
+      Elm-koodi</a>
    <p> © J. Lammi 2025</p>
 
 </body>
