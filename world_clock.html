@@ -97,7 +97,9 @@ const cities = [
 
 let cityList = "";
 for (let i = 0; i < cities.length; i++) {
-  cityList += '<li>' + cities[i].city + "</li>";
+//  cityList += '<li>' + cities[i].city + "</li>";
+    cityList += (i + 1) + '. ' + cities[i].city + ', ';
+    if ((i + 1) % 5 == 0) {cityList += '<br>'};
 }
 document.getElementById("city").innerHTML = cityList;
 
@@ -135,7 +137,9 @@ let local_time_string = local_time.toString();
 text += "<br>UTC date and time : " + local_time.toUTCString().slice(5,26);
 
 let dts = true; // Daylight saving
+
 let otherCity = cities[i].city;
+if (otherCity == 'Tokyo') {dts = false}; // No DTS in Japan!
 let otherOffset = cities[i].timezone;
 if (dts) {otherOffset += 1}; // Add DTS hour to timezone offset
 let otherTime = calcTime(otherOffset);
