@@ -99,7 +99,7 @@ let cityList = "";
 for (let i = 0; i < cities.length; i++) {
 //  cityList += '<li>' + cities[i].city + "</li>";
     cityList += (i + 1) + '. ' + cities[i].city + ', ';
-    if ((i + 1) % 5 == 0) {cityList += '<br>'};
+    if ((i + 1) % 7 == 0) {cityList += '<br>'};
 }
 document.getElementById("city").innerHTML = cityList;
 
@@ -141,7 +141,9 @@ let dts = true; // Daylight saving
 let otherCity = cities[i].city;
 if (otherCity == 'Tokyo') {dts = false}; // No DTS in Japan!
 let otherOffset = cities[i].timezone;
-if (dts) {otherOffset += 1}; // Add DTS hour to timezone offset
+if ((dts) && (cities[i].latitude > 0)) {otherOffset += 1}; // Add DTS hour to timezone offset in northern world
+if ((!dts) && (cities[i].latitude < 0)) {otherOffset += 1}; // Add DTS hour to timezone offset in southern world
+
 let otherTime = calcTime(otherOffset);
 text += "<br>" + otherCity + " local time: " + otherTime + 'h';
 text += "<br>Your local time now: " + local_time_string.slice(3, 58);
