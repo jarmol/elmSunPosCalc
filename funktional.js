@@ -1,4 +1,3 @@
-
 // @ts-ignore
 "use strict";
 // The goal of this version:
@@ -52,18 +51,6 @@ function getOption() {
     let local_time = new Date();
     let local_time_string = local_time.toString();
     let text = "UTC date and time  " + local_time.toUTCString().slice(5, 26);
-    
-    let dts = true; // Daylight saving
-    let otherCity = cities[row].city;
-    if (otherCity == 'Tokyo') { dts = false;}; // No DTS in Japan!
-    let otherOffset = cities[row].timezone;
-    // Add DTS hour to timezone offset in northern world:
-    if ((dts) && (cities[row].latitude > 0)) { otherOffset += 1;};
-    // Add DTS hour to timezone offset in southern world
-    if ((!dts) && (cities[row].latitude < 0)) {otherOffset += 1;};
-    let otherTime = calcTime(otherOffset);
-    text += "<br>" + otherCity + " local time: " + otherTime + 'h';
-    text += "<br>Your local time now: " + local_time_string.slice(3, 34);
     // Get current date and time UTC 
     const d = local_time;
     const utc_hour = d.getUTCHours();
@@ -72,6 +59,19 @@ function getOption() {
     const day = d.getUTCDate();
     const month = 1 + d.getUTCMonth();
     const full_Year = d.getUTCFullYear();
+    
+    let dts = true; // Daylight saving
+    let otherCity = cities[row].city;
+    if (otherCity == 'Tokyo') { dts = false;}; // No DTS in Japan!
+    if ((cities[row].latitude < 0) && (month > 3) && (month < 10)) {dts = false;}
+    let otherOffset = cities[row].timezone;
+    // Add DTS hour to timezone offset in northern world:
+    if ((dts) && (cities[row].latitude > 0)) { otherOffset += 1;};
+    // Add DTS hour to timezone offset in southern world
+    if ((!dts) && (cities[row].latitude < 0)) {otherOffset += 1;};
+    let otherTime = calcTime(otherOffset);
+    text += "<br>" + otherCity + " local time: " + otherTime + 'h';
+    text += "<br>Your local time now: " + local_time_string.slice(3, 34);
     
     function dn(a, b) {
         let v = Math.floor(Math.abs(a / b));
