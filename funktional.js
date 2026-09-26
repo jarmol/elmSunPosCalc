@@ -68,7 +68,7 @@ function getOption() {
     // Add DTS hour to timezone offset in northern world:
     if ((dts) && (cities[row].latitude > 0)) { otherOffset += 1;};
     // Add DTS hour to timezone offset in southern world
-    if ((!dts) && (cities[row].latitude < 0)) {otherOffset += 1;};
+    if ((dts) && (cities[row].latitude < 0)) {otherOffset += 1;};
     let otherTime = calcTime(otherOffset);
     text += "<br>" + otherCity + " local time: " + otherTime + 'h';
     text += "<br>Your local time now: " + local_time_string.slice(3, 34);
@@ -93,7 +93,13 @@ function getOption() {
     let jCent = (JD - 2451545) / 36525;
     const rad = (g) => Math.PI * g / 180.0;
     const deg = (rd) => 180.0 * rd / Math.PI;
-    
+   
+    // Calculate the date of the September change DST
+    const JDN_End_DST = (year) => toJulianDate(year, 10, 31);
+
+    console.log("End DST (time 1 h backward) on " + (31 - JDN_End_DST(full_Year) % 7 - 1) + ".10." + full_Year);
+    // End DST on 25.10.2026 European countries
+   
     function geomMeanLong(jc) {
         let gML = (280.46646 + (jc * (36000.76983 + jc * 0.0003032))) % 360.0;
         return gML;
@@ -121,7 +127,6 @@ function getOption() {
         return sunEoC;
     }
 
-    let gMA = geomMeanAnom(jCent);
 
     function obliqCorr(jc) {
         let meanObliqEcliptic = 23 + (26 + (21.448 - jc * (46.815 + jc * (0.00059 - jc * 0.001813))) / 60) / 60;
@@ -134,22 +139,25 @@ function getOption() {
         let sunTL = sunEqOfCtr(jc) + geomMeanLong(jc);
         let sunAppLong = sunTL - 0.00569 - 0.00478 * Math.sin(rad((125.04 - 1934.136 * jc)));
         let decl = deg(Math.asin(Math.sin(rad(obliqCorr(jc))) * Math.sin(rad(sunAppLong))));
-        console.log("jc = ", jc.toFixed(6));
-        console.log("sunEqOfCtr",sunEqOfCtr(jc).toFixed(4));
-        console.log("geomMeanLong", geomMeanLong(jc).toFixed(4));
-        console.log("sunAppLong",sunAppLong.toFixed(4));
-        console.log("sunTL",sunTL.toFixed(4));
         return decl;
     }
 
-    let y_var = Math.tan(rad(obliqCorr(jCent)) / 2.0) ** 2;
+    const maxAltitude = (lat, decl) => 90 - Math.abs(lat - decl);
+
     // Time Equation    
-    let gML = geomMeanLong(jCent);
-    let eot = y_var * Math.sin(2 * rad(gML)) - 2 * eccEO * Math.sin(rad(gMA))
-        + 4 * eccEO * y_var * Math.sin(rad(gMA)) * Math.cos(2 * rad(gML))
-        - 0.5 * y_var * y_var * Math.sin(4 * rad(gML))
-        - 1.25 * eccEO * eccEO * Math.sin(2 * rad(gMA));
-    let eqTime = deg(eot) * 4.0; // Convert to minutes
+    function timeEquation(jc) {
+        let y_var = Math.tan(rad(obliqCorr(jc)) / 2.0) ** 2;
+        let gML = geomMeanLong(jc);
+        let gMA = geomMeanAnom(jc);
+        let eccEO = acentricOrbit(jc);
+        let eot = y_var * Math.sin(2 * rad(gML)) - 2 * eccEO * Math.sin(rad(gMA))
+          + 4 * eccEO * y_var * Math.sin(rad(gMA)) * Math.cos(2 * rad(gML))
+          - 0.5 * y_var * y_var * Math.sin(4 * rad(gML))
+          - 1.25 * eccEO * eccEO * Math.sin(2 * rad(gMA));
+        let eqTime = deg(eot) * 4.0; // Convert to minutes
+        return eqTime;
+    }
+
     let latitude = cities[row].latitude;
     let longitude = cities[row].longitude;
     let timezone = cities[row].timezone;
@@ -165,7 +173,7 @@ function getOption() {
     let time_in_minutes = (utc_hour + timezone) * 60 + utc_minute + utc_second / 60;
     //  tz_offset from time.timezone is seconds west of UTC -> hours west of UTC
     //  Timezone convention: positive hours for east of Greenwich
-    let true_solar_time = (time_in_minutes + eqTime + 4 * longitude - 60 * timezone) % 1440;
+    let true_solar_time = (time_in_minutes + timeEquation(jCent) + 4 * longitude - 60 * timezone) % 1440;
     // This converts time in minutes to format hours, minutes, seconds 
     function mins_to_hms(mins) {
         let h = Math.floor(mins / 60);
@@ -173,9 +181,7 @@ function getOption() {
         let s = Math.round(60 * (mins - Math.floor(mins)));
         return [h, m, s];
     }
-    /*console.log('Time Equation ' + eqTime + ' minutes');
-    console.log('haSunrise ' + haSunrise);
-    console.log('true_solar_time' + true_solar_time); */
+    
     function zpad(n) {
         let zn = String(n);
         if (n < 10) {
@@ -184,15 +190,16 @@ function getOption() {
         ;
         return zn;
     }
+   
     const padTime = (hr, mn, sc) => zpad(hr) + ':' + zpad(mn) + ':' + zpad(sc);
     // Next is Solar Noontime
-    let solar_noon = (720 - 4 * longitude - eqTime + 60 * tzOffset) % 1440;
+    let solar_noon = (720 - 4 * longitude - timeEquation(jCent) + 60 * tzOffset) % 1440;
     let [h, m, s] = mins_to_hms(solar_noon);
     let hours = h;
     let minutes = m;
     let seconds = s;
     //console.log("Solar Noon " + hours + ":" + minutes + ":" + seconds);
-    let noonText = "<br>Solar Noon " + padTime(hours, minutes, seconds);
+    let noonText = "<br>Solar Noon " + padTime(hours, minutes, seconds) + ", Solar max altitude " + maxAltitude(latitude, sunDeclin(jCent)).toFixed(2) + '°';
     let sunrise_time = solar_noon - haSunrise * 4; // in minutes
     let sunset_time = solar_noon + haSunrise * 4; // in minutes
     let dayLength = sunset_time - sunrise_time;
@@ -269,6 +276,8 @@ function getOption() {
             return (540 - degreesValue) % 360;
         }
     }
+    // Solar altitude angle at noon (max altitude of the day):
+    // Noon Sun Angle = 90° - [Latitude - Solar Declination]
     let azimuth_angle = calcAzimuth(ha, solar_zenith_angle, jCent, latitude);
     let azimuthText = "Azimuth angle " + azimuth_angle.toFixed(3) + '°';
     let refraction_correction = atmosRefract(solar_elevation_angle);
@@ -281,10 +290,8 @@ let sunTrueAnom = geomMeanAnom(jCent) + sunEqOfCtr(jCent);
 let sunDistance = (1.000001018 * (1 - eccEO * eccEO)) / (1 + eccEO * Math.cos(rad(sunTrueAnom)));
 let asMillionKM = 149.5978707 * sunDistance;
 let asMillionMiles = 0.62137119223733 * asMillionKM;
-console.log("gMA", gMA);
 console.log(`Sun Distance from Earth is ${sunDistance} AU`);
 console.log(`Equal to ${asMillionKM.toFixed(3)} km`);
-console.log("sunTrueAnom " + sunTrueAnom.toFixed(4));
 
     text += noonText + "<br>"
         + sunriseText + "<br>"
