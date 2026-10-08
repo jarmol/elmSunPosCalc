@@ -65,7 +65,7 @@ function getOption() {
     console.log("Time Zone Offset: ", currentDt.offset); 
     console.log('Is this UTC time?', currentUTC);
     console.log('Other city time', tzName, dateCity.offset, dateCity.toISO({precision: 'second'})); 
-    let text = "UTC date and time " + utc_date + ' – ' + utc_time;
+    let text = "UTC date and time " + utc_date + ' <> ' + utc_time.toString().slice(0, -5);
     const d = currentDt;
     const hour = d.hour;
     const minute = d.minute;
@@ -202,14 +202,6 @@ function getOption() {
         return [h, m, s];
     }
     
-    function zpad(n) {
-        let zn = String(n);
-        if (n < 10) {
-            zn = '0' + zn;
-        }
-        ;
-        return zn;
-    }
   
     const kurzeZeit = (zeitNummer) => new Date(60000 * zeitNummer).toISOString().slice(11,-5);  
 
@@ -359,9 +351,9 @@ const cities = [
     { city: "Murcia", latitude: 37.9880, longitude: -1.1330, language: 'es-ES', timeZoneID: "Europe/Madrid" },
     { city: "Kemi", latitude: 65.7360, longitude: 24.5560, language: 'fi-FI', timeZoneID: "Europe/Helsinki" },
     { city: "Tornio", latitude: 65.8480, longitude: 24.1446, language: 'fi-FI', timeZoneID: "Europe/Helsinki" },
-    { city: "Oulu", latitude: 65.0140, longitude: 25.4730, language: 'fi-FIN', timeZoneID: "Europe/Helsinki" },
-    { city: "Rovaniemi", latitude: 66.5020, longitude: 25.7240, language: 'fi-FIN', timeZoneID: "Europe/Helsinki" },
-    { city: "Utsjoki", latitude: 69.90954, longitude: 27.0295, language: 'fi-FIN', timeZoneID: "Europe/Helsinki" },
+    { city: "Oulu", latitude: 65.0140, longitude: 25.4730, language: 'fi-FI', timeZoneID: "Europe/Helsinki" },
+    { city: "Rovaniemi", latitude: 66.5020, longitude: 25.7240, language: 'fi-FI', timeZoneID: "Europe/Helsinki" },
+    { city: "Utsjoki", latitude: 69.90954, longitude: 27.0295, language: 'fi-FI', timeZoneID: "Europe/Helsinki" },
     { city: "Tokyo", latitude: 35.7000, longitude: 139.7700, language: 'ja-JP', timeZoneID: "Asia/Tokyo" },
     { city: "Sydney AUS", latitude: -33.870, longitude: 151.2200, language: 'en-AU', timeZoneID: "Australia/Sydney" }
 ];
