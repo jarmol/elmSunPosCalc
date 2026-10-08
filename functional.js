@@ -2,12 +2,10 @@
 "use strict";
 // The goal of this version:
 // 1.) To make it more functional using more functions and less global variables
-//     As many functions have jCent as primary variable, many other variables may be replaced
-//     whwen jCent is used.
+//     As many functions have jCent as primary variable, many other variables may be removed.
+
 // 2.) Usage of the library Luxon to replace some of my methods and functions.
-// The recent version uses fixed TZ offset  values as defined in the table cities.
-// Using luxon.js and TZ names we'll get allways the right DST.
-// First thing to do: call Luxon. That may cause errors to be fixed next.
+// Using luxon.js and TZ names we'll get allways the right time zone offset and the state of DST.
 
 import { DateTime } from "https://cdn.jsdelivr.net/npm/luxon@3.4.4/+esm";
 
@@ -45,13 +43,13 @@ function getOption() {
     //let tz = cities[row].timezone;
     let tzName = cities[row].timeZoneID;
     const dh = DateTime.now();
-    let local_time = new Date();
-    let local_time_string = local_time.toString();
-    let utc_date = DateTime.now().toUTC().toISODate();
-    let utc_time = DateTime.now().toUTC().toISOTime();
+    const local_time = new Date();
+    const local_time_string = local_time.toString();
+    const utc_date = DateTime.now().toUTC().toISODate();
+    const utc_time = DateTime.now().toUTC().toISOTime();
     // Get current date and time UTC
-    let currentDt = DateTime.now();
-    let currentUTC = DateTime.now().toUTC().toISO({precision: 'second'});
+    const currentDt = DateTime.now();
+    const currentUTC = DateTime.now().toUTC().toISO({precision: 'second'});
     const dateCity = DateTime.fromISO(currentUTC).setZone(tzName);
     console.log('dateCity.hour', dateCity.hour);
     console.log('ISO UTC String', currentUTC);
@@ -151,32 +149,32 @@ function getOption() {
 
 
     function obliqCorr(jc) {
-        let meanObliqEcliptic = 23 + (26 + (21.448 - jc * (46.815 + jc * (0.00059 - jc * 0.001813))) / 60) / 60;
-        let obCorr = meanObliqEcliptic + 0.00256 * Math.cos(rad(125.04 - 1934.136 * jc));
+        const meanObliqEcliptic = 23 + (26 + (21.448 - jc * (46.815 + jc * (0.00059 - jc * 0.001813))) / 60) / 60;
+        const obCorr = meanObliqEcliptic + 0.00256 * Math.cos(rad(125.04 - 1934.136 * jc));
         return obCorr;
     }
 
     function sunDeclin(jc) {
         // sunTL is Sun true longitude 
-        let sunTL = sunEqOfCtr(jc) + geomMeanLong(jc);
-        let sunAppLong = sunTL - 0.00569 - 0.00478 * Math.sin(rad((125.04 - 1934.136 * jc)));
-        let decl = deg(Math.asin(Math.sin(rad(obliqCorr(jc))) * Math.sin(rad(sunAppLong))));
+        const sunTL = sunEqOfCtr(jc) + geomMeanLong(jc);
+        const sunAppLong = sunTL - 0.00569 - 0.00478 * Math.sin(rad((125.04 - 1934.136 * jc)));
+        const decl = deg(Math.asin(Math.sin(rad(obliqCorr(jc))) * Math.sin(rad(sunAppLong))));
         return decl;
     }
 
-    const maxAltitude = (lat, decl) => 90 - Math.abs(lat - decl);
+    const maxAltitude = (latit, declin) => 90 - Math.abs(latit - declin);
 
     // Time Equation    
     function timeEquation(jc) {
-        let y_var = Math.tan(rad(obliqCorr(jc)) / 2.0) ** 2;
-        let gML = geomMeanLong(jc);
-        let gMA = geomMeanAnom(jc);
-        let eccEO = acentricOrbit(jc);
-        let eot = y_var * Math.sin(2 * rad(gML)) - 2 * eccEO * Math.sin(rad(gMA))
+        const y_var = Math.tan(rad(obliqCorr(jc)) / 2.0) ** 2;
+        const gML = geomMeanLong(jc);
+        const gMA = geomMeanAnom(jc);
+        const eccEO = acentricOrbit(jc);
+        const eot = y_var * Math.sin(2 * rad(gML)) - 2 * eccEO * Math.sin(rad(gMA))
           + 4 * eccEO * y_var * Math.sin(rad(gMA)) * Math.cos(2 * rad(gML))
           - 0.5 * y_var * y_var * Math.sin(4 * rad(gML))
           - 1.25 * eccEO * eccEO * Math.sin(2 * rad(gMA));
-        let eqTime = deg(eot) * 4.0; // Convert to minutes
+        const eqTime = deg(eot) * 4.0; // Convert to minutes
         return eqTime;
     }
 
@@ -212,20 +210,19 @@ function getOption() {
         ;
         return zn;
     }
-   
-    const padTime = (hr, mn, sc) => zpad(hr) + ':' + zpad(mn) + ':' + zpad(sc);
+  
+    const kurzeZeit = (zeitNummer) => new Date(60000 * zeitNummer).toISOString().slice(11,-5);  
+
     // Next is Solar Noontime
     console.log('tarkistus offset',offset,'minutes');
-    let solar_noon = (720 - 4 * longitude - timeEquation(jCent) + offset) % 1440;
-    let [h, m, s] = mins_to_hms(solar_noon);
-    let hours = h;
-    let minutes = m;
-    let seconds = s;
-    //console.log("Solar Noon " + hours + ":" + minutes + ":" + seconds);
-    let noonText = "<br>Solar Noon " + padTime(hours, minutes, seconds) + ", Solar max altitude " + maxAltitude(latitude, sunDeclin(jCent)).toFixed(2) + '°';
+    const solar_noon = (720 - 4 * longitude - timeEquation(jCent) + offset) % 1440;
+    const noonString = kurzeZeit(solar_noon);
+    let decl = sunDeclin(jCent);
+    let noonText = "<br>Solar Noon\t" + noonString + ', max altitude '
+     +  maxAltitude(latitude, decl).toFixed(2) + '°';
     let sunrise_time = solar_noon - haSunrise * 4; // in minutes
     let sunset_time = solar_noon + haSunrise * 4; // in minutes
-    let dayLength = sunset_time - sunrise_time;
+    let dayLength = sunset_time - sunrise_time; // in minutes
     if (sunset_time < sunrise_time) {
         dayLength += 1440;
     }
@@ -240,14 +237,12 @@ function getOption() {
     let solar_elevation_angle = 90 - solar_zenith_angle;
     let elevationText = "Solar Elevation " + solar_elevation_angle.toFixed(3)
         + '° (without refraction correction)';
-    let [sd_h, sd_m, sd_s] = mins_to_hms(dayLength);
-    let [sr_h, sr_m, sr_s] = mins_to_hms(sunrise_time);
-    let [ss_h, ss_m, ss_s] = mins_to_hms(sunset_time);
-    let sunriseText = "Sunrise time " + padTime(sr_h, sr_m, sr_s);
-    let sunsetText = "Sunset time " + padTime(ss_h, ss_m, ss_s);
-    let dayLengthText = "Sunlight duration " + padTime(sd_h, sd_m, sd_s);
-    // A simple atmospheric refraction correction for the solar elevation angle
-    // It needs helper functions:
+    let dayLengthString = kurzeZeit(dayLength);
+    let sunriseString   = kurzeZeit(sunrise_time);
+    let sunsetString    = kurzeZeit(sunset_time); 
+    let sunriseText = "Sunrise time\t" + sunriseString;
+    let sunsetText = "Sunset time\t" + sunsetString;
+    let dayLengthText = "Sunlight duration\t" + dayLengthString;
     // Three categories of elevations angle: < 0, < 5, < 85
     // used for refraction angles
     const belowZero = (hx) => -20.774 / Math.tan(rad(hx)) / 3600.0;
