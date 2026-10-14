@@ -74,16 +74,8 @@ function getOption() {
     const month = 1 + currentDt.month;
     const year = d.year;
     console.log('Helsinki ', localize(dh, 'Europe/Helsinki', 'fi'));    
-    //let dts = true; // Daylight saving
     let otherCity = cities[row].city;
-    //if (otherCity == 'Tokyo') { dts = false;}; // No DTS in Japan!
-    //if ((cities[row].latitude < 0) && (month > 3) && (month < 10)) {dts = false;}
     let otherLang = cities[row].language;
-    // Add DTS hour to timezone offset in northern world:
-    //if ((dts) && (cities[row].latitude > 0)) { otherOffset += 1;};
-    // Add DTS hour to timezone offset in southern world
-    //if ((dts) && (cities[row].latitude < 0)) {otherOffset += 1;};
-    //let otherTime = calcTime(otherOffset);
     let otherTime = localize(dh, cities[row].timeZoneID, otherLang);
     const dto = dh.setZone(cities[row].timeZoneID);
     let offset = dto.offset;
@@ -114,17 +106,20 @@ function getOption() {
     const rad = (g) => Math.PI * g / 180.0;
     const deg = (rd) => 180.0 * rd / Math.PI;
    
-    // Calculate the date of the September change DST
+    // Calculate the date of the October change DST
     const JDN_End_DST = (year) => toJulianDate(year, 10, 31);
+    const JDN_Begin_DST = (year) => toJulianDate(year, 3, 31);
 
-    console.log("End DST (time 1 h backward) on " + (31 - JDN_End_DST(year) % 7 - 1) + ".10." + year);
     // End DST on 25.10.2026 European countries
+    console.log("End DST (time 1 h backward) on " + (31 - JDN_End_DST(year) % 7 - 1) + ".10." + year);
+    
+    // Begin  DST on 28.03.2027 European countries
+    console.log("Begin DST (time 1 h forward) on " + (31 - JDN_Begin_DST(year + 1) % 7 - 1) + ".3." + (year + 1));
    
     function geomMeanLong(jc) {
         let gML = (280.46646 + (jc * (36000.76983 + jc * 0.0003032))) % 360.0;
         return gML;
     }
-
 
     function geomMeanAnom(jc) {
         let gMA = (357.52911 + jc * (35999.05029 - 0.0001537 * jc)) % 360.0;
@@ -180,29 +175,16 @@ function getOption() {
 
     let latitude = cities[row].latitude;
     let longitude = cities[row].longitude;
-    //let dst_hour = 0;
-    //if (dts) {
-    //    dst_hour = 1;
-    //}
-    //let tzOffset = timezone + dst_hour; // Adjust for daylight saving time
     let haSunrise = deg(Math.acos(Math.cos(rad(90.833)) / (Math.cos(rad(latitude)) * Math.cos(rad(sunDeclin(jCent))))
         - Math.tan(rad(latitude)) * Math.tan(rad(sunDeclin(jCent)))));
     // Calculate the True Solar Time (in minutes)
     // time_in_minutes: time in minutes (0..1440)
     let time_in_minutes = (otherHour) * 60 + minute + second / 60;
     console.log('Time in minutes using hour, min, second', otherHour, minute, second);
-    //  tz_offset from time.timezone is seconds west of UTC -> hours west of UTC
     //  Timezone convention: positive hours for east of Greenwich
     //console.log('r213 tark. zone', zone); // p.o. utc
     // This converts time in minutes to format hours, minutes, seconds 
-    function mins_to_hms(mins) {
-        let h = Math.floor(mins / 60);
-        let m = Math.floor(mins % 60);
-        let s = Math.round(60 * (mins - Math.floor(mins)));
-        return [h, m, s];
-    }
-    
-  
+      
     const kurzeZeit = (zeitNummer) => new Date(60000 * zeitNummer).toISOString().slice(11,-5);  
 
     // Next is Solar Noontime
@@ -278,13 +260,13 @@ function getOption() {
     let ha = hourAngle(true_solar_time);
     //console.log("hourAngle " + ha.toFixed);
     function calcAzimuth(hourAngle, zenith, jc, latit) {
-        let radZenith = rad(zenith);
-        let radLatit = rad(latit);
-        let radS = rad(sunDeclin(jc));
-        let numerator = Math.sin(radLatit) * Math.cos(radZenith) - Math.sin(radS);
-        let denominator = Math.cos(radLatit) * Math.sin(radZenith);
-        let acosValue = Math.acos(numerator / denominator);
-        let degreesValue = acosValue * 180 / Math.PI;
+        const radZenith = rad(zenith);
+        const radLatit = rad(latit);
+        const radS = rad(sunDeclin(jc));
+        const numerator = Math.sin(radLatit) * Math.cos(radZenith) - Math.sin(radS);
+        const denominator = Math.cos(radLatit) * Math.sin(radZenith);
+        const acosValue = Math.acos(numerator / denominator);
+        const degreesValue = acosValue * 180 / Math.PI;
         if (hourAngle > 0) {
             return (degreesValue + 180) % 360;
         }
@@ -318,7 +300,10 @@ console.log(`Equal to ${asMillionKM.toFixed(3)} km`);
         + "<p>" + azimuthText + "</p>"
         + "Sun Distance from Earth is today " + sunDistance.toFixed(6) + " AU<br>"
         +  "That is equal to " + asMillionKM.toFixed(3) + " million km ("
-        + asMillionMiles.toFixed(3) + " million miles)<br></div>";
+        + asMillionMiles.toFixed(3) + " million miles)<br></div>"
+        + "<br>Most European countries<br>"
+        + "End DST (time 1 h backward) on " + (31 - JDN_End_DST(year) % 7 - 1) + ".10." + year
+        + "<br>Begin DST (time 1 h forward) on " + (31 - JDN_Begin_DST(year + 1) % 7 - 1) + ".03." + (year + 1);
 
     text += "<p>JDN " + JDN + ", JD " + JD.toFixed(6) + "</p>";
     text += "Solar Declination " + sunDeclin(jCent).toFixed(3) + '°';
