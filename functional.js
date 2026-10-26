@@ -9,7 +9,7 @@
 
 import { DateTime } from "https://cdn.jsdelivr.net/npm/luxon@3.4.4/+esm";
 
-/*
+/**
  * @typedef {object} City
  * @property {string} city
  * @property {number} latitude
@@ -18,10 +18,11 @@ import { DateTime } from "https://cdn.jsdelivr.net/npm/luxon@3.4.4/+esm";
  * @property {string} timeZoneID
  */
 
-/*
+/**
  * @param {number} offset
  * @returns {string}
  */
+
 // create Date object for current location
 
 
@@ -192,7 +193,7 @@ function getOption() {
     const solar_noon = (720 - 4 * longitude - timeEquation(jCent) + offset) % 1440;
     const noonString = kurzeZeit(solar_noon);
     let decl = sunDeclin(jCent);
-    let noonText = "<br>Solar Noon\t" + noonString + ', max altitude '
+    let noonText = "<br>☀️ Solar Noon\t" + noonString + ', max altitude '
      +  maxAltitude(latitude, decl).toFixed(2) + '°';
     let sunrise_time = solar_noon - haSunrise * 4; // in minutes
     let sunset_time = solar_noon + haSunrise * 4; // in minutes
@@ -214,8 +215,8 @@ function getOption() {
     let dayLengthString = kurzeZeit(dayLength);
     let sunriseString   = kurzeZeit(sunrise_time);
     let sunsetString    = kurzeZeit(sunset_time); 
-    let sunriseText = "Sunrise time\t" + sunriseString;
-    let sunsetText = "Sunset time\t" + sunsetString;
+    let sunriseText =  '☀️'  + "  Sunrise time\t" + sunriseString;
+    let sunsetText =   '☀️'  + " Sunset time\t" + sunsetString;
     let dayLengthText = "Sunlight duration\t" + dayLengthString;
     // Three categories of elevations angle: < 0, < 5, < 85
     // used for refraction angles
@@ -292,8 +293,8 @@ console.log(`Sun Distance from Earth is ${sunDistance} AU`);
 console.log(`Equal to ${asMillionKM.toFixed(3)} km`);
 
     text += noonText + "<br>"
-        + sunriseText + "<br>"
-        + sunsetText + "<br>"
+         +  sunriseText + "<br>"
+         +  sunsetText + "<br>"
         + dayLengthText + "<br>"
         + "<br>" + elevationText + "<br>"
         + refraction_corrected_elevation_text + "<br>"
