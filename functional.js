@@ -14,18 +14,49 @@ import { DateTime } from "https://cdn.jsdelivr.net/npm/luxon@3.4.4/+esm";
  * @property {string} city
  * @property {number} latitude
  * @property {number} longitude
- * @property {number} timezone
  * @property {string} timeZoneID
  */
 
 /**
- * @param {number} offset
- * @returns {string}
+ * Convert a Gregorian calendar date to its Julian Day Number (JDN).
+ * @function toJulianDate
+ * @param {number} y - The year.
+ * @param {number} m - The Gregorian month (1-12).
+ * @param {number} d - The day of the month.
+ * @returns {number} The Julian Day Number at noon for the given date.
  */
+function toJulianDate(y, m, d) {
+    function dn(a, b) {
+        let v = Math.floor(Math.abs(a / b));
+        if (a < 0)
+            v = -v;
+        return v;
+    }
+
+    const dnm = dn(m - 14, 12);
+    const A = y + 4800 + dnm;
+    const B = m - 2 - 12 * dnm;
+    const C = dn(y + 4900 + dnm, 100);
+    const JDN = dn(1461 * A, 4) + dn(367 * B, 12) - dn(3 * C, 4) + d - 32075;
+    return JDN;
+}
+
+/**
+ * Calculate the Julian Day (JD), including the time of day.
+ * @function calculateJD
+ * @param {number} y - The year.
+ * @param {number} m - The Gregorian month (1-12).
+ * @param {number} d - The day of the month.
+ * @param {number} hr - The hour.
+ * @param {number} mn - The minute.
+ * @param {number} sc - The second.
+ * @returns {number} The Julian Day for the given date and time.
+ */
+function calculateJD(y, m, d, hr, mn, sc) {
+    return toJulianDate(y, m, d) - 0.5 + (hr + mn / 60 + sc / 3600) / 24;
+}
 
 // create Date object for current location
-
-
 const localize = (dt, zone, locale) => {
   return dt.setZone(zone)
     .setLocale(locale)
@@ -41,7 +72,6 @@ function getOption() {
     let name = cities[row].city;
     let lat = cities[row].latitude;
     let lon = cities[row].longitude;
-    //let tz = cities[row].timezone;
     let tzName = cities[row].timeZoneID;
     const dh = DateTime.now();
     const local_time = new Date();
@@ -74,7 +104,8 @@ function getOption() {
     const day = currentDt.day;
     const month = 1 + currentDt.month;
     const year = d.year;
-    console.log('Helsinki ', localize(dh, 'Europe/Helsinki', 'fi'));    
+    console.log('Helsinki ', localize(dh, 'Europe/Helsinki', 'fi'));
+
     let otherCity = cities[row].city;
     let otherLang = cities[row].language;
     let otherTime = localize(dh, cities[row].timeZoneID, otherLang);
@@ -85,26 +116,14 @@ function getOption() {
 
     text += "<br>Your local time now: " + local_time_string.slice(3, 34);
     
-    function dn(a, b) {
-        let v = Math.floor(Math.abs(a / b));
-        if (a < 0)
-            v = -v;
-        return v;
-    }
-    function toJulianDate(y, m, d) {
-        const dnm = dn(m - 14, 12);
-        const A = y + 4800 + dnm;
-        const B = m - 2 - 12 * dnm;
-        const C = dn(y + 4900 + dnm, 100);
-        const JDN = dn(1461 * A, 4) + dn(367 * B, 12) - dn(3 * C, 4) + d - 32075;
-        return JDN;
-    }
-    const calculateJD = (y, m, d, hr, mn, sc) => { console.log(y, m, d, hr, mn, sc);
-        return toJulianDate(y, m, d) - 0.5 + (hr + mn / 60 + sc / 3600) / 24;}
     let JDN = toJulianDate(year, month - 1, day);
+    
     let JD = calculateJD(year, month - 1, day, hour - 3, minute, second);
+ 
     let jCent = (JD - 2451545) / 36525;
+ 
     const rad = (g) => Math.PI * g / 180.0;
+ 
     const deg = (rd) => 180.0 * rd / Math.PI;
    
     // Calculate the date of the October change DST
