@@ -1,14 +1,30 @@
 // @ts-ignore
 "use strict";
 // The goal of this version:
-// 1.) To make it more functional using more functions and less global variables
-//     As many functions have jCent as primary variable, many other variables may be removed.
-
-// 2.) Usage of the library Luxon to replace some of my methods and functions.
-// Using luxon.js and TZ names we'll get allways the right time zone offset and the state of DST.
+// To make it more functional using more functions and less global variables
+// As many functions have jCent as primary variable, many other variables
+//  may be removed.
+// Usage of the library Luxon to replace some of my methods and functions.
 
 import { DateTime } from "https://cdn.jsdelivr.net/npm/luxon@3.4.4/+esm";
 
+/**
+ * We use <b>DateTime</b> as imported from the library luxon
+ * instead of the standard version of <b>DateTime</b>.
+ * Using luxon.js and TZ names we'll get always
+ * the right time zone offset and the actual state of DST.
+ * @type {DateTime} */
+let now = DateTime.now();
+
+/**
+ * Format a DateTime object to an ISO string with precision of seconds.
+ * @function formatISO
+ * @param {DateTime} value
+ * @returns {string} The ISO string representation of the DateTime object
+*/
+function formatISO(value) {
+  return value.toISO({precision: 'second'});
+}
 /**
  * @typedef {object} City
  * @property {string} city
@@ -24,6 +40,9 @@ import { DateTime } from "https://cdn.jsdelivr.net/npm/luxon@3.4.4/+esm";
  * @param {number} m - The Gregorian month (1-12).
  * @param {number} d - The day of the month.
  * @returns {number} The Julian Day Number at noon for the given date.
+ * @example
+ * const jdn = toJulianDate(2026, 11, 1); // Returns the JDN for Nov 1, 2026
+ * console.log(jdn); // Output: 2461346
  */
 function toJulianDate(y, m, d) {
     function dn(a, b) {
@@ -51,12 +70,16 @@ function toJulianDate(y, m, d) {
  * @param {number} mn - The minute.
  * @param {number} sc - The second.
  * @returns {number} The Julian Day for the given date and time.
+ * @example
+ * const jd = calculateJD(2026, 11, 1, 0, 0, 0); // Returns the JD for Nov 1, 2026 at 00:00:00
+ * console.log('JD = ', jd); // Output: JD = 2461345.50 at 00:00:00 UTC
+ * const jd = calculateJD(2026, 11, 1, 6, 0, 0); // Returns the JD for Nov 1, 2026 at 06:00:00
+ * console.log('JD = ', jd); // Output: JD = 2461345.75 at 06:00:00 UTC
  */
 function calculateJD(y, m, d, hr, mn, sc) {
     return toJulianDate(y, m, d) - 0.5 + (hr + mn / 60 + sc / 3600) / 24;
 }
 
-// create Date object for current location
 const localize = (dt, zone, locale) => {
   return dt.setZone(zone)
     .setLocale(locale)
@@ -67,49 +90,47 @@ function getOption() {
     const selectElement = document.querySelector("#select1");
     const output =
         selectElement.options[selectElement.selectedIndex].value;
-    //console.log('out:', output);
     let row = output - 1;
     let name = cities[row].city;
     let lat = cities[row].latitude;
     let lon = cities[row].longitude;
     let tzName = cities[row].timeZoneID;
-    const dh = DateTime.now();
-    const local_time = new Date();
-    const local_time_string = local_time.toString();
-    const utc_date = DateTime.now().toUTC().toISODate();
-    const utc_time = DateTime.now().toUTC().toISOTime();
+    now = DateTime.now();
+    let local_time = new Date();
+    let local_time_string = local_time.toString();
+    let utc_date = now.toUTC().toISODate();
     // Get current date and time UTC
-    const currentDt = DateTime.now();
-    const currentUTC = DateTime.now().toUTC().toISO({precision: 'second'});
-    const dateCity = DateTime.fromISO(currentUTC).setZone(tzName);
+    let d = now;
+    let currentUTC = formatISO(now.toUTC()); 
+    let dateCity = DateTime.fromISO(currentUTC).setZone(tzName);
     console.log('dateCity.hour', dateCity.hour);
     console.log('ISO UTC String', currentUTC);
     console.log(tzName, dateCity.toString());
-    console.log('Local String', currentDt.toISO());
-    console.log("Year: ", currentDt.year);
-    console.log("Month: ", currentDt.month);
-    console.log("Day: ", currentDt.day);
-    console.log("Hour: ", currentDt.hour);
-    console.log("Minute: ", currentDt.minute);
-    console.log("Second: ", currentDt.second);
-    console.log("Time Zone Name: ", currentDt.zoneName);
-    console.log("Time Zone Offset: ", currentDt.offset); 
-    console.log('Is this UTC time?', currentUTC);
-    console.log('Other city time', tzName, dateCity.offset, dateCity.toISO({precision: 'second'})); 
+    console.log('Local String', d.toISO());
+    console.log("Year: ", d.year);
+    console.log("Month: ", d.month);
+    console.log("Day: ", d.day);
+    console.log("Hour local: ", d.hour, "Hour UTC ", d.toUTC().hour);
+    console.log("Minute: ", d.minute);
+    console.log("Second: ", d.second);
+    console.log("Time Zone Name: ", d.zoneName);
+    console.log("Time Zone Offset: ", d.offset); 
+    console.log('Other city time', tzName, dateCity.offset, formatISO(dateCity)); 
+    let utc_time = now.toUTC().toISOTime();
     let text = "UTC date and time " + utc_date + ' <> ' + utc_time.toString().slice(0, -5);
-    const d = currentDt;
     const hour = d.hour;
     const minute = d.minute;
     const second = d.second;
-    const day = currentDt.day;
-    const month = 1 + currentDt.month;
+    const day = d.day;
+    const month = 1 + d.month;
     const year = d.year;
-    console.log('Helsinki ', localize(dh, 'Europe/Helsinki', 'fi'));
+    console.log('Helsinki ', localize(now, 'Europe/Helsinki', 'fi'));
 
     let otherCity = cities[row].city;
     let otherLang = cities[row].language;
-    let otherTime = localize(dh, cities[row].timeZoneID, otherLang);
-    const dto = dh.setZone(cities[row].timeZoneID);
+    // now = DateTime.now();
+    let otherTime = localize(now, cities[row].timeZoneID, otherLang);
+    const dto = now.setZone(cities[row].timeZoneID);
     let offset = dto.offset;
     let otherHour = dateCity.hour;
     text += "<br>" + otherCity + ": " + otherTime + " ( UTC + " + offset/60 + ' h )';
@@ -117,38 +138,61 @@ function getOption() {
     text += "<br>Your local time now: " + local_time_string.slice(3, 34);
     
     let JDN = toJulianDate(year, month - 1, day);
-    
-    let JD = calculateJD(year, month - 1, day, hour - 3, minute, second);
- 
-    let jCent = (JD - 2451545) / 36525;
+    let JD = calculateJD(year, month - 1, day, d.toUTC().hour, minute, second);
+//  Checked using NOAA spreadsheet: 
+// https://www.esrl.noaa.gov/gmd/grad/solcalc/sunrise.html
+// JD 2461346.396065 is now exactly correct for local time 2026-11-01 23:30:20 
+// So is solar declination -14.647° and Sunrise time 07:44:31
+// Sunset time 16:23:01, Noon 12:03:46 in Helsinki
+let jCent = (JD - 2451545) / 36525;
  
     const rad = (g) => Math.PI * g / 180.0;
  
     const deg = (rd) => 180.0 * rd / Math.PI;
    
-    // Calculate the date of the October change DST
-    const JDN_End_DST = (year) => toJulianDate(year, 10, 31);
-    const JDN_Begin_DST = (year) => toJulianDate(year, 3, 31);
+    /** Calculate the last day of October
+     * @function JDN_LastDayOctober
+     * @param {number} year - The year.
+     * @returns {number} The Julian Day Number for the end of October.
+     */
+    const JDN_LastDayOctober = (year) => toJulianDate(year, 10, 31);
+
+    /** Calculate the date of the last Sunday of October
+     *  i.e. the end of Daylight Saving Time (DST) in most European countries.
+     * @function JDN_End_DST
+     * @param {number} year - The year.
+     * @returns {number} The Julian Day Number for the last Sunday of October.
+     */
+    const JDN_End_DST = (year) => (31 - JDN_LastDayOctober(year) % 7 - 1);
+
+    /** Calculate the date of the last day of March
+     * @function JDN_LastDayMarch
+     * @param {number} year - The year  
+     * @returns {number} The Julian Day Number for the last day of March.
+     */
+    const JDN_LastDayMarch = (year) => toJulianDate(year, 3, 31);
+
+    const JDN_Begin_DST = (year) => (31 - JDN_LastDayMarch(year) % 7 - 1);
 
     // End DST on 25.10.2026 European countries
-    console.log("End DST (time 1 h backward) on " + (31 - JDN_End_DST(year) % 7 - 1) + ".10." + year);
+    console.log("End DST (time 1 h backward) on " + JDN_End_DST(year) + ".10." + year);
     
     // Begin  DST on 28.03.2027 European countries
-    console.log("Begin DST (time 1 h forward) on " + (31 - JDN_Begin_DST(year + 1) % 7 - 1) + ".3." + (year + 1));
+    console.log("Begin DST (time 1 h forward) on " + JDN_Begin_DST(year + 1) + ".3." + (year + 1));
    
     function geomMeanLong(jc) {
-        let gML = (280.46646 + (jc * (36000.76983 + jc * 0.0003032))) % 360.0;
+        let gML = (280.46646 + (jc * (36000.76983 + jc * 3.032e-4))) % 360.0;
         return gML;
     }
 
     function geomMeanAnom(jc) {
-        let gMA = (357.52911 + jc * (35999.05029 - 0.0001537 * jc)) % 360.0;
+        let gMA = (357.52911 + jc * (35999.05029 - 1.537e-4 * jc)) % 360.0;
         return gMA;
     }
 
     // Eccent of earth orbit
     function acentricOrbit(jc) {
-        const eccEO = 0.016708634 - jc * (0.000042037 + 0.0000001267 * jc);
+        const eccEO = 0.016708634 - jc * (4.2037e-5 + 1.267e-7 * jc);
         return eccEO;
     }
 
@@ -322,8 +366,8 @@ console.log(`Equal to ${asMillionKM.toFixed(3)} km`);
         +  "That is equal to " + asMillionKM.toFixed(3) + " million km ("
         + asMillionMiles.toFixed(3) + " million miles)<br></div>"
         + "<br>Most European countries<br>"
-        + "End DST (time 1 h backward) on " + (31 - JDN_End_DST(year) % 7 - 1) + ".10." + year
-        + "<br>Begin DST (time 1 h forward) on " + (31 - JDN_Begin_DST(year + 1) % 7 - 1) + ".03." + (year + 1);
+        + "End DST (time 1 h backward) on " + JDN_End_DST(year) + ".10." + year
+        + "<br>Begin DST (time 1 h forward) on " + JDN_Begin_DST(year + 1) + ".03." + (year + 1);
 
     text += "<p>JDN " + JDN + ", JD " + JD.toFixed(6) + "</p>";
     text += "Solar Declination " + sunDeclin(jCent).toFixed(3) + '°';
