@@ -403,6 +403,7 @@ const cities = [
     { city: "Oulu", latitude: 65.0140, longitude: 25.4730, language: 'fi-FI', timeZoneID: "Europe/Helsinki" },
     { city: "Rovaniemi", latitude: 66.5020, longitude: 25.7240, language: 'fi-FI', timeZoneID: "Europe/Helsinki" },
     { city: "Utsjoki", latitude: 69.90954, longitude: 27.0295, language: 'fi-FI', timeZoneID: "Europe/Helsinki" },
+    { city: "Delhi", latitude: 28.6100, longitude:  77.2300, language: 'hi-IN', timeZoneID: "Asia/Kolkata" },
     { city: "Tokyo", latitude: 35.7000, longitude: 139.7700, language: 'ja-JP', timeZoneID: "Asia/Tokyo" },
     { city: "Sydney AUS", latitude: -33.870, longitude: 151.2200, language: 'en-AU', timeZoneID: "Australia/Sydney" }
 ];
